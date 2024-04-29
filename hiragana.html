@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>ひらがな誤字脱字チェッカー(js)</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" type="text/css" href="hiraganacheck.css">
+<script type="text/javascript" src="hiraganacheck.js" charset="utf-8"></script>
+</head>
+<body onload="page_onload()">
+<h1>ひらがな誤字脱字チェッカー(js)</h1>
+<form name="mainform">
+<div id="droptarget" ondrop="drop_files(event)" ondragenter="drop_cancel(event)" ondragover="drop_cancel(event)">JavaScript版です。<br>
+jsのためデータをネットにアップする必要がありません。あなたのPC上で処理されます。<br>
+平仮名をそれっぽく色分けして、校閲、推敲、校正、誤字脱字の発見修正の補助に使用できます。<br>
+テキストエリアにドロップ、またはローカルファイルを開く
+<input type="button" id="option_split" value="オプション" onclick="split_view()">
+<input id="file_open" type="file" onchange="button_file_open(event)" multiple><br>
+<div id="option_split_view" style="display:none">
+<input type="checkbox" id="option_sjis" value="1"><label for="option_sjis">Shift_JISで開く(デフォルトはUTF-8)</label><br>
+ファイルのページ分割：
+<select id="split_type" onchange="split_change()">
+<option value="auto">自動認識</option>
+<option value="naroubackup">小説家になろうバックアップ</option>
+<option value="headsign">行頭記号類</option>
+<option value="splitconcat">結合モードを分割</option>
+<option value="splitregex">正規表現指定</option>
+<option value="none">無効</option>
+<option value="concat">結合モード</option>
+</select>
+<span id="split_regex" style="display:none">
+区切り記号<input type="text" id="split_regex_head" size="40" value="^第?[0-9０-９〇一二三四五六七八九十百千]">
+</span>
+<span id="concat_head_view" style="display:none">
+結合見出し文字列<input type="text" id="concat_head" size="40" value="■●■">
+</span>
+<br>
+<input type="button" id="area_split" value="入力枠をページ分割" onclick="split_area()"><br>
+</div>
+<textarea name="maintext" id="maintext" cols="80" rows="8">
+</textarea>
+</div>
+<input type="button" id="start" value="構文チェック" onclick="start_check()">　
+<input type="button" id="kanjistart" value="常用漢字" onclick="start_kanji_check()">　　
+<input type="button" id="clear" value="入力枠クリア" onclick="area_clear()">　
+<input type="button" id="sample" value="サンプル" onclick="area_sample()">　
+<input type="button" id="page_add" value="ページ追加" onclick="add_page()">
+ページ名<input type="text" id="page_name" size="10" value="ページ1">
+<br>
+<input type="checkbox" id="option_linenum" value="1"><label for="option_linenum">行番号表示</label>　
+<input type="checkbox" id="option_noneonly" value="1"><label for="option_noneonly">警告・未登録単語行のみ表示</label>
+<input type="checkbox" id="option_nospace" value="1"><label for="option_nospace">空白行略</label>
+　　　
+辞書選択：
+<select name="dic" id="book" onchange="dic_change()">
+<option value="include">内蔵辞書</option>
+<option value="userdata">ユーザ辞書</option>
+<option value="mixdata">内蔵+ユーザ辞書</option>
+</select><br>
+<span id="userdicinfo" style="display:none">ユーザ辞書：
+<input type="button" id="viewinfo" value="説明表示" onclick="user_view()"><br></span>
+<span id="dicinfo" style="display:none">
+平仮名の単語を行ごとに区切って指定してください<br>
+　　「ふつうのたんご」で該当単語を追加<br>
+　　　「たんご。」で句読点などの区切り直前の単語指定<br>
+　　　「たんご、」で区切りまたは漢字等の直前の単語指定<br>
+　　　「たんご〈」でひらがなの先頭単語指定、組み合わせて「たんご〈、」「たんご〈。」も可能<br>
+　　　「のぼ/五段ラ」「しんじ/上一段」「あきらめ/下一段」「うつくし/形容詞」で品詞指定<br>
+　　「*たん/ご」で「たん」にマッチした場合に該当位置が「たんご」の時にマッチを取り消す「取消指定」<br>
+　　　「*たん/!さく」で「たん」にマッチした場合に該当位置が「たんさく」以外の時は取り消す「否定取消指定」<br>
+　　　「*たん/%あいうえお」で「たん」にマッチした場合に該当位置が「あ」「い」..の各文字の時にマッチを取り消す「取消指定」<br>
+　　「!けいこく」で警告単語(赤表示)辞書に追加<br>
+内蔵+ユーザ辞書の場合：以下の指定も可<br>
+　　「-たんご」で辞書単語削除<br>
+　　「#たん/ご」でそのパターンの内蔵取消指定の削除<br>
+　　「=けいこく」で内蔵警告辞書から削除<br>
+</span>
+<textarea name="userdic" id="userdic" cols="60" rows="5" style="display:none">
+</textarea>
+<div id="page_title"></div>
+<div id="result"></div>
+<div id="page_title_tail"></div>
+</form>
+<div id="footers">
+<hr>
+<a href="hiragana_rule.html">ルール</a>　　持ち帰り用リンク：<a href="hiragana.html">cheker</a> <a href="hiraganacheck.js">js</a> <a href="hiraganacheck.css">css</a><br>
+<br>
+copyright &copy; syuribox
+<br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
+</body>
+</html>

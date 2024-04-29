@@ -1,0 +1,22 @@
+﻿@charset "utf-8";
+/* Copyright (c) 2016 ebiebi360
+ Released under the MIT license.
+*/
+
+body {color:#000; background-color:#fff}
+h1 {background-color:#ddf}
+
+div.result {font-family:"ＭＳ ゴシック", monospace}
+
+span.colorwarn {background-color:#fbb}
+span.color1 {background-color:#ff0}
+span.color2 {background-color:#ccf}
+span.color3 {background-color:#bfb}
+span.colornone {background-color:#fdb}
+
+span.kanjizinmei {background-color:#d6d6ff}
+span.kanjiext {background-color:#fbb}
+
+div.resultext {border:1px solid #000; font-family:"ＭＳ ゴシック", monospace}
+
+a {color:#00f}
