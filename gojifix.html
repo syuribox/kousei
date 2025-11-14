@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8">
 <title>小説誤字fix(js)</title>
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width">
 </head>
 <body>
@@ -18,15 +17,17 @@
 警告無視リスト：<br>
 <textarea id="text_musi" cols="60" rows="3">
 </textarea><br>
-　<input type="checkbox" id="check_warning" value="1" checked><label for="check_warning">警告情報を表示</label>
-　<input type="checkbox" id="check_warning2" value="1"><label for="check_warning2">注意情報を表示</label><br>
-　<input type="checkbox" id="check_line" value="1" checked><label for="check_line">情報行のみ表示</label>
+　<input type="checkbox" id="check_warning" value="1" checked><label for="check_warning">警告情報</label>
+　<input type="checkbox" id="check_warning2" value="1"><label for="check_warning2">注意情報</label><br>
+　<input type="checkbox" id="check_yure" value="1" checked><label for="check_yure">表記ゆれ</label>
+　<input type="checkbox" id="check_line" value="1" checked><label for="check_line">情報行のみ</label>
 　<input type="button" id="button_goji" value="誤字確認">
 </form>
 <hr>
 <div id="result" style="margin:1em; border:1px"></div>
 <hr>
-copyright &copy; syuribox
+2024-04-26 ver0.0.2<br>
+&copy; syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
 <script type="text/javascript" src="gojifix.js" charset="utf-8"></script>
 <script type="text/javascript">
@@ -35,7 +36,7 @@ function $(t){
 }
 $('button_clear').addEventListener('click', function(){
 	if(window.confirm('入力テキストをクリアしますか？')){
-		$('text_main').value = '';;
+		$('text_main').value = '';
 	}
 });
 $('button_sample').addEventListener('click', function(){
@@ -44,16 +45,21 @@ $('button_sample').addEventListener('click', function(){
 	'ハイブリット車が普及をはじめています。\n' + 
 	'ウォーターベットは柔らかくて快適です。ベッドで寝ます。\n' + 
 	'神の信託を受けて勇者たちが旅立ちます。信託は三回目でした。\n' + 
-	'乾燥ハープを使った料理をご馳走します。ここのハープは多年草です。'
+	'乾燥ハープを使った料理をご馳走します。ここのハープは多年草です。\n' +
+	'ダイアモンドとダイヤモンドの表記があります。\n' +
 	'';
 	$('text_main').value = t;
 });
 $('button_goji').addEventListener('click', function(){
+	$('result').innerHTML = '';
+	window.setTimeout(function(){
 	$('result').innerHTML = goji_fix($('text_main').value,
 		$('check_warning').checked, 
 		$('check_warning2').checked,
 		$('check_line').checked,
+		$('check_yure').checked,
 		$('text_musi').value);
+	},10);
 });
 $('set_file').addEventListener('change', function(){
 	read_files($('text_main'), event.target.files);
