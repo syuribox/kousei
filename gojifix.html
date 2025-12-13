@@ -22,14 +22,15 @@
 　<input type="checkbox" id="check_yure" value="1" checked><label for="check_yure">表記ゆれ</label>
 　<input type="checkbox" id="check_line" value="1" checked><label for="check_line">情報行のみ</label>
 　<input type="button" id="button_goji" value="誤字確認">
+　<input type="button" id="button_set_musi" value="無視サンプル">
 </form>
 <hr>
 <div id="result" style="margin:1em; border:1px"></div>
 <hr>
-2024-04-26 ver0.0.2<br>
+2025-12-13 ver0.0.3<br>
 &copy; syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
-<script type="text/javascript" src="gojifix.js" charset="utf-8"></script>
+<script type="text/javascript" src="goji_fix.js" charset="utf-8"></script>
 <script type="text/javascript">
 function $(t){
 	return document.getElementById(t);
@@ -63,6 +64,43 @@ $('button_goji').addEventListener('click', function(){
 });
 $('set_file').addEventListener('change', function(){
 	read_files($('text_main'), event.target.files);
+});
+$('button_set_musi').addEventListener('click', function(){
+	var t = `にも関わらず
+かも知れな
+伺
+窺
+友だち
+在
+有
+居
+尚
+又は
+且
+但
+成ら
+成り
+成る
+成れ
+成ろ
+無
+履
+穿
+篭
+荒げ
+何故
+何処
+馭者
+ケージ
+ゲージ
+グレード
+グレート
+シャベル
+スコップ
+●(無効)此
+●(無効)其
+`;
+	$('text_musi').value = t;
 });
 </script>
 </body>
