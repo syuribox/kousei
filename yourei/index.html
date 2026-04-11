@@ -4,34 +4,120 @@
 <meta charset="utf-8">
 <title>index - 小説誤字fix(js)</title>
 <meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="container">
 <h1>小説誤字fix(js) 用例</h1>
-<a href="hiraku.html">推奨：ひらく</a><br>
-<a href="aru.html">ある/有る</a><br>
+[<a href="help.html">ヘルプ</a>]<br>
 <br>
-<a href="ami.html">網/綱</a><br>
-<a href="kaji.html">冶/治</a><br>
-<a href="kaji2.html">鍜/鍛</a><br>
-<a href="kan_suga.html">管/菅</a><br>
-<a href="oku.html">億/憶</a><br>
-<a href="reki.html">歴/暦</a><br>
-<a href="sake.html">酒/洒</a><br>
-<a href="sue.html">未/末</a><br>
-<a href="tou_tower.html">塔/搭</a><br>
-<a href="au.html">会う/合う/遭う</a><br>
-<a href="itiyou.html">一様/一応</a><br>
-<a href="ittan.html">一旦/一端</a><br>
-<a href="kagyou.html">稼業/家業</a><br>
-<a href="taigi.html">大儀/大義</a><br>
-<a href="tuku.html">つく</a> 付く 着く<br>
-<a href="u53f1_sika.html">叱/𠮟</a><br>
-<a href="u586b_ten.html">填/塡</a><br>
-<a href="u982c_hoho.html">頬/頰</a><br>
-<a href="u5265_haku.html">剥/剝</a><br>
-
+<a href="dic.html">参考サイト一覧</a><br>
+<a href="hiraku.html">推奨：ひらく</a><br>
+<a href="sin_jouyou.html">新常用漢字</a><br>
+<a href="betuji.html">別字</a><br>
+<a href="godandousi.html">五段活用動詞</a><br>
+<a href="keiyou.html">形容詞</a><br>
+<a href="animal_dakuon.html">動植物名の連濁</a><br>
+<br>
+<a href="ami.html">あみ：網/綱</a><br>
+<a href="au.html">あう：会う/合う/遭う</a><br>
+<a href="atari.html">あたり：当たり/辺り</a><br>
+<a href="aru.html">ある/有る</a><br>
+<a href="itiyou.html">いちよう：一様/一応</a><br>
+<a href="ittan.html">いったん：一旦/一端</a><br>
+<a href="oku.html">おく：億/憶</a><br>
+<a href="kaji2.html">か：鍜/鍛</a><br>
+<a href="kagyou.html">かぎょう：稼業/家業</a><br>
+<a href="heki.html">かべ：壁/璧</a><br>
+<a href="kan_suga.html">かん：管/菅</a><br>
+<a href="sourou.html">こう：侯/候</a><br>
+<a href="sake.html">さけ：酒/洒</a><br>
+<a href="kaji.html">じ：冶/治</a><br>
+<a href="sue.html">すえ：未/末</a><br>
+<a href="taigi.html">たいぎ：大儀/大義</a><br>
+<a href="tuku.html">つく：付く/着く</a><br>
+<a href="tou_tower.html">とう：塔/搭</a><br>
+<a href="nai.html">ない/無い</a><br>
+<a href="asi_haku.html">はく：履く/ 穿く</a><br>
+<a href="majiri.html">まじり：交じり/混じり</a><br>
+<a href="reki.html">れき：歴/暦</a><br>
+<a href="u53f1_sika.html">しかる：叱/𠮟</a><br>
+<a href="u586b_ten.html">てん：填/塡</a><br>
+<a href="u982c_hoho.html">ほお：頬/頰</a><br>
+<a href="u5265_haku.html">はく：剥/剝</a><br>
+<a href="home_form.html">ホーム/フォーム</a><br>
+<br>
 <hr>
 &copy; syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
 </body>
 </html>
+/* style.css */
+:root {
+    --bg-body: #f0f0f0;
+    --bg-container: #ffffff;
+    --text-color: #333;
+    --info-bg: #f9f9f9;
+    --accent: #d32f2f;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-body: #1a1a1a;
+        --bg-container: #2a2a2a;
+        --text-color: #e0e0e0;
+        --info-bg: #3a3a3a;
+        --accent: #ff5252;
+    }
+}
+
+body {
+    line-height: 1.8;
+    margin: 0;
+    padding: 0;
+    background: var(--bg-body);
+    color: var(--text-color);
+}
+
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding-top: 20px;
+    background: var(--bg-container);
+    padding: 30px 25px;    min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+    .container {
+        margin: 20px 10px;
+        padding: 20px 18px;
+        max-width: 100%;
+    }
+}
+
+h1 {
+    margin-top: 0;
+    font-size: 1.8em;
+}
+
+.bigchar {
+    font-size: 80px;
+    line-height: 1;
+    margin: 20px 0 10px;
+    text-align: center;
+}
+
+.info {
+    padding: 18px;
+    border-radius: 8px;
+    border-left: 6px solid;
+    margin: 25px 0;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid;
+    margin: 40px 0 20px;
+}
+

@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <title>叱/𠮟 - 小説誤字fix(js)</title>
 <meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="container">
 <h1>小説誤字fix(js) - 用例</h1>
 [<a href="index.html">index</a>]<br>
 <h2>字</h2>
@@ -13,11 +15,20 @@
 U+53F1　(推奨)　異体字<br>
 JIS第1水準<br>
 <div style="font-size:60px">𠮟</div>
-U+2B9F0　新常用漢字／サロゲートペア<br>
+U+20B9F　<a href="sin_jouyou.html">新常用漢字</a>／サロゲートペア<br>
 JIS第3水準<br>
+<h2>説明</h2>
+多くのフリーフォントではJIS第2水準までしか文字が収録されていないことがあります。<br>
+JIS第3水準の新常用漢字は文字化けする可能性があり、webではまだ非推奨です。<br>
+JIS第3水準の文字はShift_JISで表すことができず、基本的にUTF-8などを必要とします。<br>
+互換性を考慮する場合は、U+53F1「叱」のほうを使用します。<br>
+<h3>サロゲートペア</h3>
+サロゲートペアの文字は、1文字で2文字分のバイト数が必要です。<br>
+「小説家になろう」などでは、使用することができない文字となっています。<br>
 <hr>
 &copy; syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
 </body>
 </html>
 
