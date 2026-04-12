@@ -1,19 +1,85 @@
 ﻿@charset "utf-8";
+/* Copyright (c) syuribox
+ Released under the MIT license.
+*/
+:root {
+    --bg-body: #f0f0f0;
+    --bg-container: #fff;
+    --bg-title: #ddf;
+    --text-color: #333;
+    --colorwarn:#fbb
+    --color1:#ff0;
+    --color2:#ccf;
+    --color3:#bfb;
+    --colornone:#fdb;
+    --color-link:#00f
+}
 
-body {color:#000; background-color:#fff}
-h1 {background-color:#ddf}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-body: #000;
+        --bg-container: #1a1a1a;
+        --bg-title: #224;
+        --text-color: #e0e0e0;
+        --colorwarn:#922;
+        --color1:#770;
+        --color2:#227;
+        --color3:#070;
+        --colornone:#700;
+        --color-link:#66f;
+    }
+}
+@media (max-width: 768px) {
+    .container {
+        margin: 20px 10px;
+        padding: 20px 18px;
+        max-width: 100%;
+    }
+}
+@media (max-width: 1400px) {
+    .container2 {
+        margin: 20px 10px;
+        padding: 20px 18px;
+        max-width: 100%;
+    }
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    color:var(--text-color);
+    background-color:var(--bg-body)
+}
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 30px 25px 20px;
+    background: var(--bg-container);
+    min-height: 100vh;
+}
+.container2 {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 30px 25px 20px;
+    background: var(--bg-container);
+    min-height: 100vh;
+}
+
+h1 {background-color:var(--bg-title)}
 
 div.result {font-family:"ＭＳ ゴシック", monospace}
 
-span.colorwarn {background-color:#fbb}
-span.color1 {background-color:#ff0}
-span.color2 {background-color:#ccf}
-span.color3 {background-color:#bfb}
-span.colornone {background-color:#fdb}
+span.colorwarn {background-color:var(--colorwarn)}
+span.color1 {background-color:var(--color1)}
+span.color2 {background-color:var(--color2)}
+span.color3 {background-color:var(--color3)}
+span.colornone {background-color:var(--colornone)}
 
-span.kanjizinmei {background-color:#d6d6ff}
-span.kanjiext {background-color:#fbb}
+span.kanji {background-color:var(--color1)}
+span.kanjizinmei {background-color:var(--color2)}
+span.kanjisin {background-color:var(--color3)}
+span.kanjiext {background-color:var(--colorwarn)}
 
 div.resultext {border:1px solid #000; font-family:"ＭＳ ゴシック", monospace}
 
-a {color:#00f}
+a {color:var(--color-link)}

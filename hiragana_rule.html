@@ -6,9 +6,9 @@
 <link rel="stylesheet" type="text/css" href="hiraganacheck.css">
 </head>
 <body>
+<div class="container">
 <h1>ひらがな誤字脱字チェッカー(js) - ルール</h1>
-<p>　ひらがなの書き方について、政府は<a href="http://www.mext.go.jp/b_menu/hakusho/nc/k19860701001/k19860701001.html">現代仮名遣い</a>や<a href="http://kokugo.bunka.go.jp/kokugo_nihongo/joho/kijun/naikaku/kanji/">常用漢字表</a>、<a href="http://www.moj.go.jp/MINJI/minji86.html">人名用漢字</a> <a href="http://www.mext.go.jp/b_menu/hakusho/nc/k19730618001/k19730618001.html">送り仮名の付け方</a>、<a href="http://www.clb.go.jp/info/other/houreiniokerukanji.pdf">法令における漢字使用等について</a>などを公開しています。<br>
-　<a href="http://www.sanseido.net/main/words/hyakka/howto/19.aspx">三省堂 Web Dictionaly</a>も参考になります。<br>
+<p>　ひらがなの書き方について、「政府は現代仮名遣い」や「常用漢字表」、「<a href="http://www.moj.go.jp/MINJI/minji86.html">人名用漢字</a>」、「送り仮名の付け方」、「法令における漢字使用等について」などを公開しています。<br>
 　記者ハンドブックなどの市販の本が表記ルールに詳しいそうです。<br>
 　小説は芸術の分野に属するので、このルールに従う必要はありませんが、ある程度は準じたほうが読者にとって読みやすい文章になると思います。<br>
 </p>
@@ -94,7 +94,7 @@
 　　角→かど、つの、すみ<br>
 <br>
 ■標準辞書の単語<br>
-　ひらがなの登録単語は、主にひらがなで表記するものを集めているため、圧倒的に語彙がたりません。意図的にひらがな書きにしたものは、高確率で未登録単語扱いになります。<br>
+　ひらがなの登録単語は、主にひらがなで表記するものを集めているため、圧倒的に語彙が足りません。意図的にひらがな書きにしたものは、高確率で未登録単語扱いになります。<br>
 　また「単語の区切り」は「国語文法」に則ったものではありません。<br>
 </p>
 <h2>表記ゆれ</h2>
@@ -117,7 +117,8 @@
 <tr><td>　　続く：つずく→つづく</td><td>　綴る：つずる→つづる</td><td>　常々：つねずね→つねづね</td></tr>
 <tr><td>　　(3つ)ずつ：づつ→ずつ</td><td>　(竹)筒：ずつ→づつ</td><td>　難しい：むづかしい→むずかしい</td></tr>
 <tr><td>　　若しくは：もしくわ→もしくは</td><td>　こんにちわ→こんにちは</td><td>　すいません→すみません</td></tr>
-<tr><td>　　近々：ちかじか→ちかぢか</td><td>　ぢゃない→じゃない</td><td>　</td>　</tr>
+<tr><td>　　近々：ちかじか→ちかぢか</td><td>　ぢゃない→じゃない</td><td>　</td></tr>
+<tr><td>　　こじんまり→こぢんまり</td><td>　</td><td>　</td>　</tr>
 </table>
 <br>
 ■漢字かな表記ゆれ<br>
@@ -255,7 +256,6 @@
 ■記号類や改行のルール<br>
 　ノベルチェッカーで、ある程度の入力ミスを検出することができます。<br>
 　別プロジェクトとしてノベルチェッカークローンを用意してあるので、ご利用ください。<br>
-<br>
 </p>
 <h2>品詞判定</h2>
 <p>■五段活用<br>
@@ -293,11 +293,14 @@
 <h2>常用漢字チェッカー</h2>
 <p>■常用漢字<br>
 　常用漢字→白で表示<br>
+　新常用漢字→<span class="kanjisin">緑背景</span>で表示<br>
 　人名用漢字→<span class="kanjizinmei">青背景</span>で表示<br>
 　その他の漢字→<span class="kanjiext">赤背景</span>で表示<br>
 </p>
 <hr>
-copyright &copy; syuribox
+<a href="LICENSE.html">LICENSE</a> <a href="hiragana.html">cheker</a>
+copyright © syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
+<body>
 </body>
 </html>
