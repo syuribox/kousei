@@ -33,6 +33,10 @@ body {
     padding: 30px 25px;    min-height: 100vh;
 }
 
+.big-char {
+    font-size:60px
+}
+
 @media (max-width: 768px) {
     .container {
         margin: 20px 10px;
