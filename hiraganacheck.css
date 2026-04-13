@@ -12,7 +12,9 @@
     --color2:#ccf;
     --color3:#bfb;
     --colornone:#fdb;
-    --color-link:#00f
+    --color-link:#00f;
+    --hit-button-text:#fff;
+    --hit-button-bg:#33f;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,23 +29,13 @@
         --color3:#070;
         --colornone:#700;
         --color-link:#66f;
+        --hit-button-text:#fff;
+        --hit-button-bg:#55f;
     }
 }
-@media (max-width: 768px) {
-    .container {
-        margin: 20px 10px;
-        padding: 20px 18px;
-        max-width: 100%;
-    }
+.mobile-only {
+  display: none;
 }
-@media (max-width: 1400px) {
-    .container2 {
-        margin: 20px 10px;
-        padding: 20px 18px;
-        max-width: 100%;
-    }
-}
-
 body {
     margin: 0;
     padding: 0;
@@ -69,6 +61,11 @@ h1 {background-color:var(--bg-title)}
 
 div.result {font-family:"ＭＳ ゴシック", monospace}
 
+.hit-button{
+    color:var(--hit-button-text);
+    background-color:var(--hit-button-bg);
+}
+
 span.colorwarn {background-color:var(--colorwarn)}
 span.color1 {background-color:var(--color1)}
 span.color2 {background-color:var(--color2)}
@@ -80,6 +77,34 @@ span.kanjizinmei {background-color:var(--color2)}
 span.kanjisin {background-color:var(--color3)}
 span.kanjiext {background-color:var(--colorwarn)}
 
-div.resultext {border:1px solid #000; font-family:"ＭＳ ゴシック", monospace}
+div.resultext {border:1px solid var(--text-color); font-family:"ＭＳ ゴシック", monospace}
 
 a {color:var(--color-link)}
+
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+    margin: 0.3rem;
+    padding: 0.4rem;
+}
+input[type="checkbox"] {
+    margin: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .container {
+        margin: 20px 10px;
+        padding: 20px 18px;
+        max-width: 100%;
+    }
+    .mobile-only {
+        display:inline-block;
+    }
+}
+@media (max-width: 1400px) {
+    .container2 {
+        margin: 20px 10px;
+        padding: 20px 18px;
+        max-width: 100%;
+    }
+}

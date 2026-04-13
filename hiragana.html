@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>ひらがな誤字脱字チェッカー(js)</title>
 <!--
-	Copyright (c) 2016 ebiebi360
+	Copyright (c) 2016-2026 syuribox
 	Released under the MIT license.
 -->
 <link rel="stylesheet" type="text/css" href="hiraganacheck.css">
@@ -14,14 +14,14 @@
 <div class="container2">
 <h1>ひらがな誤字脱字チェッカー(js)</h1>
 <form name="mainform">
-<div id="droptarget" ondrop="drop_files(event)" ondragenter="drop_cancel(event)" ondragover="drop_cancel(event)">JavaScript版です。<br>
-jsのためデータをネットにアップする必要がありません。あなたのPC、スマホ上で処理されます。<br>
-平仮名をそれっぽく色分けして、校閲、推敲、校正、誤字脱字の発見修正の補助に使用できます。<br>
-テキストエリアにドロップ、またはローカルファイルを開く
+<div id="droptarget" ondrop="drop_files(event)" ondragenter="drop_cancel(event)" ondragover="drop_cancel(event)">
+テキストエリアにドロップ、またはローカルファイルを開く<br>
 <input type="button" id="option_split" value="オプション" onclick="split_view()">
 <input id="file_open" type="file" onchange="button_file_open(event)" multiple><br>
 <div id="option_split_view" style="display:none">
-<input type="checkbox" id="option_sjis" value="1"><label for="option_sjis">Shift_JISで開く(デフォルトはUTF-8)</label><br>
+　<input type="checkbox" id="option_sjis" value="1"><label for="option_sjis">Shift_JISで開く(デフォルトはUTF-8)</label>
+<span style="display:none">
+<br>
 ファイルのページ分割：
 <select id="split_type" onchange="split_change()">
 <option value="auto">自動認識</option>
@@ -38,24 +38,30 @@ jsのためデータをネットにアップする必要がありません。あ
 <span id="concat_head_view" style="display:none">
 結合見出し文字列<input type="text" id="concat_head" size="40" value="■●■">
 </span>
+</span>
 <br>
-<input type="button" id="area_split" value="入力枠をページ分割" onclick="split_area()"><br>
+　<input type="button" id="clear" value="入力枠クリア" onclick="area_clear()">
+　<input type="button" id="sample" value="サンプル" onclick="area_sample()">
+<span style="display:none">
+　<input type="button" id="area_split" value="入力枠をページ分割" onclick="split_area()">
+</span>
+<br>
+　<input type="checkbox" id="option_linenum" value="1" checked><label for="option_linenum">行番号表示</label>
+　<input type="checkbox" id="option_noneonly" value="1" checked><label for="option_noneonly">特徴行のみ表示</label>
+　<input type="checkbox" id="option_nospace" value="1" checked><label for="option_nospace">空白行略</label>
 </div>
 <textarea name="maintext" id="maintext" cols="80" rows="8" style="width:95%">
 </textarea>
 </div>
-<input type="button" id="start" value="構文チェック" onclick="start_check()">　
-<input type="button" id="kanjistart" value="常用漢字" onclick="start_kanji_check()">　　
-<input type="button" id="clear" value="入力枠クリア" onclick="area_clear()">　
-<input type="button" id="sample" value="サンプル" onclick="area_sample()">　
-<input type="button" id="page_add" value="ページ追加" onclick="add_page()">
+<span class="mobile-only">　</span><input type="button" id="start" value="構文チェック" onclick="start_check()" class="hit-button">
+　<input type="button" id="kanjistart" value="常用漢字" onclick="start_kanji_check()">　<br class="mobile-only">
+<span style="display:none">
+　<br class="mobile-only">
+　<input type="button" id="page_add" value="ページ追加" onclick="add_page()">
 ページ名<input type="text" id="page_name" size="10" value="ページ1">
+</span>
 <br>
-<input type="checkbox" id="option_linenum" value="1" checked><label for="option_linenum">行番号表示</label>　
-<input type="checkbox" id="option_noneonly" value="1" checked><label for="option_noneonly">警告・未登録単語行のみ表示</label>
-<input type="checkbox" id="option_nospace" value="1" checked><label for="option_nospace">空白行略</label>
-　　　
-辞書選択：
+　辞書選択：
 <select name="dic" id="book" onchange="dic_change()">
 <option value="include">内蔵辞書</option>
 <option value="userdata">ユーザ辞書</option>
@@ -87,7 +93,9 @@ jsのためデータをネットにアップする必要がありません。あ
 </form>
 <div id="footers">
 <hr>
-<a href="LICENSE.html">LICENSE</a> <a href="hiragana_rule.html">ルール</a>　　持ち帰り用リンク：<a href="hiragana.html">cheker</a> <a href="hiraganacheck.js">js</a> <a href="hiraganacheck.css">css</a><br>
+<a href="LICENSE.html">LICENSE</a>　<a href="hiragana_rule.html">ルール</a><br>
+<br>
+download：<a href="hiragana.zip">zip file</a><br>
 <br>
 copyright © syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
