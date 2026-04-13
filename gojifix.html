@@ -12,7 +12,7 @@
 <form name="mainform">
 <input type="button" id="button_view_options" value="オプション表示▼">
 <br>
-<div id="view_options" style="display:none">
+<div id="view_options" style="display:inline">
 <br>
 ファイル読込<input type="file" id="set_file">
 <br>
@@ -29,10 +29,13 @@
 <input type="checkbox" id="check_yure" value="1"><label for="check_yure">表記ゆれ</label>
 　<input type="checkbox" id="check_line" value="1" checked><label for="check_line">情報行のみ</label>
 </div>
-<textarea id="text_main" cols="60" rows="8" style="width:95%">
+<textarea id="text_main" rows="8" style="width:95%"
+ placeholder="ここにテキスト(小説)を貼り付けてください。
+もしくは、ファイルから開くこともできます。
+">
 </textarea><br>
 警告無視リスト：<br>
-<textarea id="text_musi" cols="60" rows="3" style="width:95%">
+<textarea id="text_musi" rows="3" style="width:95%">
 </textarea><br>
 　<input type="button" id="button_goji" value="誤字確認" class="hit-button">
 　<input type="button" id="button_set_musi" value="無視サンプル">
@@ -41,7 +44,7 @@
 <div id="result" style="margin:1rem; border:1px"></div>
 <hr>
 [<a href="./yourei/index.html">ヒント</a>]　[<a href="./yourei/help.html">ヘルプ</a>]<br>
-2026-4-11 ver0.0.4<br>
+2026-4-14 ver0.1<br>
 <br>
 　download: <a href="gojifix.zip">gojifix.zip</a><br>
 <br>

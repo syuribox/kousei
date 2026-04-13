@@ -1,5 +1,6 @@
 ﻿'use strict';
 function goji_fix(input_data, aimai_flag, warn2_flag, line_flag, yure_flag, musi_list) {
+let str_error = '';
 let dummy_rep_list = function(){};
 const rep_list =
 `
@@ -16,6 +17,7 @@ const rep_list =
 %{suru}■(させ|され|し(た|て|とい[てた]|よう|([な無]|にゃ)(い|かった|く|ければ|さ?(そう|[す過]ぎ|げ)?)|ま(す|した|せ[ぬん])|そう|[す過]ぎ)|す(る|れば)|せ[ずぬん])
 %{sinai}■感知(し((てい|てやし|ちゃい|て|)([な無](い|かった|きゃ|けれ|けりゃ|さ?([す過]ぎ|そう)|さ[げみ気]|[いくきげみ気])|ね[えぇー])|(て[あお]り|て|)ませ[ぬん])|せ[ずぬん])
 %{da_desu}■(だ|で(す|し[たて]|は([な無]([いかきくけ]||ありませ[んぬ])))|なら)
+%{keiyou}■(かった|けれ|[いく]|)
 %{fruit}■(?:いちご|かき|くり|ざくろ|びわ|みかん|やまもも|アセロラ|アップル|アボカド|アンズ|イチゴ|イチジク|オレンジ|カキ|カリン|キイチゴ|キウイ|キウイフルーツ|クリ|グァバ|グミ|グレープ|グレープフルーツ|ココヤシ|サクランボ|ザクロ|スイカ|スターフルーツ|ストロベリー|スモモ|ドラゴンフルーツ|ドリアン|ナシ|ハスカップ|バナナ|パイナップル|パッションフルーツ|パパイヤ|パパイヤ|ビワ|ピーチ|フルーツ|ブドウ|ブラックベリー|ブルーベリー|プラム|ベリー|マスカット|マルメロ|マンゴスチン|マンゴー|ミカン|ミラクルフルーツ|メロン|モモ|ヤマモモ|ライチ|ライチ|ライム|ラズベリー|ラズベリー|ラフランス|ラ・フランス|リンゴ|レモン|ローズヒップ|山桃|木イチゴ|木苺|杏子|枇杷|柘榴|柿|栗|洋ナシ|苺|蜜柑|西瓜|葡萄)
 %{vegetable}■(?:いんげん|こんにゃく|さつまいも|さといも|さやいんげん|さやえんどう|しょうが|そら豆|だいこん|とうがらし|とうもろこし|なす|にんじん|にんにく|ほうれん草|れんこん|アスパラガス|アズキ|インゲン|インゲンマメ|エダマメ|エンドウ|エンドウマメ|オクラ|カブ|カボチャ|カリフラワー|キャベツ|キュウリ|クレソン|コンニャク|ゴボウ|ゴマ|ゴーヤ|サツマイモ|サトイモ|サヤインゲン|ショウガ|ジャガイモ|ズッキーニ|セリ|セロリ|ソラマメ|タケノコ|タマネギ|タマネギ|ダイコン|ダイズ|チンゲンサイ|チンゲン菜|トウガラシ|トウモロコシ|トマト|ナガイモ|ナス|ニラ|ニンジン|ニンニク|ネギ|ハクサイ|パセリ|パプリカ|ピーナッツ|ピーマン|ブロッコリー|ホウレンソウ|ミョウガ|モロヘイヤ|ヤマトイモ|ラディッシュ|レタス|レンコン|人参|南瓜|唐辛子|大根|大蒜|枝豆|白菜|筍|胡麻|芋|苦瓜|茄子|落花生|葱|蒟蒻|蓮根|蕪|里芋|野菜)
 %{meal}■(?:アワ|オオムギ|キビ|コムギ|コメ|ムギ|ヒエ|ライムギ|ライ麦|大麦|小麦|[米麦粟稗黍])
@@ -2461,6 +2463,8 @@ const fix_hira_list =
 いいそ(!=[。、，！？」』≫〉〕｝］])■いいぞ
 いいたろう■いいだろう
 いいてしょう■いいでしょう
+いいところどり■いいとこどり
+いいところ取り■いいとこ取り
 いいなづけ■いいなずけ[許嫁]%{gendai}
 いおお■いおう[言おう,硫黄..]
 いかづち■いかずち%{gendai}
@@ -2537,6 +2541,7 @@ const fix_hira_list =
 おびれ(?=[がはも][付着附突就][いかきくけこ])■おひれ[慣用]
 おまちどう■おまちどお[お待ち遠]<a href="https://salon.mainichi-kotoba.jp/archives/107646" target="webdic">🌎毎日</a>
 おもんばか■おもんぱかる[慮る/ば→ぱ]
+おもしき■おぼ[思]しき／おもわしき
 おようございます■おはようございます
 おわずけ■おあずけ[御預け]
 おわづけ■おあずけ[御預け]%{gendai}
@@ -2774,6 +2779,9 @@ const fix_hira_list =
 たたちに■ただちに
 たたの■ただの？
 ただの感だ■ただの勘だ
+だだっっひろい■ただっっぴろい
+ただっっひろい■ただっっぴろい
+ただっ広%{keiyou}■だだっ広$1
 たっだ(?!いま)■だった？
 たづさえ■たずさえ%{gendai}
 たまごの皮■たまごの殻
@@ -2802,6 +2810,7 @@ const fix_hira_list =
 だけだけ■たけだけ
 だたし■ただし／だったし
 だだちに■ただちに
+だっだ(?![れめ])■だった
 だど(?=[。、」』）])■だけど
 だどな(?=[。、」』）])■だけどな
 だどね(?=[。、」』）])■だこどね
@@ -2833,6 +2842,7 @@ const fix_hira_list =
 っている欲し■っていて欲し
 ってい欲し■っていて欲し
 っぼ([いかきくけ])■っぽい
+つかさと(った|って|らない|らなく|[っらりるれろん])■つかさど[司]$1
 つくずく■つくづく%{gendai}
 つくつく■つくづく
 つず([いかきくけこ])■つづ[続]$1%{gendai}
@@ -15369,7 +15379,7 @@ const cnv_list =
 `;
 	var cxxxx = 0;
 	let func_esq_regex = function(str){
-		let ret = '';
+		let retx = '';
 		let esc = 0;
 		for(let x = 0; x < str.length; x++){
 			if('(' == str.charAt(x)){
@@ -15377,10 +15387,10 @@ const cnv_list =
 			}else if(')' == str.charAt(x)){
 				esc--;
 			}else if(esc === 0){
-				ret += str.charAt(x);
+				retx += str.charAt(x);
 		  }
 		}
-		return ret;
+		return retx;
 		// return str.replace(/\([^\()]+?\)/g, '');
 	};
 	let func_sort_length = function(a, b){
@@ -15501,7 +15511,7 @@ const cnv_list =
 			try {
 				new RegExp(item, 'g');
 			} catch (e) {
-				alert('arr0_list パターン構文が正しくありません\n' + item);
+				str_error + 'arr0_listパターン構文不正　' + item + '\n';
 			}
 			if (item == '') {
 				item = `＜nodata${idx}＞`;
@@ -15525,7 +15535,7 @@ const cnv_list =
 		try {
 			arr0_list[a][2] = new RegExp(word, 'g');
 		} catch (e) {
-			alert('arr0_list パターン構文が正しくありません\n' + word);
+			str_error + 'arr0_listパターン構文不正　' + word + '\n';
 		}
 		arr0_list[a][3] = new RegExp(arr0_list[a][1], 'g');
 	}
@@ -15576,14 +15586,14 @@ const cnv_list =
 		try {
 			arr_list[a][2] = new RegExp(arr_list[a][0], 'g');
 		} catch (e) {
-			alert('arr_list パターン構文が正しくありません%dindex='+ a +'\n' + arr_list[a][0]);
+			str_error + 'パターン構文不正　' + arr_list[a][0] + '\n';
 		}
 		arr_list[a][3] = '＜b_' + a + '＞';
 		let add_doll = '';
 		try{
 			add_doll = func_add_doll(arr_list[a][1]);
 		} catch (e) {
-				alert('arr_list パターン構文が正しくありません ■%dindex='+ a +'\n' + arr_list[a][0]);
+				str_error + 'パターン構文不正　' + arr_list[a][0] + '\n';
 		}
 		if(0 < add_doll.length){
 			arr_list[a][4] = new RegExp(arr_list[a][3] + '◆\\(([^\\n\\r\\(\\)]*?)\\)', 'g');
@@ -15623,14 +15633,14 @@ const cnv_list =
 			try {
 				arr_aimai[a][2] = new RegExp(arr_aimai[a][0], 'g');
 			} catch (e) {
-				alert('arr_aimai パターン構文が正しくありませんindex='+ a +'\n' + arr_aimai[a][0]);
+				str_error + 'arr_aimaiパターン構文不正　' + arr_aimai[a][0] + '\n';
 			}
 			arr_aimai[a][3] = '＜c_' + a + '＞';
 			let add_doll = '';
 			try{
 				add_doll = func_add_doll(arr_aimai[a][1]);
 			} catch (e) {
-				alert('arr_aimai パターン構文が正しくありません ■index='+ a +'\n' + arr_aimai[a][0]);
+				str_error + 'arr_aimaiパターン構文不正　' + arr_aimai[a][0] + '\n';
 			}
 			if(0 < add_doll.length){
 				arr_aimai[a][4] = new RegExp(arr_aimai[a][3] + '◆\\(([^\\n\\r\\(\\)]*?)\\)', 'g');
@@ -15695,12 +15705,12 @@ const cnv_list =
 			}
 			const item = yure_array[y].split('/');
 			t = t.replace(new RegExp('＄' + y + 'a', 'g'),
-				 '<span style="color:blue">' + item[0] +
-				'</span><span style="color:hotpink">■↔(' + item[1] + '[表記ゆれ])</span>'
+				 '<span class="color-hit">' + item[0] +
+				'</span><span class="color-pink">■↔(' + item[1] + '[表記ゆれ])</span>'
 			);
 			t = t.replace(new RegExp('＄' + y + 'b', 'g'),
-				 '<span style="color:blue">' + item[1] +
-				'</span><span style="color:hotpink">■↔(' + item[0] + '[表記ゆれ])</span>'
+				 '<span class="color-hit">' + item[1] +
+				'</span><span class="color-pink">■↔(' + item[0] + '[表記ゆれ])</span>'
 			);
 		}
 		t = t.replace(new RegExp('＄x', 'g'), '＄');
@@ -15710,7 +15720,8 @@ const cnv_list =
 		const arr_warn2_end = arr_warn2.length;
 		for(let k=0; k<arr_warn2_end;++k){
 			if(0 < arr_warn2[k][0].length){
-				t = t.replace(arr_warn2[k][4], '<span style="color:blue">' + func_esq_regex(arr_warn2[k][0]) + '</span><span style="color:green">■🔍('+ arr_warn2[k][1] + ')</span>');
+				t = t.replace(arr_warn2[k][4], '<span class="color-hit">' + func_esq_regex(arr_warn2[k][0]) +
+					'</span><span class="color-green">■🔍('+ arr_warn2[k][1] + ')</span>');
 			}
 		}
 		// ret += '<hr>' + t;
@@ -15725,11 +15736,11 @@ const cnv_list =
 			let add_doll = func_add_doll(arr_aimai[k][1]);
 			let re_to = '';
 			if(0 < add_doll.length){
-				re_to = '<span style="color:blue">' + func_esq_regex(arr_aimai[k][0]) + '$1' +
-					'</span><span style="color:orange">■⚠('+ arr_aimai[k][1].replaceAll(add_doll, '$$1') + ')</span>';
+				re_to = '<span class="color-hit">' + func_esq_regex(arr_aimai[k][0]) + '$1' +
+					'</span><span class="color-orange">■⚠('+ arr_aimai[k][1].replaceAll(add_doll, '$$1') + ')</span>';
 			}else{
-				re_to = '<span style="color:blue">' + func_esq_regex(arr_aimai[k][0]) +
-					'</span><span style="color:orange">■⚠('+ arr_aimai[k][1] + ')</span>';
+				re_to = '<span class="color-hit">' + func_esq_regex(arr_aimai[k][0]) +
+					'</span><span class="color-orange">■⚠('+ arr_aimai[k][1] + ')</span>';
 			}
 			t = t.replace(arr_aimai[k][4], re_to);
 		}
@@ -15743,11 +15754,11 @@ const cnv_list =
 		let add_doll = func_add_doll(arr_list[k][1]);
 		let re_to = '';
 		if(0 < add_doll.length){
-			re_to = '<span style="color:blue">' + func_esq_regex(arr_list[k][0]) + '$1' +
-				'</span><span style="color:red">■🐛(' + arr_list[k][1].replaceAll(add_doll, '$$1') + ')</span>';
+			re_to = '<span class="color-hit">' + func_esq_regex(arr_list[k][0]) + '$1' +
+				'</span><span class="color-red">■🐛(' + arr_list[k][1].replaceAll(add_doll, '$$1') + ')</span>';
 		}else{
-			re_to = '<span style="color:blue">' + func_esq_regex(arr_list[k][0]) +
-				'</span><span style="color:red">■🐛('+ arr_list[k][1] + ')</span>';
+			re_to = '<span class="color-hit">' + func_esq_regex(arr_list[k][0]) +
+				'</span><span class="color-red">■🐛('+ arr_list[k][1] + ')</span>';
 		}
 		t = t.replace(arr_list[k][4], re_to);
 	}
@@ -15777,15 +15788,20 @@ const cnv_list =
 		t = ret2.replace(/◆=/g, '■').replace(/◆_/g, '◆');
 	}
 
-	ret = '凡例：・<span style="color:blue">発見箇所</span><span style="color:red">■🐛(修正候補[説明])</span>　' + bug_count + '個' + ret;
+	//  出力メイン開始
+	if(0 < str_error.length){
+		ret += str_error + '<hr>';
+	}
+
+	ret += '凡例：・<span class="color-hit">発見箇所</span><span class="color-red">■🐛(修正候補[説明])</span>　' + bug_count + '個' + ret;
 	if(aimai_flag){
-				ret += '<br>　　　・<span style="color:blue">発見箇所</span><span style="color:orange">■⚠(警告情報)</span>　' + warn_count + '個';
+				ret += '<br>　　　・<span class="color-hit">発見箇所</span><span class="color-orange">■⚠(警告情報)</span>　' + warn_count + '個';
 	}
 	if(warn2_flag){
-				ret += '<br>　　　・<span style="color:blue">発見箇所</span><span style="color:green">■🔍(注意情報)</span>　' + warn2_count + '個';
+				ret += '<br>　　　・<span class="color-hit">発見箇所</span><span class="color-green">■🔍(注意情報)</span>　' + warn2_count + '個';
 	}
 	if(yure_flag){
-				ret += '<br>　　　・<span style="color:blue">発見箇所</span><span style="color:hotpink">■↔(表記ゆれ情報)</span>　' + yure_count + '個';
+				ret += '<br>　　　・<span class="color-hit">発見箇所</span><span class="color-pink">■↔(表記ゆれ情報)</span>　' + yure_count + '個';
 	}
 
 	ret += '<br>※注意：出力文字列は全角英数は半角英数に置換されています。<hr>';
