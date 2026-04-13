@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
 <meta charset="utf-8">
 <title>ひらがな誤字脱字チェッカー(js)</title>
@@ -7,11 +7,12 @@
 	Copyright (c) 2016-2026 syuribox
 	Released under the MIT license.
 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" type="text/css" href="hiraganacheck.css">
 </head>
 <body id="mainbody">
 <div class="container2">
-<h1>ひらがな誤字脱字チェッカー(js)</h1>
+<h1>ひらがなチェッカー</h1>
 <form name="mainform">
 <div id="droptarget">
 <input type="button" id="option_split" value="オプション▼">
@@ -28,10 +29,10 @@
 <option value="concat">結合モード</option>
 </select>
 <span id="split_regex" style="display:none">
-区切り記号<input type="text" id="split_regex_head" size="40" value="^第?[0-9０-９〇一二三四五六七八九十百千]">
+区切り記号<input type="text" id="split_regex_head" size="10" value="^第?[0-9０-９〇一二三四五六七八九十百千]">
 </span>
 <span id="concat_head_view" style="display:none">
-結合見出し文字列<input type="text" id="concat_head" size="40" value="■●■">
+結合見出し文字列<input type="text" id="concat_head" size="10" value="■●■">
 </span>
 <br>
 　<input type="button" id="clear" value="入力枠クリア">
