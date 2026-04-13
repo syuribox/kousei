@@ -1,22 +1,36 @@
-﻿/* style.css */
+﻿@charset "utf-8";
+/* style.css */
 :root {
     --bg-body: #f0f0f0;
     --bg-container: #ffffff;
+    --bg-title: #ddf;
     --text-color: #333;
     --info-bg: #f9f9f9;
     --accent: #d32f2f;
+    --color-link:#00f;
+    --hit-button-text:#fff;
+    --hit-button-bg:#33f;
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
         --bg-body: #1a1a1a;
         --bg-container: #2a2a2a;
+        --bg-title: #224;
         --text-color: #e0e0e0;
         --info-bg: #3a3a3a;
         --accent: #ff5252;
+        --color-link:#66f;
+        --hit-button-text:#fff;
+        --hit-button-bg:#55f;
     }
 }
-
+.mobile-only {
+    display: none;
+}
+.pc-mode {
+    display: inline-block;
+}
 body {
     line-height: 1.8;
     margin: 0;
@@ -25,12 +39,25 @@ body {
     color: var(--text-color);
 }
 
+textarea {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 .container {
     max-width: 720px;
     margin: 0 auto;
-    padding-top: 20px;
+    padding: 20px 30px 25px 20px;
     background: var(--bg-container);
-    padding: 30px 25px;    min-height: 100vh;
+    min-height: 100vh;
+}
+
+.container2 {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 30px 25px 20px;
+    background: var(--bg-container);
+    min-height: 100vh;
 }
 
 .big-char {
@@ -39,15 +66,42 @@ body {
 
 @media (max-width: 768px) {
     .container {
-        margin: 20px 10px;
+        margin: 0 10px;
+        padding: 20px 18px;
+        max-width: 100%;
+    }
+    .mobile-only {
+        display:inline-block;
+    }
+    .pc-mode {
+        display: none;
+    }
+}
+@media (max-width: 1400px) {
+    .container2 {
+        margin: 0 10px;
         padding: 20px 18px;
         max-width: 100%;
     }
 }
 
+.hit-button{
+    color:var(--hit-button-text);
+    background-color:var(--hit-button-bg);
+}
+
+input[type="button"],
+input[type="submit"],
+input[type="reset"] {
+    margin: 0.3rem;
+    padding: 0.4rem;
+}
+input[type="checkbox"] {
+    margin: 0.5rem;
+}
+
 h1 {
-    margin-top: 0;
-    font-size: 1.8em;
+    background-color:var(--bg-title)}
 }
 
 .bigchar {
@@ -66,7 +120,10 @@ h1 {
 
 hr {
     border: none;
-    border-top: 1px solid;
-    margin: 40px 0 20px;
+    border-top: 2px solid;
+    margin: 20px 0 10px;
 }
 
+a {
+    {color:var(--color-link)}
+}
