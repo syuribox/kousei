@@ -8,22 +8,17 @@
 	Released under the MIT license.
 -->
 <link rel="stylesheet" type="text/css" href="hiraganacheck.css">
-<script type="text/javascript" src="hiraganacheck.js" charset="utf-8"></script>
 </head>
-<body onload="page_onload()">
+<body id="mainbody">
 <div class="container2">
 <h1>ひらがな誤字脱字チェッカー(js)</h1>
 <form name="mainform">
-<div id="droptarget" ondrop="drop_files(event)" ondragenter="drop_cancel(event)" ondragover="drop_cancel(event)">
-テキストエリアにドロップ、またはローカルファイルを開く<br>
-<input type="button" id="option_split" value="オプション" onclick="split_view()">
-<input id="file_open" type="file" onchange="button_file_open(event)" multiple><br>
+<div id="droptarget">
+<input type="button" id="option_split" value="オプション▼">
+<input id="file_open" type="file" multiple><br>
 <div id="option_split_view" style="display:none">
-　<input type="checkbox" id="option_sjis" value="1"><label for="option_sjis">Shift_JISで開く(デフォルトはUTF-8)</label>
-<span style="display:none">
-<br>
 ファイルのページ分割：
-<select id="split_type" onchange="split_change()">
+<select id="split_type">
 <option value="auto">自動認識</option>
 <option value="naroubackup">小説家になろうバックアップ</option>
 <option value="headsign">行頭記号類</option>
@@ -38,54 +33,60 @@
 <span id="concat_head_view" style="display:none">
 結合見出し文字列<input type="text" id="concat_head" size="40" value="■●■">
 </span>
-</span>
 <br>
-　<input type="button" id="clear" value="入力枠クリア" onclick="area_clear()">
-　<input type="button" id="sample" value="サンプル" onclick="area_sample()">
+　<input type="button" id="clear" value="入力枠クリア">
+　<input type="button" id="sample" value="サンプル">
 <span style="display:none">
-　<input type="button" id="area_split" value="入力枠をページ分割" onclick="split_area()">
+　<input type="button" id="area_split" value="入力枠をページ分割">
 </span>
 <br>
-　<input type="checkbox" id="option_linenum" value="1" checked><label for="option_linenum">行番号表示</label>
-　<input type="checkbox" id="option_noneonly" value="1" checked><label for="option_noneonly">特徴行のみ表示</label>
+表示：<input type="checkbox" id="option_linenum" value="1" checked><label for="option_linenum">行番号</label>
+　<input type="checkbox" id="option_noneonly" value="1" checked><label for="option_noneonly">特徴行のみ</label>
 　<input type="checkbox" id="option_nospace" value="1" checked><label for="option_nospace">空白行略</label>
 </div>
-<textarea name="maintext" id="maintext" cols="80" rows="8" style="width:95%">
+<textarea name="maintext" id="maintext" rows="8" style="width:95%"
+ placeholder="ここにテキスト(小説)を貼り付けてください。
+もしくは、ファイルから開くこともできます。">
 </textarea>
 </div>
-<span class="mobile-only">　</span><input type="button" id="start" value="構文チェック" onclick="start_check()" class="hit-button">
-　<input type="button" id="kanjistart" value="常用漢字" onclick="start_kanji_check()">　<br class="mobile-only">
+<span class="mobile-only">　</span><input type="button" id="start" value="構文チェック" class="hit-button">
+　<input type="button" id="kanjistart" value="常用漢字">　<br class="mobile-only">
 <span style="display:none">
 　<br class="mobile-only">
-　<input type="button" id="page_add" value="ページ追加" onclick="add_page()">
+　<input type="button" id="page_add" value="ページ追加">
 ページ名<input type="text" id="page_name" size="10" value="ページ1">
 </span>
 <br>
 　辞書選択：
-<select name="dic" id="book" onchange="dic_change()">
+<select name="dic" id="book">
 <option value="include">内蔵辞書</option>
 <option value="userdata">ユーザ辞書</option>
 <option value="mixdata">内蔵+ユーザ辞書</option>
 </select><br>
 <span id="userdicinfo" style="display:none">ユーザ辞書：
-<input type="button" id="viewinfo" value="説明表示" onclick="user_view()"><br></span>
+<input type="button" id="viewinfo" value="説明表示"><br></span>
 <span id="dicinfo" style="display:none">
-平仮名の単語を行ごとに区切って指定してください<br>
-　　「ふつうのたんご」で該当単語を追加<br>
-　　　「たんご。」で句読点などの区切り直前の単語指定<br>
-　　　「たんご、」で区切りまたは漢字等の直前の単語指定<br>
-　　　「たんご〈」でひらがなの先頭単語指定、組み合わせて「たんご〈、」「たんご〈。」も可能<br>
-　　　「のぼ/五段ラ」「しんじ/上一段」「あきらめ/下一段」「うつくし/形容詞」で品詞指定<br>
-　　「*たん/ご」で「たん」にマッチした場合に該当位置が「たんご」の時にマッチを取り消す「取消指定」<br>
-　　　「*たん/!さく」で「たん」にマッチした場合に該当位置が「たんさく」以外の時は取り消す「否定取消指定」<br>
-　　　「*たん/%あいうえお」で「たん」にマッチした場合に該当位置が「あ」「い」..の各文字の時にマッチを取り消す「取消指定」<br>
-　　「!けいこく」で警告単語(赤表示)辞書に追加<br>
+平仮名、平仮名に続く漢字、漢字に続く平仮名、カタカナに続く平仮名を単語を行ごとに区切って指定してください<br>
+　「ふつうのたんご」で該当単語を追加<br>
+　「たんご。」で句読点などの区切り直前の単語指定<br>
+　「たんご、」で区切りまたは漢字等の直前の単語指定<br>
+　「たんご〈」でひらがなの先頭単語指定、組み合わせて「たんご〈、」「たんご〈。」も可能<br>
+　「のぼ/五段ラ」「しんじ/上一段」「あきらめ/下一段」「うつくし/形容詞」で品詞指定<br>
+　「*たん/ご」で「たん」にマッチした場合に該当位置が「たんご」の時にマッチを取り消す「取消指定」<br>
+　「*たん/!さく」で「たん」にマッチした場合に該当位置が「たんさく」以外の時は取り消す「否定取消指定」<br>
+　「*にげ/%なにぬねのん」で「にげ」にマッチした場合に該当位置が「な,に,ぬ」→「にげな,にげに」...の各文字の時にマッチを取り消す「取消指定」<br>
+　「!けいこく」で警告単語(赤表示)辞書に追加<br>
 内蔵+ユーザ辞書の場合：以下の指定も可<br>
-　　「-たんご」で辞書単語削除<br>
-　　「#たん/ご」でそのパターンの内蔵取消指定の削除<br>
-　　「=けいこく」で内蔵警告辞書から削除<br>
+　「-たんご」で辞書単語削除<br>
+　「#たん/ご」でそのパターンの内蔵取消指定の削除<br>
+　「=けいこく」で内蔵警告辞書から削除<br>
 </span>
-<textarea name="userdic" id="userdic" cols="60" rows="5" style="display:none; width:95%"">
+<textarea name="userdic" id="userdic" rows="5" style="display:none; width:95%"" placeholder="たんごきょうだい
+バチる
+ホゲ/五段ラ
+ケチくさ/形容詞
+漢字しぐさ
+">
 </textarea>
 <div id="page_title"></div>
 <div id="result"></div>
@@ -94,12 +95,39 @@
 <div id="footers">
 <hr>
 <a href="LICENSE.html">LICENSE</a>　<a href="hiragana_rule.html">ルール</a><br>
+2026-4-14 ver0.1<br>
 <br>
-download：<a href="hiragana.zip">zip file</a><br>
+download：<a href="hiragana.zip">hiragana.zip</a><br>
 <br>
 copyright © syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
 </div>
 </div>
+<script type="text/javascript" src="hiraganacheck.js" charset="utf-8"></script>
+<script type="text/javascript">
+"use strict";
+(function(){
+	function $(id){
+		return document.getElementById(id);
+	}
+	$('mainbody').addEventListener('load', page_onload);
+	$('option_split').addEventListener('click', split_view);
+	$('clear').addEventListener('click', area_clear);
+	$('sample').addEventListener('click', area_sample);
+	$('area_split').addEventListener('click', split_area);
+	$('start').addEventListener('click', start_check);
+	$('kanjistart').addEventListener('click', start_kanji_check);
+	$('page_add').addEventListener('click', add_page);
+	$('viewinfo').addEventListener('click', user_view);
+
+	$('split_type').addEventListener('change', split_change);
+	$('book').addEventListener('change', dic_change);
+
+	$('droptarget').addEventListener('drop', drop_files);
+	$('droptarget').addEventListener('dragenter', drop_cancel);
+	$('droptarget').addEventListener('dragover', drop_cancel);
+	$('file_open').addEventListener('change', button_file_open);
+})();
+</script>
 </body>
 </html>
