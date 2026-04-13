@@ -7,9 +7,15 @@
     --text-color: #333;
     --info-bg: #f9f9f9;
     --accent: #d32f2f;
-    --color-link:#00f;
+    --color-link:#33f;
     --hit-button-text:#fff;
     --hit-button-bg:#33f;
+    
+    --color-hit: blue;
+    --color-red: red;
+    --color-orange: orange;
+    --color-green: green;
+    --color-pink: hotpink;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,6 +29,12 @@
         --color-link:#66f;
         --hit-button-text:#fff;
         --hit-button-bg:#55f;
+
+        --color-hit: #8af;
+        --color-red: #f88;
+        --color-orange: #ff8;
+        --color-green: #8f8;
+        --color-pink: #fce;
     }
 }
 .mobile-only {
@@ -101,7 +113,23 @@ input[type="checkbox"] {
 }
 
 h1 {
-    background-color:var(--bg-title)}
+    background-color:var(--bg-title)
+}
+
+span.color-hit {
+    color: var(--color-hit);
+}
+span.color-red {
+    color: var(--color-red);
+}
+span.color-orange {
+    color: var(--color-orange);;
+}
+span.color-green {
+    color: var(--color-green);
+}
+span.color-pink {
+    color: var(--color-pink);
 }
 
 .bigchar {
@@ -125,5 +153,5 @@ hr {
 }
 
 a {
-    {color:var(--color-link)}
+    color:var(--color-link)
 }
