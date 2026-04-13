@@ -34,7 +34,7 @@
     }
 }
 .mobile-only {
-  display: none;
+    display: none;
 }
 body {
     margin: 0;
@@ -42,6 +42,12 @@ body {
     color:var(--text-color);
     background-color:var(--bg-body)
 }
+
+textarea {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 .container {
     max-width: 720px;
     margin: 0 auto;
