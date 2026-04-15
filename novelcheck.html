@@ -3,12 +3,16 @@
 <head>
 <meta charset="utf-8">
 <title>ノベルチェッカー(js)</title>
+<!--
+	Copyright (c) 2018 syuribox
+-->
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width">
 <link rel="stylesheet" type="text/css" href="novelcheck.css">
 <script type="text/javascript" src="novelcheck.js" charset="utf-8"></script>
 </head>
 <body>
+<div class="container2">
 <h1>ノベルチェッカー(js)</h1>
 <form name="mainform">
 原稿用紙サイズ
@@ -24,7 +28,9 @@
 <input type="checkbox" id="option_sjis" value="1"><label for="option_sjis">SJIS</label>
 <input type="file" onchange="file_opens(event)">
 <br>
-<textarea name="maintext" id="maintext" cols="60" rows="8">
+<textarea name="maintext" id="maintext" rows="8" style="width:95%"
+ placeholder="ここにテキスト(小説)を貼り付けてください。
+もしくは、ファイルから開くこともできます。">
 </textarea><br>
 <input type="button" id="button_option" value="オプション" onclick="open_option()">　
 <input type="button" id="button_check" value="構文チェック" onclick="start_check()">
@@ -72,12 +78,15 @@
 <input type="checkbox" id="custom_red_imp" value="1"><label for="custom_red_imp">警告</label><br>
 <label for="custom_gray">カスタム灰Regex</label><input type="text" id="custom_gray" value="" size="20"> : 
 <input type="checkbox" id="custom_gray_imp" value="1"><label for="custom_gray_imp">警告</label><br>
-
 </div>
 </form>
 <div id="result"></div>
 <hr>
+2026-04-16 ver0.1<br>
+<br>
+<a href="index.html">index</a><br>
 &copy; syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
 </body>
 </html>

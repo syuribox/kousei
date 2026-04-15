@@ -1,7 +1,25 @@
 ﻿@charset "utf-8";
+/* Copyright (c) 2018 syuribox
+*/
 
-body {color:#000; background-color:#fff}
+body {color:#000; background-color:#f0f0f0}
 h1 {background-color:#ddf}
+
+.container2 {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 30px 25px 20px;
+    background: #ffffff;
+    min-height: 100vh;
+}
+
+@media (max-width: 1400px) {
+    .container2 {
+        margin: 0 10px;
+        padding: 20px 18px;
+        max-width: 100%;
+    }
+}
 
 div.result {font-family:"ＭＳ ゴシック", Meiryo;}
 div.resultext {border:1px solid #000; font-family:"ＭＳ ゴシック", Meiryo; word-wrap: break-word;}
