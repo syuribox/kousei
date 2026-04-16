@@ -1,9 +1,46 @@
 ﻿// Hiragana Checker js
-// Copyright (c) 2024 syuribox
+// Copyright (c) 2024 suyribox
 // Released under the MIT license.
 "use strict";
+
 function html_escape(s){
 	return s.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, '&#39;').replace(/"/g, '&#34;');
+}
+
+function is_kanji(c){
+	if((0x4e00 <= c && c <= 0x9fcf)
+		|| (0x3400 <= c && c <= 0x4dbf)
+		|| (0xf900 <= c && c <= 0xfadf)
+		|| (0x3005 === c)){ // 々
+		return true;
+	}
+	return false;
+}
+
+function is_hiragana(c){
+	// [ぁ-ゔ]
+	if(0x3041 <= c && c <= 0x3094){
+		return true;
+	}
+	return false;
+}
+
+function is_katakana(c){
+	// [ァ-ヴ]
+	// 0x30f5-0x30fa：ヵヶヷヸヹヺは対象外
+	// 濁点、半濁点、伸ばし棒も対象外
+	if(0x30a1 <= c && c <= 0x30f4){
+		return true;
+	}
+	return false;
+}
+
+function kata_to_hira(c){
+	return c - 96;
+}
+
+function fixnum(i){
+	return ("_____" + i).substr(-6);
 }
 
 function get_id(id){
@@ -543,7 +580,7 @@ function page_view_update(index, mode){
 	const s = get_id('maintext').value;
 	const limit_length = 100000;
 	const stop_time = 100;
-	const f = (last_check_type === 1 ? kanji_check : check_output);
+	const f = (last_check_type === 1 ? check_kanji : check_output);
 	if( limit_length < s.length ){
 		setTimeout(() => {
 			f(s.substr(0, limit_length), stop_time);
@@ -659,7 +696,7 @@ function start_check2(param_text){
 		const s = get_id('maintext').value;
 		const limit_length = 100000;
 		const stop_time = 100;
-		const f = (last_check_type === 1 ? kanji_check : check_output);
+		const f = (last_check_type === 1 ? check_kanji : check_output);
 		if( limit_length < s.length ){
 			setTimeout(() => {
 				f(s.substr(0, limit_length), stop_time);
@@ -696,7 +733,7 @@ function area_sample(){
 	sample += 'そんな馬鹿なことがあるとは思わないだろうが、家の屋根に刺さっている。\n';
 	sample += '「おはようございます。ご主人様」\n';
 	sample += 'グレイが出てきてそう言った。\n';
-	document.mainform.maintext.value = sample;
+	get_id('maintext').value = sample;
 }
 
 function add_page(){
@@ -729,9 +766,8 @@ function user_view(){
 }
 
 
-function fixnum(i){
-	return ("_____" + i).substr(-6);
-}
+//■■■■■■■■■■
+function check_output(param_text){
 function dummy_hiradic_org(){}
 const hiradic_org = 
 `ぁ、
@@ -867,6 +903,10 @@ const hiradic_org =
 あのころ
 あはは
 あばずれ
+あばばば
+あばばばば
+あばばばばば
+あばばばばばば
 あばら家
 あばれ/下一段
 あひる
@@ -987,6 +1027,7 @@ const hiradic_org =
 あわれ
 あんかけ
 あんぐり
+あんこ
 あんぜんな
 あんた/人称名詞
 あんだけ
@@ -1008,6 +1049,7 @@ const hiradic_org =
 あーいう
 あーし/人称名詞
 あーだこーだ
+あーん
 い/上一段
 い/五段イク
 い/五段ラ
@@ -1247,6 +1289,7 @@ const hiradic_org =
 うかべ/下一段
 うがい
 うがち
+うぐいす
 うぐって
 うぐっと
 うけ/下一段
@@ -1259,9 +1302,12 @@ const hiradic_org =
 うごか/五段サ
 うごめ/五段カ
 うさぎ
+うさちゃん
+うさみみ
 うさんくさ/形容詞
 うさん臭
-うざい
+うさ耳
+うざ/形容詞
 うざった/形容詞
 うじゃうじゃ
 うす/形容詞
@@ -1524,6 +1570,7 @@ const hiradic_org =
 おし/形容詞
 おしえ/下一段
 おしおき
+おしくら
 おしっこ
 おしどり
 おしべ
@@ -1550,6 +1597,7 @@ const hiradic_org =
 おそば
 おそらく
 おそるおそる
+おそるべし
 おそれ
 おそろい
 おそろし/形容詞
@@ -1587,15 +1635,17 @@ const hiradic_org =
 おつむ
 おつもり
 おつゆ
+おてんば
 おでこ
 おでん
 おと/五段サ
-おととい
 おとうさま
 おとうさん
 おとがめ
 おとぎ
 おとずれ/下一段
+おとっさん
+おととい
 おとなし/形容詞
 おとり
 おど/五段ラ
@@ -1634,6 +1684,7 @@ const hiradic_org =
 おねーちゃん
 おのず
 おのの/五段カ
+おのぼり
 おのれ
 おはぎ
 おはよ
@@ -1688,6 +1739,7 @@ const hiradic_org =
 おめえ
 おめえぇ
 おめおめ
+おめかし
 おめでた/形容詞
 おめでと
 おめでとう
@@ -1717,6 +1769,7 @@ const hiradic_org =
 およ/五段ガ
 およし
 およそ
+およばれ
 および
 およぶ
 おら、
@@ -1807,6 +1860,7 @@ const hiradic_org =
 かたじけない
 かたじけねぇ
 かたち
+かたっぱし
 かたづ/五段カ
 かたづけ/下一段
 かたど/五段ラ
@@ -1919,14 +1973,19 @@ const hiradic_org =
 かわ/五段ラ
 かわい/形容詞
 かわいが/五段ラ
-かわいそう
+かわいそす
 かわいらし/形容詞
+かわゆい
+かわりばんこ
 かを
 かんがえ/下一段
 かんじ
 かんたん
 かんたんな
 かんだ
+かんぱい
+かんべん
+かんぱーい
 かんな
 かんね
 かんばし/形容詞
@@ -2140,6 +2199,7 @@ const hiradic_org =
 くず/助詞後続
 くずおれ/下一段
 くせ
+くせっ毛
 くそ
 くそう
 くたって
@@ -2302,6 +2362,7 @@ const hiradic_org =
 けじめ
 けたたまし/形容詞
 けち
+けち/五段ラ
 けちょんけちょん
 けちんぼ
 けっきょく
@@ -2511,6 +2572,7 @@ const hiradic_org =
 こんがり
 こんぐらい
 こんだけ
+こんちゃ
 こんど
 こんな
 こんなん
@@ -2522,6 +2584,7 @@ const hiradic_org =
 こーでも
 ご、
 ごうかな
+ごかんべん
 ごきげんよう
 ごきげんよろしゅう
 ごきって
@@ -2561,6 +2624,7 @@ const hiradic_org =
 ごっちゃ
 ごっちゃごちゃ
 ごっつんこ
+ごっほん
 ごつ/形容詞
 ごと
 ごとき
@@ -2581,6 +2645,7 @@ const hiradic_org =
 ごめん
 ごめんなさい
 ごめんなさーい
+ごめーん
 ごもっとも
 ごゆっくり
 ごらん
@@ -2604,6 +2669,7 @@ const hiradic_org =
 さあな
 さあね
 さいころ
+さいわい
 さえ
 さえぎ/五段ラ
 さえず/五段ラ
@@ -2653,6 +2719,7 @@ const hiradic_org =
 さって
 さっと
 さっぱり
+さっぱりめ
 さつま揚
 さて
 さておき
@@ -2780,7 +2847,9 @@ const hiradic_org =
 しかけ/下一段
 しかし
 しかした
+しかしたまに
 しかしながら
+しかた
 しかたありませぬ
 しかたありません
 しかたが
@@ -2821,6 +2890,7 @@ const hiradic_org =
 しくない
 しぐさ
 しぐれ
+しげ/下一段
 しげに
 しこたま
 しこり
@@ -2852,6 +2922,10 @@ const hiradic_org =
 したやつら
 したら
 したり
+したんす
+したんすね
+したんすよ
+したんすわ
 しだ/五段サ
 しだす
 しちまいたい
@@ -3040,6 +3114,7 @@ const hiradic_org =
 しろよ
 しわ
 しわくちゃ
+しんがり
 しんじ/上一段
 しんせつな
 しんと静
@@ -3120,6 +3195,7 @@ const hiradic_org =
 じゅう
 じゅうたん
 じゅうぶんな
+じゅく/五段サ
 じゅる
 じゅるり
 じゅるる
@@ -3149,6 +3225,7 @@ const hiradic_org =
 す/五段カ
 す/五段マ
 す/五段ラ
+すいとん
 すうって
 すうっと
 すえかねた
@@ -3209,6 +3286,7 @@ const hiradic_org =
 すっげー
 すっご/形容詞
 すって
+すってんてん
 すっと
 すっとぼけ
 すっとぼけ/下一段
@@ -3245,6 +3323,7 @@ const hiradic_org =
 すべやか
 すぼま/五段ラ
 すぼめ/下一段
+すぽっと
 すま/五段サ
 すま/五段ワ
 すまん
@@ -3276,6 +3355,7 @@ const hiradic_org =
 するとこ
 するとこういう
 するところ
+するとこんな
 するとは
 するとはいえ
 するなと
@@ -3291,6 +3371,8 @@ const hiradic_org =
 すれ違
 すわ/五段ラ
 すわ〈、
+すんげぇ
+すんげえ
 すんご/形容詞
 すんじゃ
 すんぞ
@@ -3351,6 +3433,7 @@ const hiradic_org =
 せいですべて
 せいら
 せいろ
+せか/五段サ
 せが/五段マ
 せがたか/形容詞
 せき止
@@ -3367,6 +3450,7 @@ const hiradic_org =
 せっかく
 せっかち
 せっかん
+せっけん
 せっせと
 せっつ/五段カ
 せつな/形容詞
@@ -3388,11 +3472,14 @@ const hiradic_org =
 せん
 せーの
 ぜ、
+ぜいたく
+ぜいたくな
 ぜぇ、
 ぜったい
 ぜひ
 ぜひとも
 ぜんぶ
+そ？
 そ/五段ラ
 そ/五段ワ
 そいつ
@@ -3638,12 +3725,13 @@ const hiradic_org =
 たっぷり
 たっぷりと
 たて/下一段
+たてがみ
 たとえ
 たとえば
 たど/上一段
 たどたどし/形容詞
+たどり
 たどりつ/五段カ
-たどり着
 たなび/五段カ
 たの/五段マ
 たのし/五段マ
@@ -3666,6 +3754,8 @@ const hiradic_org =
 たまねぎ
 たまの
 たまりにたまった
+たまんない
+たまんね
 たむろ
 ため
 ため/下一段
@@ -3692,6 +3782,7 @@ const hiradic_org =
 たるんで
 たる者
 たわ/五段マ
+たわい
 たわいない
 たわいもない
 たわごと
@@ -3700,6 +3791,7 @@ const hiradic_org =
 たんこぶ
 たんたんと
 たんぱく
+たんぽぽ
 たんまり
 だ
 だ/五段サ
@@ -3713,6 +3805,7 @@ const hiradic_org =
 だいじょーぶ
 だいすきな
 だいたい
+だいたん
 だいぶ
 だから
 だからか
@@ -3738,6 +3831,7 @@ const hiradic_org =
 だぞ、
 だぞ。
 だぞあれは
+だだっぴろ/形容詞
 だだっ広
 だっけ
 だっこ
@@ -3752,6 +3846,10 @@ const hiradic_org =
 だったら
 だったらし/形容詞
 だったり
+だったんす
+だったんすね
+だったんすよ
+だったんすわ
 だって
 だってば
 だってよ。
@@ -3800,6 +3898,7 @@ const hiradic_org =
 だろう
 だろうし
 だわ。
+だんぜん
 だんまり
 だんらん
 だんろ
@@ -3821,6 +3920,7 @@ const hiradic_org =
 ちげー
 ちちち
 ちっ、
+ちっく
 ちっこ/形容詞
 ちっさ/形容詞
 ちっさい
@@ -3850,6 +3950,9 @@ const hiradic_org =
 ちまっと
 ちみっこ/形容詞
 ちゃ/五段ワ
+ちゃぁん
+ちゃあん
+ちゃあんと
 ちゃいけない
 ちゃいない
 ちゃいや
@@ -3867,10 +3970,12 @@ const hiradic_org =
 ちゃっちゃと
 ちゃぶ
 ちゃぶ台
+ちゃぽん
 ちゃら/形容詞
 ちゃらんぽらん
 ちゃん
 ちゃんこ
+ちゃんこそ
 ちゃんち
 ちゃんちゃら
 ちゃんっ子
@@ -3880,6 +3985,8 @@ const hiradic_org =
 ちゅっと
 ちゅどーん
 ちゅぱちゅぱ
+ちゅぽん
+ちゅぽんっと
 ちょ〈、
 ちょい
 ちょいと
@@ -3929,11 +4036,16 @@ const hiradic_org =
 ちりも積
 ちりん
 ちんけ
+ちんこ
+ちんま/形容詞
 ちんたら
 ちんちくりん
 ちんぴら
 ちんぷんかんぷん
+ちんぽ
 ちんまい
+ちんまり
+ちーん
 っ、
 っ。
 っから
@@ -4033,12 +4145,14 @@ const hiradic_org =
 つつ/五段マ
 つつがなく
 つづ/五段カ
+つづ/五段ラ
 つづけ/下一段
 つとめ/下一段
 つな/五段ガ
 つないだ
 つなが/五段ラ
 つね/五段ラ
+つねに
 つば
 つばさ
 つばめ
@@ -4075,6 +4189,7 @@ const hiradic_org =
 つる/五段マ
 つるはし
 つるり
+つるん
 つれてい/五段カ
 つれない
 つんざく
@@ -4106,7 +4221,7 @@ const hiradic_org =
 てきとうな
 てきぱき
 てこいれ
-てこずら
+てこず/五段ラ
 てこと
 てた
 てたら
@@ -4118,6 +4233,7 @@ const hiradic_org =
 てなわけで
 てにいれ/下一段
 てにはい/五段ラ
+てにをは
 てば
 てぶら
 てへ
@@ -4131,6 +4247,7 @@ const hiradic_org =
 てめえら
 てめー
 ても
+てよだわ
 てりゅう弾
 てる
 てんこもり
@@ -4146,6 +4263,7 @@ const hiradic_org =
 でか/形容詞
 でかけ/下一段
 でかつ
+でかした
 でかつて
 でから
 でかーい
@@ -4154,6 +4272,7 @@ const hiradic_org =
 できたて
 できねぇ
 できねー
+できばえ
 でこぼこ
 でしゃば/五段ラ
 でしゅ
@@ -4220,13 +4339,13 @@ const hiradic_org =
 ということわざ
 というのは
 といえなく
+というかた
 といえば
 とうぜん
 とうちゃん
 とうっすら
 とうに
 とうの昔
-とうれし/形容詞;■と／うれしい(警告とうれ回避)
 とう句
 とお/五段ラ
 とお/形容詞
@@ -4278,11 +4397,15 @@ const hiradic_org =
 としている
 としてた
 としてる
+としてんぞ
+としてんな
 としてんの
+としてんよ
 とじ/上一段
 とする
 とたん
 とっかえ
+とっちらか/五段ラ
 とっかかり
 とっく
 とっさ
@@ -4323,6 +4446,7 @@ const hiradic_org =
 ともかく
 ともだち
 ともとれる
+とも/五段ラ
 とやかく
 とやら
 とら/五段サ
@@ -4466,6 +4590,7 @@ const hiradic_org =
 どんぐらい
 どんぐり
 どんだけ
+どんちゃん
 どんと
 どんど焼
 どんな
@@ -4734,6 +4859,8 @@ const hiradic_org =
 なんのかんの
 なんぼ
 なんぼの
+なんまんだ
+なんまんだぶ
 なんも
 なんやかんや
 なんやで
@@ -4759,6 +4886,7 @@ const hiradic_org =
 にぎわう
 にく/形容詞
 にくべ/下一段
+にくる
 にげ/下一段
 にこやか
 にこり
@@ -4791,10 +4919,12 @@ const hiradic_org =
 にはびこ/五段ラ
 にぶ/五段カ
 にぶちん
+にへら
 にまにま
 にも
 にもかかわらず
 にもしかしたら
+にもとから
 にもとづき
 にもの、
 にもら/五段ワ
@@ -4892,8 +5022,8 @@ const hiradic_org =
 のかもしれぬ
 のかもしれん
 のから
-のかわいらし/形容詞;■の／かわいらしい
 のかご/助詞後続;■の／かご
+のかた/助詞後続
 のが
 のけ/下一段
 のけぞ/五段ラ
@@ -4909,8 +5039,8 @@ const hiradic_org =
 のぞきこ/五段マ
 のぞみ
 のたう/五段タ
-のたうち回
 のたうちまわ/五段ワ
+のたうち回
 のたく/五段ラ
 のたま/五段ワ
 のたれ死
@@ -4937,6 +5067,8 @@ const hiradic_org =
 のっぴき
 のっぺり
 のっぽ
+のっぺら坊
+のっぺらぼう
 ので
 のでしょ
 のでしょう
@@ -4976,6 +5108,8 @@ const hiradic_org =
 のらくら
 のらり
 のりかえ/下一段
+のろ/五段カ
+のろい
 のろけ
 のろし
 のろま
@@ -4992,6 +5126,7 @@ const hiradic_org =
 はあ、
 はい/五段ラ
 はい、
+はいです
 はか/五段ラ
 はかど/五段ラ
 はかな/形容詞
@@ -5027,6 +5162,7 @@ const hiradic_org =
 はずれ/下一段
 はせ/下一段
 はたき
+はたから
 はたして
 はたと
 はたまた
@@ -5041,6 +5177,7 @@ const hiradic_org =
 はっちゃけ
 はっちゃけ/下一段
 はっと
+はっはい
 はっはっは
 はっはっはっは
 はつらつ
@@ -5071,6 +5208,7 @@ const hiradic_org =
 はやはり
 はやむなく
 はやめた
+はやめておけ
 はら/五段マ
 はら/五段ワ
 はらりと
@@ -5147,6 +5285,7 @@ const hiradic_org =
 ばれ/下一段
 ばれてーら
 ばんざい
+ばんざーい
 ばーか
 ばーさま
 ばーさん
@@ -5235,6 +5374,7 @@ const hiradic_org =
 ひっくり
 ひっくるめ/下一段
 ひっこ/五段マ
+ひっさげ/下一段
 ひっそり
 ひったく/五段ラ
 ひっつ/五段カ
@@ -5532,6 +5672,7 @@ const hiradic_org =
 ひのき
 ひび
 ひまな
+ひまわり
 ひもじい
 ひゃっ
 ひや/五段サ
@@ -5626,6 +5767,7 @@ const hiradic_org =
 ぴょこん
 ぴょん
 ぴょんぴょん
+ぴよん
 ぴん、
 ぴんっと
 ぴんと
@@ -5675,10 +5817,12 @@ const hiradic_org =
 ふち
 ふっ、
 ふっかけ/下一段
+ふっかふか
 ふっくら
 ふっと
 ふっふっふ
 ふっふーん
+ふっわふわ
 ふっ飛
 ふてぶてし/形容詞
 ふて腐
@@ -5693,6 +5837,8 @@ const hiradic_org =
 ふにゃふにゃ
 ふにゃり
 ふにゃん
+ふにゅん
+ふにょん
 ふははは
 ふはははは
 ふははははは
@@ -5718,6 +5864,7 @@ const hiradic_org =
 ふるま/五段ワ
 ふわって
 ふわっと
+ふわっふわ
 ふわもこ
 ふわり
 ふわん
@@ -5794,6 +5941,7 @@ const hiradic_org =
 ぶら下
 ぶり
 ぶりっこ
+ぶりっ子
 ぶれ/下一段
 ぶわっ
 ぶわって
@@ -5818,6 +5966,7 @@ const hiradic_org =
 ぷつり
 ぷつんと
 ぷはっ
+ぷはあ
 ぷぷっ
 ぷりって
 ぷりっと
@@ -5857,6 +6006,7 @@ const hiradic_org =
 へらって
 へらっと
 へん
+へんぴ
 へんな
 へー、
 へーー、
@@ -5877,6 +6027,7 @@ const hiradic_org =
 べっちょり
 べっとり
 べつに
+べろん
 べんりな
 ぺきっと
 ぺこっと
@@ -5904,6 +6055,7 @@ const hiradic_org =
 ぺろんと
 ほ/五段ラ
 ほい
+ほいさっさ
 ほう
 ほうが
 ほうじ茶
@@ -5996,6 +6148,7 @@ const hiradic_org =
 ぼそり
 ぼたん
 ぼっかり
+ぼっきゅんぼん
 ぼっこぼこ
 ぼったく/五段ラ
 ぼっち
@@ -6039,11 +6192,14 @@ const hiradic_org =
 ぽにょぽにょ
 ぽややん
 ぽやん
+ぽよよん
 ぽよん
 ぽよんぽよん
 ぽろっと
 ぽろり
 ぽんと
+ぽんぽこ
+ぽんぽこりん
 ま/五段カ
 ま/五段タ
 ま〈。
@@ -6053,6 +6209,7 @@ const hiradic_org =
 まい/五段ラ
 まい、
 まいど
+まえがき
 まおう
 まか/五段サ
 まかな/五段ワ
@@ -6228,7 +6385,9 @@ const hiradic_org =
 むくれ/下一段
 むげには
 むさぼ/上一段
+むさ苦
 むし/五段ラ
+むしば/五段マ
 むしゃくしゃ
 むしゃぶ/五段ラ
 むしゃぶるい
@@ -6249,6 +6408,7 @@ const hiradic_org =
 むっと
 むなし/形容詞
 むにゃむにゃ
+むにゃむにゃむにゃ
 むふって
 むふっと
 むむ〈、
@@ -6337,6 +6497,7 @@ const hiradic_org =
 もしてる
 もしばし
 もしばしばある
+もしゃもしゃ
 もじ/五段ラ
 もたげ/下一段
 もたげて
@@ -6347,6 +6508,7 @@ const hiradic_org =
 もちのろん
 もちゃんと
 もちろん
+もっかい
 もっさり
 もったい
 もったいない
@@ -6358,6 +6520,7 @@ const hiradic_org =
 もっと
 もっとも
 もっぱら
+もっふもふ
 もつ/五段カ
 もつ●もつく、もつかない
 もつくり
@@ -6366,6 +6529,7 @@ const hiradic_org =
 もつれ/下一段
 もつれさ/五段サ
 もつれ合
+もつ者
 もてな/五段サ
 もてはや/五段サ
 もとい
@@ -6449,6 +6613,7 @@ const hiradic_org =
 やって
 やっと
 やっぱ
+やってたまに
 やっぱり
 やっべ
 やっべえ
@@ -6502,6 +6667,7 @@ const hiradic_org =
 やーん
 ゆ/五段カ
 ゆいいつ
+ゆいちゃん
 ゆいつ
 ゆううつ
 ゆうしゃ
@@ -6716,12 +6882,14 @@ const hiradic_org =
 わぃ、
 わい、
 わいせつ
+わいのわいの
 わか/五段サ
 わか/五段ラ
 わか/形容詞
 わかりっこ
 わかれ/下一段
 わかんねえ
+わかんね
 わが
 わがまま
 わき
@@ -6773,6 +6941,7 @@ const hiradic_org =
 わんさか
 わんぱく
 わーい
+わーお
 を
 をしとき
 をしに
@@ -6880,7 +7049,7 @@ const hira2dic_org = [
 'ご|あうきくごしすそたつとてぶほみりろわん',
 'さ|ぁあくてばびぶまらわん',
 'ざ|ぁあくばぶらりわん',
-'し|ぃおくげこずばぶまわ',
+'し|ぃおくげこずばぶまわん',
 'じ|くぐたとめりろわん',
 'しゃ|かきくらりん',
 'じゃ|かきばぶらりん',
@@ -6895,7 +7064,7 @@ const hira2dic_org = [
 'た|じだびぷまむゆらるん',
 'だ|ぁあくさばぶぼめらるん',
 'ち|かきくびまらりろん',
-'ちゃ|うかぷらり',
+'ちゃ|うかくぷらり',
 'ちゅ|うぴぷぽるん',
 'ちょ|いきくこびぼめろん',
 'ぢ|くぐたとめりろわん',
@@ -7004,6 +7173,7 @@ const exdic_org =
 いているか#ら
 いないか#も
 いないか#ら
+いま#たは
 いままで#す
 いや#すい
 いや#すく
@@ -7068,6 +7238,7 @@ const exdic_org =
 からみ#るみる
 からみ#んな
 からんだ#け
+かわいそうな#んて
 が#る
 が#れた
 が#れて
@@ -7076,6 +7247,7 @@ const exdic_org =
 がけ#たたまし
 がた#くさん
 がた#くまし
+がた#びたび
 がた#どり
 がた#まに
 がた#まら
@@ -7095,6 +7267,7 @@ const exdic_org =
 がち#りばめ
 がち#んぷん
 がち#んまり
+がちゃ#くちゃく
 がちゃ#んと
 きいた#め
 きた#がっ
@@ -7135,10 +7308,15 @@ const exdic_org =
 されるか#も
 しい#い
 しい#じっ
+しい#たずら
 しい#ただき
+しう#れしい
 しか#が%まみむめもん
 しか#ゆし
 しか#ら
+しか#わい%いく
+しか#わいすぎ
+しか#わいそう
 しかし#て
 しかし#ゃ
 しかし#ゅ
@@ -7207,9 +7385,12 @@ const exdic_org =
 たら#しい
 たら#しく
 だからか#もしれ
+だけか#わい%いく
+だけか#わいそう
 だけだけ#ど
 だったか#%いしつともら
 だと#も
+ちがい#る
 ちゃんこ#れ
 ちゃんこ#んにち
 ちゃんこ#んばん
@@ -7261,7 +7442,9 @@ const exdic_org =
 でず#いぶん
 でず#ぼら
 でず#らか
+でた#またま
 でた#まに
+でた#まら
 でた#め息
 でちゃ#ちゃっと
 でちゃ#ん
@@ -7276,7 +7459,9 @@ const exdic_org =
 では#%ぁぃぅぇぇゃゅょ
 では#がき
 では#しゃ%いがぎぐげご
+では#じい%たてるな
 では#じめ
+でも#しゃもしゃ
 でも#だえ
 でも#ちろん
 でも#てあそ
@@ -7296,6 +7481,7 @@ const exdic_org =
 でよ#ろめ
 でろ#く%にな
 というか#ら
+とう#れし
 とうる#さい
 とうれ#し
 とお#うるさ
@@ -7313,6 +7499,8 @@ const exdic_org =
 とか#すか
 とか#みしめ
 とか#らか%わいうえおっ
+とか#わい%いくさ
+とか#わいそう
 とき#つい
 とき#つく
 とき#つけ
@@ -7382,9 +7570,13 @@ const exdic_org =
 なお#もちゃ
 なおし#つこ
 なか#けら
+なか#わいさ
 なかったら#しい
 なき#らめき
 なく#らい
+なくか#わい%いく
+なくか#わいすぎ
+なくか#わいそう
 なくす#ぐ
 なくちゃ#んと
 なさ#まざま
@@ -7395,6 +7587,7 @@ const exdic_org =
 なの#どか
 なのです#ぐ
 なのです#ごすご
+なら#ぶりっ
 ならい#い
 ならい#くら
 ならい#ざ
@@ -7405,6 +7598,7 @@ const exdic_org =
 ならせ#めて
 ならばせ#めて
 なりそう#なので
+なりな#んなり
 なるか#しら
 なんだか#んだ
 に#ゃ
@@ -7415,6 +7609,7 @@ const exdic_org =
 にく#だら%ずなぬん
 にく#びれ
 にく#らい
+にく#らべ
 にく#る
 にく#れ%るたな
 にく#わえ
@@ -7423,10 +7618,12 @@ const exdic_org =
 にじり#じり
 にず#ら
 にず#らっと
+にず#んずん
 にた#くさん
 にた#しなめ
 にた#じろ
 にた#たえ
+にた#てがみ
 にた#どり
 にた#まに
 にた#むろ
@@ -7491,6 +7688,7 @@ const exdic_org =
 のか#まど
 のか#もしれ
 のか#わい%いくさ
+のか#わいらし
 のかな#い
 のかな#ど
 のかな#り
@@ -7527,6 +7725,7 @@ const exdic_org =
 のど#たばた
 のど#ちら
 のど#れ
+のど#んちゃん
 のど#んな
 のに#じ%まみむめもん
 のに#じん
@@ -7571,8 +7770,9 @@ const exdic_org =
 はく#ぐも
 はく#すぐった
 はく#びれ
-はく#れ%るぬ
-はく#れない
+はく#るくる
+はく#れ%るぬん
+はく#れな%いかきくけこ
 はく#れません
 はけ#して
 はざま#あ
@@ -7580,6 +7780,7 @@ const exdic_org =
 はず#るい
 はず#るく
 はず#るそう
+はず#んぐり
 はせ#いぜい
 はせ#めて
 はたと#え
@@ -7587,6 +7788,8 @@ const exdic_org =
 はて#めぇ
 はて#めえ
 はなす#すべ
+はは#っきり
+はは#るかに
 はまった#く
 はめ#ぐ%らりるれろん
 はめ#げ
@@ -7604,6 +7807,9 @@ const exdic_org =
 はや#わらか
 はやさ#ぐれ
 はやめ#ていただ
+はやめ#ておけ
+はやめ#てほしい
+はやめて#ほしい
 ほうばっ#かり
 ませんか#%いしつともら
 までも#う
@@ -7629,6 +7835,7 @@ const exdic_org =
 もうし#ばらく
 もうす#ごい
 もぐ#ちゃぐちゃ
+もぐ#んぐん
 もし#かたがない
 もし#かたない
 もし#た
@@ -7650,6 +7857,7 @@ const exdic_org =
 もして#くれ
 もしばし#ば
 もたらした#まえ
+もち#っちゃ
 もち#らほら
 もつ#%いきくけこ
 もつ#かない
@@ -7751,6 +7959,7 @@ const exdic_org =
 function dummy_warndic_org(){}
 const warndic_org = 
 `あいずち/→あいづち(相槌..)
+あたらめ/→あらため
 いおお/→いおう(言おう,硫黄..)
 いかづち/いかずち(雷)
 いきどうる/→いきどおる(憤る)
@@ -7773,6 +7982,7 @@ const warndic_org =
 おとづれ/→おとずれ[る](訪れ[る])
 かしづ[い,か,き,く,け,こ]/→かしず%(傅%)
 かねかね/→かねがね
+かわいいくて/→かわいくて
 がねかね/→かねがね
 がねがね/→かねがね
 がらから/→からがら
@@ -7911,6 +8121,7 @@ const kanji_pre_dic_org =
 イジメ/下一段
 イッてしま/五段ワ
 ウザ/形容詞
+エタ/五段ラ
 エモ/形容詞
 エロ/形容詞
 カレーまん
@@ -7940,6 +8151,7 @@ const kanji_pre_dic_org =
 テメェ/人称名詞
 テメエ/人称名詞
 テメー/人称名詞
+テンパ/五段ラ
 デカ/形容詞
 デレ/下一段
 ナメ/下一段
@@ -7947,6 +8159,7 @@ const kanji_pre_dic_org =
 ハゲ/下一段
 バカげ/下一段
 バカバカし/形容詞
+バズ/五段ラ
 バテ/下一段
 バレ/下一段
 ビビ/五段ラ
@@ -8033,6 +8246,7 @@ const kanji_pre_dic_org =
 交わ/五段ラ
 人っきり
 人づきあい
+人づて
 人なつっこ/形容詞
 人びと
 人懐っこ/形容詞
@@ -8048,6 +8262,7 @@ const kanji_pre_dic_org =
 付け/下一段
 代/五段ラ
 代わ/五段ラ
+代わりばんこ
 令嬢らは
 以て
 仰/五段ガ
@@ -8085,10 +8300,10 @@ const kanji_pre_dic_org =
 佇/五段マ
 位置づけ
 低/形容詞
-低め
 住/五段マ
 住ま/五段ワ
 体たらく
+体力づくり
 何かもら/五段ワ
 何せ
 何だか
@@ -8211,6 +8426,7 @@ const kanji_pre_dic_org =
 出てから
 出ま/五段サ
 出来/上一段
+出来ばえ
 分/五段カ
 分/五段ラ
 分か/五段ラ
@@ -8458,6 +8674,7 @@ const kanji_pre_dic_org =
 土ぼこり
 在/五段ラ
 地べた
+坊ちゃま
 垂ら/五段サ
 垂れ/下一段
 型ど/五段ラ
@@ -8492,9 +8709,12 @@ const kanji_pre_dic_org =
 壊れ/下一段
 売/五段ラ
 売れ/下一段
+売れっ
+売れっこ
 変え/下一段
 変わ/五段ラ
 変わり
+変わりばんこ
 外/五段サ
 外れ/下一段
 多/形容詞
@@ -9161,6 +9381,7 @@ const kanji_pre_dic_org =
 書きなぐ/五段ラ
 替え/下一段
 替わ/五段ラ
+替わりばんこ
 最た
 有/五段サ
 有/五段ラ
@@ -9634,6 +9855,7 @@ const kanji_pre_dic_org =
 相まみえ
 相容れ/下一段
 省/五段カ
+眇めつ
 看做/五段サ
 真っ
 真似/下一段
@@ -9663,6 +9885,7 @@ const kanji_pre_dic_org =
 短/形容詞
 短め
 短めな
+矯めつ
 石づき
 研/五段ガ
 砕/五段カ
@@ -9747,6 +9970,7 @@ const kanji_pre_dic_org =
 籠も/五段ラ
 籠もり
 籠り
+粗/形容詞
 粘/五段ラ
 糞ったれ
 糸たら/五段サ
@@ -9820,6 +10044,7 @@ const kanji_pre_dic_org =
 縮ま/五段ラ
 縮め/下一段
 縮れ/下一段
+繁/五段ラ
 繋/五段ガ
 繋が/五段ラ
 織/五段ラ
@@ -9952,6 +10177,7 @@ const kanji_pre_dic_org =
 茶化/五段サ
 茶色/形容詞
 茹で/下一段
+茹でたて
 草むら
 荒/五段バ
 荒/五段マ
@@ -9967,6 +10193,7 @@ const kanji_pre_dic_org =
 華華し/形容詞
 萎/五段マ
 萎び/上一段
+萎れ/下一段
 落/五段サ
 落ち/上一段
 落っこち/上一段
@@ -10126,6 +10353,7 @@ const kanji_pre_dic_org =
 語/五段ラ
 語ち/上一段
 語ら/五段ワ
+語りぐさ
 誤/五段ラ
 誤魔化/五段サ
 説/五段カ
@@ -10223,6 +10451,7 @@ const kanji_pre_dic_org =
 躊躇/五段ワ
 躍/五段ラ
 躓/五段カ
+身ぎれい
 身ごも/五段ラ
 身じろ/五段ガ
 躱/五段サ
@@ -10576,7 +10805,7 @@ const one_kanji_dic_org =
 か仮会体勘勝可和回帰彼感構母確神考解買金顔香
 が学我頑
 き九今傷北君奇昨木気消級綺緊聞貴金騎
-く口来臭苦黒
+く口来殺臭苦黒
 ぐ偶
 け剣結賢
 げ元
@@ -10635,32 +10864,6 @@ function bin_search_dic(dic, word){
 	while(left <= right){
 		var center = Math.floor((left + right) / 2);
 		var val = dic[center];
-		if(val === word){
-			return center;
-		}
-		if(val < word){
-			left = center + 1;
-		}else{
-			right = center - 1;
-		}
-	}
-	return -1;
-}
-
-function bin_search_dic_arr1(dic, word){
-	var left = 0;
-	var right = dic.length;
-	if(dic.length === 0){
-		return -1;
-	}
-	while(left <= right){
-		var center = Math.floor((left + right) / 2);
-		var val;
-		if(dic[center] !== undefined){
-			val = dic[center][0];
-		}else{
-			val = undefined;
-		}
 		if(val === word){
 			return center;
 		}
@@ -10758,93 +10961,59 @@ function search_ex_dic(exdic, target, word){
 				}
 			}
 			if(tto === false){
-				return [-2, -2];
+				return [0, '', 0];
 			}
 		}
 	}
-	var exdic_len = exdic.length;
-	var a = bin_search_dic_arr1(exdic, target);
-	if(a !== -1){
-		var dic_target = exdic[a][0];
-		for(var i = 1; i < exdic[a].length; i++){
-			var dic_suffix = exdic[a][i];
+	if(exdic.has(target)){
+		const dic_target = exdic.get(target);
+		for(let i = 0; i < dic_target.length; i++){
+			const dic_suffix = dic_target[i];
 			if(0x21 === dic_suffix.charCodeAt(0)){
 				// 「いちゃ」「!つ」：「つ」以外の文字列だったら拒否
 				if(dic_target.length + dic_suffix.length - 1 <= word.length
 					&& dic_suffix.substr(1) !== word.substr(dic_target.length, dic_suffix.length - 1)){
-					return [a, i];
+					return [0, target, i];
 				}
 			}else if(0x25 === dic_suffix.charCodeAt(0)){
 				// 「するか」「%いも」
 				if(dic_target.length + 1 <= word.length
 					&& -1 != dic_suffix.indexOf(word.charAt(dic_target.length))){
-					return [a, i];
+					return [0, target, i];
 				}
 			}
 			var x = dic_suffix.indexOf('%');
 			if(-1 != x){
 				var w = dic_suffix.substr(0, x);
 				var y = dic_suffix.substr(x + 1);
-				if(dic_target.length + w.length + 1 <= word.length
-					&& w === word.substr(dic_target.length, w.length)
-					&& -1 != y.indexOf(word.charAt(dic_target.length + w.length))){
+				if(target.length + w.length + 1 <= word.length
+					&& w === word.substr(target.length, w.length)
+					&& -1 != y.indexOf(word.charAt(target.length + w.length))){
 					// 「あいう」「え%いかきくけこ」
-					return [a, i];
+					return [0, target, i];
 				}
 			}else{
-				if(dic_target.length + dic_suffix.length <= word.length
-					&& dic_suffix === word.substr(dic_target.length, dic_suffix.length)){
-					return [a, i];
+				if(target.length + dic_suffix.length <= word.length
+					&& dic_suffix === word.substr(target.length, dic_suffix.length)){
+					return [0, target, i];
 				}
 			}
 		}
 	}
-	return [-1, -1];
+	return [1, '', 0];
 }
 
-function is_kanji(c){
-	if((0x4e00 <= c && c <= 0x9fcf)
-		|| (0x3400 <= c && c <= 0x4dbf)
-		|| (0xf900 <= c && c <= 0xfadf)
-		|| (0x3005 === c)){ // 々
-		return true;
-	}
-	return false;
-}
-
-function is_hiragana(c){
-	// [ぁ-ゔ]
-	if(0x3041 <= c && c <= 0x3094){
-		return true;
-	}
-	return false;
-}
-
-function is_katakana(c){
-	// [ァ-ヴ]
-	// 0x30f5-0x30fa：ヵヶヷヸヹヺは対象外
-	// 濁点、半濁点、伸ばし棒も対象外
-	if(0x30a1 <= c && c <= 0x30f4){
-		return true;
-	}
-	return false;
-}
-
-function kata_to_hira(c){
-	return c - 96;
-}
-
-function hira2dic_expand(dic){
-	for(var i = 0; i < hira2dic_org.length; i++){
-		var len = hira2dic_org[i].length;
+function hira2dic_expand(arr, dic){
+	for(var i = 0; i < arr.length; i++){
+		var len = arr[i].length;
 		for(var k = 1; k < len; k++){
-			if(hira2dic_org[i].charAt(k) == '|'){
+			if(arr[i].charAt(k) == '|'){
 				break;
 			}
 		}
-		var head = hira2dic_org[i].substr(0, k);
+		var head = arr[i].substr(0, k);
 		for(k++; k < len; k++){
-			dic.push(head + hira2dic_org[i].charAt(k) + head + hira2dic_org[i].charAt(k));
+			dic.push(head + arr[i].charAt(k) + head + arr[i].charAt(k));
 		}
 	}
 	return dic;
@@ -10914,7 +11083,7 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 		if(dic_info[i] === ''){
 			if(ret[2].length < word.length){
 				var ex_ret = search_ex_dic(exdic_, word, word+suffix);
-				if(-1 === ex_ret[0]){
+				if(ex_ret[0]){
 					ret = [0, i, word];
 				}
 			}
@@ -10944,7 +11113,7 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 			}
 			if(ret[2].length < ret_word.length){
 				var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
-				if(-1 === ex_ret[0]){
+				if(ex_ret[0]){
 					ret = [0, i, ret_word];
 				}
 			}
@@ -10955,7 +11124,7 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 			if(ext === suffix.substr(0, ext.length)){
 				if(ret[2].length < word.length){
 					var ex_ret = search_ex_dic(exdic_, word, word+suffix);
-					if(-1 === ex_ret[0]){
+					if(ex_ret[0]){
 						ret = [0, i, word];
 					}
 				}
@@ -11027,13 +11196,14 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 								'たい', 'たかった', 'たがる', 'たがった', 'たがってる', 'たがってろ', 'たがって', 'たくて', 'たく',
 								'たければ', 'たげなら', 'たげな', 'たげ', 'たそう', 'っぱなし',
 								'なくらい', 'なく', 'ながら', 'なさい', 'なさらない', 'なさらなかった', 'なさらなく', 'なさらなければ', 'なさり', 'なさる', 'なされ',
-								'まくら', 'まくり', 'まくる', 'まくれば', 'まくれ', 'まくれろう', 'まくれろ',
+								'まくら', 'まくりんぐ', 'まくり', 'まくる', 'まくれば', 'まくれ', 'まくれろう', 'まくれろ',
 								'ようのない', 'よう', 'ゃ', ''],
 							/* 3書い書け */ ['たから', 'たきり', 'たし', 'たっけ', 'たっきり', 'たのち', 'たの', 'たら', 'た', 'ていかない', 'ていかなく', 'ていたい', 'ていたく', 'ていた', 'ているし', 'ている',
 								'ていろ', 'てかない', 'てかなく', 'てかなきゃ', 'てきた', 'てきてた', 'てきてる', 'てきて', 'てくるし', 'てくる',
 								'てくれちゃ', 'てくれず', 'てくれた', 'てくれてて', 'てくれてた', 'てくれてる', 'てくれて', 'てくれば', 'てくれた', 'てくれぬ', 'てくれりゃ', 'てくれる', 'てくれん', 'てくれ', 'てくんない', 'てくんなく', 'てくんねえ', 'てくんねぇ', 'てく',
 								'てた', 'てちゃ', 'てった', 'てって', 'てても', 'てて', 'ても', 'てない', 'てなくて', 'てなく', 'てみたい', 'ては',
-								'てみたく', 'てみた', 'てみない', 'てみなかった', 'てみなくては', 'てみなく', 'てみる', 
+								'てみたく', 'てみた', 'てみない', 'てみなかった', 'てみなくては', 'てみなく', 'てみる',
+								'てられた', 'てられて', 'てられる', 'てられ',
 								'てら', 'てりゃ', 'てる', 'てれば', 'てろ', 'て', 'といたら', 'といた', 'といて', 'といで', 'とくれ', 'とく', 'ときゃ', 'とけば', 'とけ', 'とらん',
 								'ちまい', 'ちまう', 'ちまった', 'ちまってた', 'ちまってる', 'ちまって', 'ちまえば', 'ちまえ', 'ちまおう',
 								'ちゃいそう', 'ちゃう', 'ちゃえば', 'ちゃえ', 'ちゃおう', 'ちゃお', 'ちゃだめ', 'ちゃやだ', 'ちゃった',
@@ -11133,7 +11303,7 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 									}
 									if(enable){
 										var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
-										if(-1 === ex_ret[0]){
+										if(ex_ret[0]){
 											if(ret[2].length < ret_word.length){
 												ret = [katuyou_type + 1, i, ret_word];
 											}
@@ -11219,7 +11389,7 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 							if(false == enable){
 							}else{
 								var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
-								if(ex_ret[0] === -1){
+								if(ex_ret[0]){
 									if(ret[2].length < ret_word.length){
 										ret = [7, i, ret_word];
 									}
@@ -11268,7 +11438,7 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 						var ret_word = word + ex;
 						if(ex === suffix.substr(0, ex.length)){
 							var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
-							if(ex_ret[0] === -1){
+							if(ex_ret[0]){
 								if(ret[2].length < ret_word.length){
 									ret = [7, i, ret_word];
 								}
@@ -11314,7 +11484,7 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 				'すぎないし', 'すぎない', 'すぎなかったし', 'すぎなかったら', 'すぎなかった', 'すぎなくて', 'すぎなく',
 				'すぎぬ', 'すぎひん', 'すぎるし', 'すぎる',
 				'すぎん', 'すぎ',
-				'めだから', 'め', 'み',
+				'めだから', 'めでは', 'めでした', 'めです', 'め', 'み',
 				''
 			];
 			if(word.charAt(word.length - 1) != 'し'){
@@ -11339,7 +11509,7 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 						// skip おなじく/らい →おなじ/くらい
 					}else{
 						var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
-						if(-1 === ex_ret[0]){
+						if(ex_ret[0]){
 							if(ret[2].length < ret_word.length){
 								ret = [9, i, ret_word];
 							}
@@ -11381,7 +11551,7 @@ function exdic_add_hiradic2(exdic_arr, hiradic2_arr, hiradic_arr, error_info)
 	my_add(3);
 }
 
-function check_output(param_text){
+function output_main(param_text){
 	last_check_type = 0;
 
 	var hoge = '';
@@ -11394,7 +11564,7 @@ function check_output(param_text){
 	var kanji_pre_dic;
 	const exdic_arr = exdic_org.replace(/\r\n/g, '\n').replace(/#/g, '\n').split('\n');
 	const hiradic_arr = hiradic_org.replace(/\r\n/g, '\n').split('\n').map(item => item.replace(/;.+$/, ''));
-	const hiradic2_arr = hira2dic_expand([]);
+	const hiradic2_arr = hira2dic_expand(hira2dic_org, []);
 
 	{
 		//「あーちゃん」「わーちゃん」とか登録
@@ -11499,7 +11669,7 @@ function check_output(param_text){
 				}
 			}
 
-			var hira_temp = hira2dic_expand(hiradic_arr.concat());
+			var hira_temp = hira2dic_expand(hira2dic_org, hiradic_arr.concat());
 			var len2 = hira_temp.length;
 			var len3 = deldic.length;
 			for(var i = 0; i < len2; i++){
@@ -11531,7 +11701,9 @@ function check_output(param_text){
 					exdic.push(exdic_arr[i], exdic_arr[i+1]);
 				}
 			}
-			kanji_pre_dic = kanji_pre_dic.concat(kanji_pre_dic_org.replace(/\r\n/g, '\n').split('\n'));
+			kanji_pre_dic = kanji_pre_dic.concat(kanji_pre_dic_org.
+				replace(/\r\n/g, '\n').split('\n').
+				map(item => item.replace(/;.+$/, '')));
 		}
 		userdic = '';
 	}
@@ -11553,7 +11725,7 @@ function check_output(param_text){
 	hiradic.sort();
 
 	// 例外辞書に擬音を登録
-	exdic_add_hiradic2(exdic_arr, hiradic2_arr, hiradic_arr, error_info);
+	exdic_add_hiradic2(exdic, hiradic2_arr, hiradic_arr, error_info);
 
 	var hiradic_temp = [];
 	var tango_prev = 'x';
@@ -11606,36 +11778,30 @@ function check_output(param_text){
 			hiradic_len = len;
 		}
 	}
+	// exdic sort
 	hiradic_temp = null;
 	if(exdic.length % 2 != 0 ){
 		alert('例外辞書項目数不正' + exdic.length);
 		return;
 	}
-	var exdic_temp = [];
-	var exdic_length = exdic.length;
-	for(var i = 0; i < exdic_length; i+=2){
-		exdic_temp.push([exdic[i], exdic[i+1]]);
-	}
-	exdic_temp.sort(function(s1, s2){
-			var ret = s1[0] - s2[0];
-			if(ret === 0){
-				return s1[1] - s2[1];
+	const exdic_map = new Map();
+	{
+		const exdic_length = exdic.length;
+		for(let i = 0; i < exdic_length; i+=2){
+			const key = exdic[i];
+			const value = exdic[i + 1];
+			if(key === ''){
+				continue;
 			}
-			return ret;
-		});
-	var exdic_sort = [];
-	exdic_length = exdic_temp.length;
-	var prev_exdic_item = '';
-	for(var i = 0; i < exdic_length; i++){
-		if(exdic_temp[i][0] === prev_exdic_item){
-			exdic_sort[exdic_sort.length - 1].push(exdic_temp[i][1]);
-		}else{
-			prev_exdic_item = exdic_temp[i][0];
-			exdic_sort.push([prev_exdic_item, exdic_temp[i][1]]);
+			if(exdic_map.has(key)){
+				exdic_map.get(key).push(value);
+			}else{
+				exdic_map.set(key, [value]);
+			}
 		}
 	}
+	// exdic_arr = null;
 	// exdic = null;
-	// exdic_temp = null;
 
 	warndic.sort();
 	kanji_pre_dic.sort();
@@ -11818,6 +11984,7 @@ function check_output(param_text){
 		var this_char = line.charCodeAt(r);
 		var is_kana =false;
 		var end_check = false;
+		// TODO: HTML <ruby> </ruby>への対応
 		if(0 < ruby_end_r){
 			if(r === ruby_end_r + (diff - ruby_end_diff)){
 				ruby_end_r = -1;
@@ -11828,6 +11995,7 @@ function check_output(param_text){
 				word_start = r;
 			}
 		}else if(this_char === 0x7c || this_char === 0xff5c){
+			// 縦棒だったら
 			var ruby_mode = 1;
 			var char1 = line.charCodeAt(r + 1);
 			var r1 = 1;
@@ -11957,7 +12125,7 @@ function check_output(param_text){
 					for(var n = 0; n < two.length; n++){
 						if(two[n].length <= word.length && two[n] === word.substr(0, two[n].length)){
 							var word2 = prev_str_kanji + two[n];
-							var info_ret = expand_word_info(kanji_pre_info[m][n], word2, line.substr(word_start2 + k + word2.length - prev_str_kanji.length), exdic_sort);
+							var info_ret = expand_word_info(kanji_pre_info[m][n], word2, line.substr(word_start2 + k + word2.length - prev_str_kanji.length), exdic_map);
 							if(0 <= info_ret[0]){
 								// hit
 								if(max_word.length < info_ret[2].length){
@@ -11968,8 +12136,8 @@ function check_output(param_text){
 										var word3 = max_word.substr(0, a);
 										var b = bin_search_dic(warndic, word3);
 										if(-1 != b){
-											var ex_ret = search_ex_dic(exdic_sort, word3, word3)
-											if(-1 ===  ex_ret[0]){
+											var ex_ret = search_ex_dic(exdic_map, word3, word3)
+											if(ex_ret[0]){
 												word_type = 'warn';
 												warn_info = warndic_info[b];
 											}
@@ -12019,8 +12187,8 @@ function check_output(param_text){
 					var word4 = word2 + '。';
 					var m = bin_search_dic(warndic, word2);
 					if(-1 != m){
-						var ex_ret = search_ex_dic(exdic_sort, word2, word.substr(k))
-						if(-1 ===  ex_ret[0] &&
+						var ex_ret = search_ex_dic(exdic_map, word2, word.substr(k))
+						if(ex_ret[0] &&
 								max_word.length - prev_str_kanji.length < word2.length){
 							word_type = 'warn';
 							max_word = word2;
@@ -12030,7 +12198,7 @@ function check_output(param_text){
 					}
 					m = bin_search_dic(hiradic, word2);
 					if(-1 != m){
-						var info_ret = expand_word_info(hiradic_info[m], word2, line.substr(word_start2 + k + word2.length), exdic_sort);
+						var info_ret = expand_word_info(hiradic_info[m], word2, line.substr(word_start2 + k + word2.length), exdic_map);
 						if(0 <= info_ret[0]){
 							// hit
 							if(max_word.length - prev_str_kanji.length < info_ret[2].length){
@@ -12069,8 +12237,8 @@ function check_output(param_text){
 						}
 					}
 					if(-1 != m){
-						var ex_ret = search_ex_dic(exdic_sort, word2, word.substr(k));
-						if(-1 === ex_ret[0]){
+						var ex_ret = search_ex_dic(exdic_map, word2, word.substr(k));
+						if(ex_ret[0]){
 							if(max_word.length - prev_str_kanji.length < word2.length){
 								max_word = word2;
 								prev_str_kanji = '';
@@ -12265,8 +12433,12 @@ function check_output(param_text){
 		alert('エラーがあります。本文上部をご覧ください。');
 	}
 }
+	output_main(param_text);
+}
 
-var kanji_list = [
+//■■■■■■■■■■■■■■
+function check_kanji(param_text){
+const kanji_list = [
 	// 小学校で習う漢字(1年-6年)
 	'一右雨円王音下火花貝学気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文木本名目立力林六',
 	'引羽雲園遠何科夏家歌画回会海絵外角楽活間丸岩顔汽記帰弓牛魚京強教近兄形計元言原戸古午後語工公広交光考行高黄合谷国黒今才細作算止市矢姉思紙寺自時室社弱首秋週春書少場色食心新親図数西声星晴切雪船線前組走多太体台地池知茶昼長鳥朝直通弟店点電刀冬当東答頭同道読内南肉馬売買麦半番父風分聞米歩母方北毎妹万明鳴毛門夜野友用曜来里理話',
@@ -12285,7 +12457,7 @@ var kanji_list = [
 	// 代用異体字
 	'填頬剥叱',
 ];
-var kanji_list_ex = [
+const kanji_list_ex = [
 	// 人名用漢字
 	'丑丞乃之乎也云亘亙些亦亥亨亮仔伊伍伽佃佑伶侃俄俣倭倦倖偲傭儲允兎兜其冴凌凧凪凱函劉劫勿匡廿卜卯卿厨厩叉叡叢叶只吾吻哉哨啄哩喬喧喰喋嘩嘉嘗噌噂圃圭坐尭坦埴堰堺堵塙壕壬夷奄套娃姪姥娩嬉孟宏宋宕宥寅寓寵尖尤屑峨峻嵯嵩嶺巌巳巴巷巽帖幌幡庄庇庚庵廟廻弘弛彦彪彬忽怜恢恰恕悌惟惚悉惇惹惣慧憐戊或戟托按挺挽掬捲捷捺捧掠揃摺撒撰撞播撫擢孜敦斐斡斧斯於旭昂昏昌晃晒晋晦智暢曙曝曳朋朔杏杖杜李杭杵杷枇柑柴柘柊柏柾柚桧桔桂栖桐栗梧梓梢梯桶梶椛梁棲椋椀楯楚楕椿楠楓楢楊榎樺榊榛槙槍槌樫槻樟樋橘樽檎檀櫛櫓欣欽歎此殆毅毘汀汝汐汲沌沓沫洲洛浩浬淵淳渚淀淋渥湘湊湛溢溜漕漣濡瀕灘灸灼烏焚煤煉燕燦燭爾牒牟牡牽犀狼猪獅玖珂珊玲琢琉瑛琶琵琳瑚瑞瑳瓜瓢甥甫畠畢疋疏皐瞥矩砦砥砧硯碓碗碩碧磐磯祇祢禰祐祷禄禎禽禾秦秤稀稔稜穣穿窄窪窺竣竪竺竿笈笹笠筈筑箕箔篇篠簾籾粥粟糊紘紗紐絃紬絢綜綴緋綾縞徽纂纏翠耀而耶耽聡肇肋肴胤胡腔膏臥舜舵芥芹芭芙芦苑茄苔茅茸茜莞荻莫菅菖萄菩萌菱葦葵萱葺萩董葡蓑蒔蒐蒼蒲蒙蓉蓮蔭蔦蓬蔓蕎蕨蕉蕃蕪薙蕗藁薩蘇蘭蝦蝶螺蟹衿袈袴裡裟裳襖訊訣註詫誼諏諒謂諺讃豹貰賑跨蹄蹟輔輯輿轟辰辻迂迄辿迦這逗逢遥遁遼邑祁郁鄭酉醇醐醍釘釧鋒鋸錐錆錫鍬鎧閃閏閤阿陀隈隼雀雁雛雫霞靖鞄鞍鞘鞠鞭頁頗饗馨馴馳駕駿魁魯鮎鯉鯛鰯鱒鱗鳩鳶鳳鴨鴻鵜鵬鷲鷺鷹麟麿黛鼎',
 	'侑俐凜凛凰勁堯奎崚巖已彗徠惺昊昴晏晄晟晨暉檜栞梛椰槇橙櫂毬洸洵滉漱澪煌熙燎燿珈珀琥瑶皓眸祿稟穰穹笙絆綺綸羚翔脩苺茉莉菫萠蕾詢諄赳迪逞遙釉頌颯驍麒黎猪',
@@ -12294,7 +12466,6 @@ var kanji_list_ex = [
 	'亞惡爲榮衞圓應櫻奧價壞懷樂卷陷氣僞戲峽狹曉勳惠鷄藝縣儉劍險圈檢顯驗嚴廣恆國碎雜兒濕實壽收從澁獸縱敍將燒奬條乘淨剩疊孃讓釀眞寢愼盡粹醉穗齊靜攝專戰纖禪壯爭莊搜裝騷藏臟帶滯單團彈晝鑄廳聽鎭轉傳盜稻拜賣髮拔祕拂佛飜萬默彌藥與搖樣謠來覽凉壘禮橫寬薰黑緖諸祥神瀨增都德福賴綠郞朗',
 ];
 
-function kanji_check(param_text){
 	last_check_type = 1;
 
 	var hoge = '';
