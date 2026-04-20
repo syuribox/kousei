@@ -20,7 +20,12 @@ function is_kanji(c){
 	if((0x4e00 <= c && c <= 0x9fcf)
 		|| (0x3400 <= c && c <= 0x4dbf)
 		|| (0xf900 <= c && c <= 0xfadf)
-		|| (0x3005 === c)){ // 々
+		|| (0x3005 === c)
+		|| (0x10000 <= c && (
+			(0x20000 <= c&& c <= 0x2ee5f)
+			|| (0x30000 <= c&& c <= 0x323af)
+			))
+		){ // 々
 		return true;
 	}
 	return false;
@@ -11600,7 +11605,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 										const desu = ['ましたから', 'ましたか', 'ましたし', 'ました', 'ましても', 'まして', 'ましょうから', 'ましょうか',
 											'ましょう', 'ましょ', 'ますから', 'ますか', 'ますし', 'ます', 'ませんから', 'ませんか', 'ませんし', 'ません', 'ませ'];
 										for(let p = 0; p < desu.length; p++){
-											if(suffix.startsWith(2, desu[p])){
+											if(suffix.startsWith(desu[p], 2)){
 												// '書けてます', '脱いでます'
 												ret_word += desu[p];
 												break;
@@ -11973,7 +11978,7 @@ const output_main = function(param_text){
 					warndic.push(userdic[i].substr(1));
 				}else if(first_char === '='){
 					//none
-				}else if(is_kanji(first_char.charCodeAt(0))){
+				}else if(is_kanji(userdic[i].codePointAt(0))){
 					kanji_pre_dic.push(userdic[i]);
 				}else if(is_katakana(first_char.charCodeAt(0))){
 					kanji_pre_dic.push(userdic[i]);
@@ -12005,7 +12010,7 @@ const output_main = function(param_text){
 					warndic.push(userdic[i].substr(1));
 				}else if(first_char === '='){
 					warndic_del.push(userdic[i].substr(1));
-				}else if(is_kanji(first_char.codePointAt(0))){
+				}else if(is_kanji(userdic[i].codePointAt(0))){
 					kanji_pre_dic.push(userdic[i]);
 				}else if(is_katakana(first_char.charCodeAt(0))){
 					kanji_pre_dic.push(userdic[i]);
@@ -12202,7 +12207,15 @@ const output_main = function(param_text){
 	// max_kanji = 0;
 	for(let i = 0; i < kanji_pre_dic.length; i++){
 		let k = 0;
-		for(; is_kanji(kanji_pre_dic[i].charCodeAt(k)) || is_katakana(kanji_pre_dic[i].charCodeAt(k)); k++){}
+		let c_kan = kanji_pre_dic[i].codePointAt(k);
+		while( is_kanji(c_kan) || is_katakana(c_kan)){
+			if(0x10000 <= c_kan){
+				k+=2;
+			}else{
+				k++;
+			}
+			c_kan = kanji_pre_dic[i].codePointAt(k);
+		}
 		const one = kanji_pre_dic[i].substr(0, k);
 		const two0 = kanji_pre_dic[i].substr(k);
 		const pos = two0.indexOf('/');
@@ -12477,6 +12490,12 @@ const output_main = function(param_text){
 					prev_kanji = true;
 				}else if(is_katakana(prev_char)){
 					prev_kata = true;
+				}else if(0xDC00 <= prev_char && prev_char <= 0xDFFF){
+					// 1文字前なので、下位サロゲート
+					prev_char = line.codePointAt(word_start2 - 2);
+					if(is_kanji(prev_char)){
+						prev_kanji = true;
+					}
 				}
 			}
 			let prematch = false;
@@ -12501,9 +12520,19 @@ const output_main = function(param_text){
 				let m = -1;
 				for(let n = 1; n <= max_len; n++){
 					let prev_char2 = line.charCodeAt(word_start2 - n);
+					if(0xDC00 <= prev_char2 && prev_char2 <= 0xDFFF){
+						// 1文字分戻ってきた：下位サロゲート
+						n++;
+						if(n <= max_len){
+							// 継続
+						}else{
+							break;
+						}
+						prev_char2 = line.codePointAt(word_start2 - n);
+					}
 					if((!prev_kata && is_kanji(prev_char2)) || (prev_kata && is_katakana(prev_char2))){
 						let str_kanji_org = line.substr(word_start2 - n, n);
-						let str_kanji = str_kanji_org.replace(/(.)々/g, '$1$1');
+						let str_kanji = str_kanji_org.replace(/(.)々/ug, '$1$1');
 						let p = bin_search_dic(kanji_pre_one_dic, str_kanji);
 						if(-1 != p){
 							m = p;
@@ -12825,7 +12854,7 @@ const output_main = function(param_text){
 	text += lines.join('');
 	hoge = hoge.replace(/\n/g, '<br>');
 
-	document.getElementById("result").innerHTML = '<div class="resultext">' + text + '<br>' + hoge + '</div>';
+	get_id('result').innerHTML = '<div class="resultext">' + text + '<br>' + hoge + '</div>';
 	if(0 < err_str.length){
 		alert('エラーがあります。本文上部をご覧ください。');
 	}
@@ -12850,9 +12879,11 @@ const kanji_list = [
 	'挨宛嵐畏萎椅茨咽淫唄怨媛艶旺岡臆俺苛牙瓦潰崖蓋骸柿顎葛釜鎌韓玩伎亀畿臼巾僅錦串窟熊詣稽隙桁拳鍵舷股虎勾梗喉乞駒頃痕沙挫采塞埼柵拶斬餌鹿嫉腫呪袖蹴憧拭尻芯腎須裾凄醒脊戚煎羨腺詮膳狙遡曽爽痩捉遜汰唾堆戴誰旦綻酎貼捗椎爪鶴諦溺妬賭藤瞳栃頓那奈梨謎鍋匂虹捻罵箸氾汎阪斑眉膝肘阜蔽餅蔑蜂貌睦勃昧枕蜜冥麺冶弥闇湧妖沃藍璃侶瞭瑠呂賂弄麓脇',
 	'曖彙鬱楷諧毀嗅惧憬錮傲刹恣摯羞箋踪緻嘲貪丼訃璧哺喩瘍拉辣籠慄',
 	// 第3水準
-	// '塡剝頰', // 𠮟　正字だが第3なので無効とする
-	// 代用異体字
-	'填頬剥叱',
+	// 塡剝頰　𠮟
+	// サロゲートペアの拡張漢字の赤字表示対応
+	// 「𠮟」も現状では赤字にしておく。塡剝頰はリスト入れておく
+	// 代用異体字/
+	'填頬剥叱塡剝頰',
 ];
 const kanji_list_ex = [
 	// 人名用漢字
@@ -12943,7 +12974,8 @@ const kanji_list_ex = [
 		const word_end = -1;
 		let word_period = false;
 		const this_char = line.codePointAt(r);
-		const this_char2 = line[r];
+		const this_char_len = (0x10000 <= this_char) ? 2:1;
+		const this_char2 = line.substring(r, r + this_char_len);
 		let sinjoyou = false;
 		if(is_kanji(this_char) && this_char != 0x3005){
 			let hit = false;
@@ -13017,16 +13049,17 @@ const kanji_list_ex = [
 					}
 					num += fixnum(line_num);
 					const s_ = s4 + num + s5;
+					const add_line = ((line) => lines.push(line + '<br>'));
 					if(0 < line_tag.length){
-						lines.push(s_ + line_tag + line_strip + '</a>');
+						add_line(s_ + line_tag + line_strip + '</a>');
 					}else{
-						lines.push(s_ + line_strip);
+						add_line(s_ + line_strip);
 					}
 				}else{
 					if(0 < line_tag.length){
-						lines.push(line_tag + line_strip + '</a>');
+						add_line(line_tag + line_strip + '</a>');
 					}else{
-						lines.push(line_strip);
+						add_line(line_strip);
 					}
 				}
 				line_none_hit = false;
@@ -13041,11 +13074,12 @@ const kanji_list_ex = [
 	if(concat_mode){
 		parts.push('<span id="titles"></span>' + part_titles.join('<br>') + '<hr>');
 	}
+	parts.push('<div class="resultext">');
 	let headtext = '';
 	headtext += '■常用漢字テスト<br>';
-	headtext += '　<span class="kanjiext">漢字</span>※：常用・人名以外の漢字<br>';
-	headtext += '　<span class="kanjizinmei">漢字</span>※：人名用漢字<br>';
-	headtext += '　<span class="kanjisin">漢字</span>※：新常用漢字<br>';
+	headtext += '　<span class="kanjiext">漢字</span>：常用・人名以外の漢字<br>';
+	headtext += '　<span class="kanjizinmei">漢字</span>：人名用漢字<br>';
+	headtext += '　<span class="kanjisin">漢字</span>：新常用漢字<br>';
 	headtext += '　漢字：常用漢字、漢字以外<br>';
 	if(option_linenum && !option_noneonly){
 		headtext += '　' + hit_count + '行ヒットしました(※の行)<br>'
@@ -13059,12 +13093,10 @@ const kanji_list_ex = [
 	headtext += '<hr>';
 	headtext += '■結果テキスト<br>';
 	parts.push(headtext);
-	parts.push(...lines);
 	if(0 < hoge.length){
-		hoge = hoge.replace(/\n/g, '<br>');
+		hoge = hoge.replaceAll('\n', '<br>');
 	}
-	parts.push('<div class="resultext">');
-	parts.push(text);
+	parts.push(...lines);
 	parts.push('<br>');
 	parts.push(hoge);
 	parts.push('</div>');
