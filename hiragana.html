@@ -37,6 +37,9 @@
 <br>
 　<input type="button" id="clear" value="入力枠クリア">
 　<input type="button" id="sample" value="サンプル">
+<br class="mobile-only">
+　<input type="button" id="memosave" value="メモ保存">
+　<input type="button" id="memoload" value="ロード">
 <span style="display:none">
 　<input type="button" id="area_split" value="入力枠をページ分割">
 </span>
@@ -105,8 +108,20 @@ copyright © syuribox
 </div>
 </div>
 <script type="text/javascript" src="hiraganacheck.js" charset="utf-8"></script>
+<script type="text/javascript" src="coffee_cat.js" charset="utf-8"></script>
+<script type="text/javascript" src="goblin.js" charset="utf-8"></script>
 <script type="text/javascript">
 "use strict";
+let memo_data = `ここにはメモを一時的に記録することができます。
+ブラウザのプログラムのJavaScriptの変数上に保存されます。
+メモリー上に展開され、ファイルなどには保存されません。
+F5などの再読み込みでも消えます。`;
+
+const sample_data = `文章のサンプルとして小説を用意しました。
+・ラブコメ　　  3,000文字 「コーヒーと猫」
+・ファンタジー 35,000文字 「転生者ゴブリン初の貴族を目指します」\n\n` +
+text_coffee_cat + '\n\n' + text_goblin;
+
 (function(){
 	function $(id){
 		return document.getElementById(id);
@@ -114,7 +129,7 @@ copyright © syuribox
 	$('mainbody').addEventListener('load', page_onload);
 	$('option_split').addEventListener('click', split_view);
 	$('clear').addEventListener('click', area_clear);
-	$('sample').addEventListener('click', area_sample);
+	$('sample').addEventListener('click', () => area_sample(sample_data));
 	$('area_split').addEventListener('click', split_area);
 	$('start').addEventListener('click', start_check);
 	$('kanjistart').addEventListener('click', start_kanji_check);
@@ -128,6 +143,12 @@ copyright © syuribox
 	$('droptarget').addEventListener('dragenter', drop_cancel);
 	$('droptarget').addEventListener('dragover', drop_cancel);
 	$('file_open').addEventListener('change', button_file_open);
+	$('memosave').addEventListener('click', () => {
+		memo_data = $('maintext').value;
+	});
+	$('memoload').addEventListener('click', () => {
+		$('maintext').value = memo_data;
+	});
 })();
 </script>
 </body>

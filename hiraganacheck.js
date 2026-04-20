@@ -4,7 +4,16 @@
 "use strict";
 
 function html_escape(s){
-	return s.replace(/&/g,"&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, '&#39;').replace(/"/g, '&#34;');
+	return s.replace(/[&<>'"]/g, match => {
+		switch(match) {
+				case '&': return '&amp;';
+				case '<': return '&lt;';
+				case '>': return '&gt;';
+				case "'": return '&#39;';
+				case '"': return '&#34;';
+		}
+		return match;
+	});
 }
 
 function is_kanji(c){
@@ -75,9 +84,9 @@ var str_update = ' [変更]';
 var last_check_type = 0;
 
 function read_files(files){
-	var file_size = 0;
-	for(var i = 0; i < files.length; i++){
-		file_size += files[i].size;
+	let file_size = 0;
+	for(const f of files){
+		file_size += f.size;
 	}
 	if( 500000 < file_size ){
 		if(false == window.confirm('合計ファイルサイズが500KB以上あります。\n' +
@@ -85,13 +94,13 @@ function read_files(files){
 			return;
 		}
 	}
-	var curret_name = '<>';
+	let curret_name = '<>';
 	if(current_page != -1){
 		curret_name = book[current_page].name;
 	}
 	book = []; //reset
-	var index = 0;
-	var one_file = files.length < 2;
+	let index = 0;
+	const one_file = files.length < 2;
 	const end_read = function(data, next){
 		const text = data.replace(/\r\n/g, '\n');
 		if(!one_file){
@@ -111,8 +120,8 @@ function read_files(files){
 			start_check();
 		}else{
 			split_file_to_pages(false);
-			var page_num = 0;
-			for(var i = 0; i < book.length; i++){
+			let page_num = 0;
+			for(let i = 0; i < book.length; i++){
 				if(book[i].name === curret_name){
 					page_num = i;
 					break;
@@ -122,9 +131,9 @@ function read_files(files){
 		}
 		return;
 	};
-	var loader = function(e){
+	const loader = function(e){
 		 // UTF-8でリロード
-		let loader_utf8 = function(e){
+		const loader_utf8 = function(e){
 			end_read(e.target.result, loader);
 			return;
 		};
@@ -137,7 +146,7 @@ function read_files(files){
 			-1 !== data.indexOf('縺昴ｌ')
 		){
 			 // 文字化け検出→UTF-8でリロード
-			let reader4 = new FileReader();
+			const reader4 = new FileReader();
 			reader4.onload = loader_utf8;
 			//再読み込み
 			reader4.readAsText(files[index], 'UTF-8');
@@ -149,13 +158,13 @@ function read_files(files){
 		return;
 	};
 	// 1つめを読み込む
-	var reader = new FileReader();
+	const reader = new FileReader();
 	reader.onload = loader;
 	reader.readAsText(files[index], 'Shift_JIS');
 }
 
 function split_view(){
-	var disp = 'none';
+	let disp = 'none';
 	if(get_id('option_split_view').style.display == 'none'){
 		disp = 'block';
 	}
@@ -164,7 +173,7 @@ function split_view(){
 }
 
 function split_change(){
-	var disp = 'none';
+	let disp = 'none';
 	let split_value = 'auto';
 	if(get_id('split_type') != null){
 		split_value = get_id('split_type').value;
@@ -174,7 +183,7 @@ function split_change(){
 	}
 	get_id('split_regex').style.display = disp;
 	disp = 'none';
-	var val = split_value;
+	let val = split_value;
 	if(val == 'concat' || val == 'splitconcat'){
 		disp = 'inline';
 	}
@@ -183,13 +192,13 @@ function split_change(){
 
 function split_area(){
 	book = [];
-	var page = {};
+	let page = {};
 	page.text = get_id('maintext').value.replace(/\r\n/g, '\n');
 	let split_value = 'auto';
 	if(get_id('split_type') != null){
 		split_value = get_id('split_type').value;
 	}
-	var concat_mode = (split_value === 'concat');
+	const concat_mode = (split_value === 'concat');
 	if(concat_mode){
 		page.name = concat_page_name;
 	}else{
@@ -205,12 +214,12 @@ function split_file_to_pages(from_split_area){
 	if(get_id('split_type') != null){
 		split_type = get_id('split_type').value;
 	}
-	var concat_head = get_id('concat_head').value;
-	var newbook = [];
-	var narou_file = false;
-	var filename_max = 0;
-	for(var i = 0; i < book.length; i++){
-		var file = book[i];
+	let concat_head = get_id('concat_head').value;
+	let newbook = [];
+	let narou_file = false;
+	let filename_max = 0;
+	for(let i = 0; i < book.length; i++){
+		let file = book[i];
 		if(-1 != file.name.search(/^N([0-9]{4})([A-Z]{2})\-([\d]+)\.txt$/i)){
 			narou_file = true;
 		}
@@ -221,32 +230,32 @@ function split_file_to_pages(from_split_area){
 	if(narou_file && split_type === 'none' ){
 		split_type = 'nameonly';
 	}
-	var concat_text = [];
+	let concat_text = [];
 	if(split_type != 'none'){
-		for(var i = 0; i < book.length; i++){
-			var file = book[i];
-			var complete = false;
-			var part_left = '\n------------------------- 第';
-			var part_right = '部分開始 -------------------------\n【サブタイトル】\n';
-			var part_end = -1;
-			var part_mark = part_left + '1' + part_right;
+		for(let i = 0; i < book.length; i++){
+			let file = book[i];
+			let complete = false;
+			const part_left = '\n------------------------- 第';
+			const part_right = '部分開始 -------------------------\n【サブタイトル】\n';
+			let part_end = -1;
+			let part_mark = part_left + '1' + part_right;
 			if(!complete && (split_type === 'auto' || split_type==='naroubackup')){
 				part_end = file.text.indexOf(part_mark);
 			}
 			if(-1 != part_end){
-				var part_start = 0;
-				var k = 0;
+				let part_start = 0;
+				let k = 0;
 				while(-1 != part_end){
-					var page = {};
+					let page = {};
 					page.name = file.name;
-					var title = '';
+					let title = '';
 					if(part_start === 0){
 						title = '/【情報ヘッダ】';
 					}else{
 						pos_start = part_start + part_mark.length;
-						var pos_end = file.text.indexOf('\n', pos_start);
+						let pos_end = file.text.indexOf('\n', pos_start);
 						if(-1 != pos_end){
-							var title = file.text.substr(pos_start, pos_end - pos_start);
+							let title = file.text.substr(pos_start, pos_end - pos_start);
 							if( 20 < title.length ){
 								title = title.substr(0, 30) + '..';
 							}
@@ -257,7 +266,7 @@ function split_file_to_pages(from_split_area){
 					k++;
 					part_mark = part_left + k + part_right;
 					part_end = file.text.indexOf(part_mark, part_end);
-					var part_end2 = part_end;
+					let part_end2 = part_end;
 					if(-1 === part_end2){
 						part_end2 = file.text.length;
 					}
@@ -268,10 +277,10 @@ function split_file_to_pages(from_split_area){
 				complete = true;
 			}
 			if(!complete){
-				var concat_head = get_id('concat_head').value;
-				var head = -1;
+				let concat_head = get_id('concat_head').value;
+				let head = -1;
 				part_mark = '\n' + concat_head;
-				var head_top = false;
+				let head_top = false;
 				if(split_type === 'auto' || split_type==='splitconcat'){
 					head_top = (file.text.substr(0, concat_head.length) === concat_head);
 					if(head_top){
@@ -281,22 +290,22 @@ function split_file_to_pages(from_split_area){
 					}
 				}
 				if(head != -1 && head < 3000){
-					var k = 1;
+					let k = 1;
 					if(head_top){
 						part_end = concat_head.length;
 					}else{
 						part_end = head + part_mark.length;
 					}
 					while(-1 != part_end){
-						var page = {};
+						let page = {};
 						page.name = file.name;
 						k++;
-						var pos_end = file.text.indexOf('\n', part_end);
+						let pos_end = file.text.indexOf('\n', part_end);
 						if(-1 != pos_end){
-							var title = file.text.substr(part_end, pos_end - part_end);
+							let title = file.text.substr(part_end, pos_end - part_end);
 							if(from_split_area){
-								var re = title.match(/^[_\d]+\/([^\\\/<>:\*\?]+)\/([\s\S]+)$/);
-								var sub = '';;
+								let re = title.match(/^[_\d]+\/([^\\\/<>:\*\?]+)\/([\s\S]+)$/);
+								let sub = '';;
 								if(re){
 									sub = re[2];
 									if( 20 < sub.length ){
@@ -307,8 +316,8 @@ function split_file_to_pages(from_split_area){
 									re = title.match(/^[_\d]+\/([\s\S]+)$/);
 								}
 								if(re){
-									var re_file = re[1];
-									var re2 = re[1].match(/_+$/);
+									let re_file = re[1];
+									const re2 = re[1].match(/_+$/);
 									if(re2){
 										re_file = re_file.substr(0, re_file.length - re2.length);
 									}
@@ -334,15 +343,15 @@ function split_file_to_pages(from_split_area){
 						}else{
 							multi_match = true;
 						}
-						var part_end2 = part_end;
+						let part_end2 = part_end;
 						if(-1 === part_end2){
 							part_end2 = file.text.length;
 						}else{
 							part_end2 -= part_mark.length;
-							if(pos_end + 1 < file.text.length && file.text.charAt(pos_end) === '\n'){
+							if(pos_end + 1 < file.text.length && file.text[pos_end] === '\n'){
 									pos_end += 1;
 							}
-							if(pos_end + 1 < file.text.length && file.text.charAt(pos_end) === '\n'){
+							if(pos_end + 1 < file.text.length && file.text[pos_end] === '\n'){
 									pos_end += 1;
 							}
 						}
@@ -355,21 +364,21 @@ function split_file_to_pages(from_split_area){
 				}
 			}
 			if(!complete){
-				var ret = file.text.match(/^[■□◆◇▼▽▲△●○]/m);
+				const ret = file.text.match(/^[■□◆◇▼▽▲△●○]/m);
 				if((split_type === 'auto' || split_type==='headsign') && ret && ret.index < 3000){
-					var k = 1;
-					var part_start = 0;
-					var part_end = ret.index;
-					var part_mark = '\n' + ret[0];
-					var multi_match = false;
+					let k = 1;
+					let part_start = 0;
+					let part_end = ret.index;
+					let part_mark = '\n' + ret[0];
+					let multi_match = false;
 					while(-1 != part_end){
-						var page = {};
+						let page = {};
 						page.name = file.name;
 						k++;
-						var pos_start = part_end;
-						var pos_end = file.text.indexOf('\n', pos_start);
+						let pos_start = part_end;
+						let pos_end = file.text.indexOf('\n', pos_start);
 						if(-1 != pos_end){
-							var title = file.text.substr(pos_start, pos_end - pos_start);
+							let title = file.text.substr(pos_start, pos_end - pos_start);
 							if( 20 < title.length ){
 								title = title.substr(0, 30) + '..';
 							}
@@ -387,7 +396,7 @@ function split_file_to_pages(from_split_area){
 						}else{
 							multi_match = true;
 						}
-						var part_end2 = part_end;
+						let part_end2 = part_end;
 						if(-1 === part_end2){
 							part_end2 = file.text.length;
 						}
@@ -401,10 +410,10 @@ function split_file_to_pages(from_split_area){
 				}
 			}
 			if(!complete){
-				var regex_str = get_id('split_regex_head').value;
-				var regex_obj = null;
-				var ret = null;
-				var second_ret = null;
+				const regex_str = get_id('split_regex_head').value;
+				let regex_obj = null;
+				let ret = null;
+				let second_ret = null;
 				try{
 					if(split_type==='splitregex'){
 						regex_obj = new RegExp(regex_str, 'mg');
@@ -417,14 +426,14 @@ function split_file_to_pages(from_split_area){
 					alert('正規表現指定がエラーです。\n' + regex_str + '');
 				}
 				if(second_ret && ret.index < 3000){
-					var k = 1;
-					var part_start = 0;
-					var part_end = ret.index;
-					var part_mark = ret[0];
-					var test = [];
+					let k = 1;
+					let part_start = 0;
+					let part_end = ret.index;
+					let part_mark = ret[0];
+					let test = [];
 					while(ret){
 						test.push(part_end);
-						var page = {};
+						let page = {};
 						page.name = file.name;
 						k++;
 						if(second_ret){
@@ -433,7 +442,7 @@ function split_file_to_pages(from_split_area){
 						}else{
 							ret = regex_obj.exec(file.text);
 						}
-						var part_end2;
+						let part_end2;
 						if(ret){
 							part_end = ret.index;
 							part_end2 = part_end;
@@ -447,9 +456,9 @@ function split_file_to_pages(from_split_area){
 					complete = true;
 				}
 			}
-			var filename_org = file.name;
+			const filename_org = file.name;
 			if(split_type === 'concat'){
-				var limit = filename_max;
+				let limit = filename_max;
 				if(20 < limit){
 					limit = 20;
 				}
@@ -459,16 +468,16 @@ function split_file_to_pages(from_split_area){
 			}
 			if(!complete){
 				if(-1 != filename_org.search(/^N([0-9]{4})([A-Z]{2})\-([\d]+)\.txt$/i)){
-					var separeter = '\n********************************************\n';
-					var head = file.text.indexOf(separeter);
-					var pos_start = 0;
+					const separeter = '\n********************************************\n';
+					const head = file.text.indexOf(separeter);
+					let pos_start = 0;
 					if(head != -1 && head < file.text.length / 3){
 						pos_start = head + separeter.length;
 					}
-					if(-1 == ' \t\n　'.indexOf(file.text.charAt(pos_start))){
-						var pos_end = file.text.indexOf('\n', pos_start);
+					if(-1 == ' \t\n　'.indexOf(file.text[pos_start])){
+						const pos_end = file.text.indexOf('\n', pos_start);
 						if(pos_end != -1){
-							var title = file.text.substr(pos_start, pos_end - pos_start);
+							let title = file.text.substr(pos_start, pos_end - pos_start);
 							if( 20 < title.length ){
 								title = title.substr(0, 20) + '..';
 							}
@@ -479,7 +488,7 @@ function split_file_to_pages(from_split_area){
 			}
 			if(split_type === 'concat'){
 				if(!from_split_area){
-					var num = '';
+					let num = '';
 					if(10 <= book.length && i + 1 <= 9){
 						num = '_';
 					}
@@ -498,7 +507,7 @@ function split_file_to_pages(from_split_area){
 			book[i] = null;
 		}
 		if(split_type === 'concat'){
-			var page = {};
+			const page = {};
 			page.text = concat_text.join('\n');
 			page.name = concat_page_name;
 			newbook.push(page);
@@ -510,19 +519,19 @@ function split_file_to_pages(from_split_area){
 }
 
 function concat_pages(){
-	var concat_text = [];
-	var concat_head = get_id('concat_head').value;
-	var filename_max = 0;
-	for(var i = 0; i < book.length; i++){
-		var file = book[i];
-		var re = file.name.match(/^([^\\\/<>:\*\?]+)\//);
+	const concat_text = [];
+	const concat_head = get_id('concat_head').value;
+	let filename_max = 0;
+	for(let i = 0; i < book.length; i++){
+		const file = book[i];
+		const re = file.name.match(/^([^\\\/<>:\*\?]+)\//);
 		if(re && filename_max < re[1].length){
 			filename_max = re[1].length;
 		}
 	}
-	for(var i = 0; i < book.length; i++){
-		var file = book[i];
-		var num = '';
+	for(let i = 0; i < book.length; i++){
+		const file = book[i];
+		let num = '';
 		if(10 <= book.length && i + 1 <= 9){
 			num = '_';
 		}
@@ -531,19 +540,16 @@ function concat_pages(){
 		}
 		num += i + 1;
 
-		var limit = filename_max;
-		if(20 < limit){
-			limit = 20;
-		}
-		var name = file.name;
-		var re = name.match(/^([^\\\/<>:\*\?]+)\//);
+		const limit = Math.min(20, filename_max);
+		let name = file.name;
+		const re = name.match(/^([^\\\/<>:\*\?]+)\//);
 		if(re && re[1].length < limit){
 			name = (re[1] + '____________________').substr(0, limit) + name.substr(re[1].length);
 		}
 		concat_text.push('\n' + concat_head + num + '/' + name + '\n');
 		concat_text.push(file.text);
 	}
-	var page = {};
+	const page = {};
 	page.name = concat_page_name;
 	page.text = concat_text.join('\n');
 	book = [];
@@ -558,8 +564,8 @@ function page_view(index){
 }
 
 function progress_box(){
-	var myHeight = window.innerHeight - get_id('footers').clientHeight - 80;
-	var output = '';
+	const myHeight = window.innerHeight - get_id('footers').clientHeight - 80;
+	let output = '';
 	if(0 < myHeight){
 		output = '<div style="height:' + myHeight + 'px">解析中……</div>';
 	}else{
@@ -592,7 +598,7 @@ function page_view_update(index, mode){
 }
 
 function create_pages(index, top){
-	var pages = '';
+	let pages = '';
 	if(top){
 		pages += '<span id="filebar">ファイル制御：</span>　';
 	}
@@ -629,7 +635,7 @@ function create_pages(index, top){
 	}else{
 		pages += '　<select id="book_page2">';
 	}
-	for(var i = 0; i < book.length; i++){
+	for(let i = 0; i < book.length; i++){
 		pages += '<option value="' + i + '"';
 		if(i == index){
 			pages += ' selected';
@@ -678,11 +684,11 @@ function start_kanji_check(){
 
 function start_check2(param_text){
 	if( -1 < current_page ){
-		var page = book[current_page];
-		var textarea = get_id('maintext').value.replace(/\r\n/g, '\n');
+		const page = book[current_page];
+		const textarea = get_id('maintext').value.replace(/\r\n/g, '\n');
 		if(textarea !== page.text){
 			page.text = get_id('maintext').value;
-			var up = str_update;
+			const up = str_update;
 			if(-1 == page.name.indexOf(up)){
 				page.name += up;
 			}
@@ -723,21 +729,24 @@ function all_clear(){
 	get_id('page_name').value = 'ページ' + 1;
 }
 
-function area_sample(){
-	var sample = '';
-	sample += '　ある日、空らかユーフォーが降っていいた。\n';
-	sample += 'そなん馬鹿なとこがあとは思わなだろうが、家の屋根に刺さってがいる。\n';
-	sample += '「おはようごさいます。ご主人様」\n';
-	sample += 'グレイが出てかてそう言った。\n';
-	sample += '　ある日、空からユーフォーが降ってきた。\n';
-	sample += 'そんな馬鹿なことがあるとは思わないだろうが、家の屋根に刺さっている。\n';
-	sample += '「おはようございます。ご主人様」\n';
-	sample += 'グレイが出てきてそう言った。\n';
-	get_id('maintext').value = sample;
+function area_sample(sample_text){
+	const sample = `　ある日、空らかユーフォーが降っていいた。
+そなん馬鹿なとこがあとは思わなだろうが、家の屋根に刺さってがいる。
+「おはようごさいます。ご主人様」
+グレイが出てかてそう言った。
+　ある日、空からユーフォーが降ってきた。
+そんな馬鹿なことがあるとは思わないだろうが、家の屋根に刺さっている。
+「おはようございます。ご主人様」
+グレイが出てきてそう言った。
+`;
+	if(sample_text === undefined || sample_text == ''){
+		sample_text = sample;
+	}
+	get_id('maintext').value = sample_text;
 }
 
 function add_page(){
-	var page = {};
+	const page = {};
 	page.name = get_id('page_name').value;
 	page.text = get_id('maintext').value;
 	book[book.length] = page;
@@ -746,7 +755,7 @@ function add_page(){
 }
 
 function dic_change(){
-	var disp = 'none';
+	let disp = 'none';
 	if(document.getElementById('book').value != 'include'){
 		disp = 'block';
 	}
@@ -758,7 +767,7 @@ function dic_change(){
 }
 
 function user_view(){
-	var disp = 'none';
+	let disp = 'none';
 	if(document.getElementById('dicinfo').style.display == 'none'){
 		disp = 'block';
 	}
@@ -1146,6 +1155,7 @@ const hiradic_org =
 いたぶる
 いたまえ
 いたるところ
+いたわし/形容詞
 いたんだ、
 いたんだぞ、
 いだ/五段カ
@@ -1284,6 +1294,10 @@ const hiradic_org =
 うお、
 うおお
 うおおお
+うおおおお
+うおおおおお
+うおおおおおお
+うおっほん
 うかが/五段ワ
 うかつ
 うかべ/下一段
@@ -1329,9 +1343,12 @@ const hiradic_org =
 うっ、
 うっかり
 うっさい
+うっす
 うっすら
 うっせぇ
 うっせえ
+うっぜぇ
+うっぜえ
 うっそ
 うっそう
 うっちゃ/五段ラ
@@ -1399,6 +1416,8 @@ const hiradic_org =
 うやうやし/形容詞
 うやむや
 うら/五段マ
+うらや/五段マ
+うらやまし/形容詞
 うらやま
 うら若
 うるさ/形容詞
@@ -1453,6 +1472,8 @@ const hiradic_org =
 ええ
 ええい
 ええよ
+ええんか
+ええんよ
 えくぼ
 えぐ/五段ラ
 えぐい
@@ -1481,6 +1502,7 @@ const hiradic_org =
 お/五段ラ
 お/五段ワ
 お、
+お？
 おあいにく
 おあずけ
 おあつらえ/下一段
@@ -1603,6 +1625,8 @@ const hiradic_org =
 おそろし/形容詞
 おぞまし/形容詞
 おたく/人称名詞
+おたんじょう
+おたんじょうび
 おだて
 おだて/下一段
 おち
@@ -1618,6 +1642,7 @@ const hiradic_org =
 おっきな
 おっくう
 おっさん
+おっし
 おっしゃ
 おっしゃ/五段ナサル
 おっす
@@ -1697,6 +1722,7 @@ const hiradic_org =
 おばちゃん
 おぱんつ
 おひさし
+おひさま
 おひざ元
 おひたし
 おひとつ
@@ -1709,6 +1735,7 @@ const hiradic_org =
 おふくろ
 おふたり
 おへそ
+おへんじ
 おべっか
 おほほほ
 おほほほほ
@@ -1718,8 +1745,10 @@ const hiradic_org =
 おぼつ/五段カ
 おぼつかない
 おぼれ/下一段
-おぼん
 おぼろげ
+おぼん
+おま、
+おまい/人称名詞
 おまえ/人称名詞
 おまかせ
 おまかわ
@@ -1886,6 +1915,7 @@ const hiradic_org =
 かっちょ
 かっちょ悪
 かっちり
+かっとな/五段ラ
 かっぽじ/五段ラ
 かっ飛
 かつ
@@ -1974,6 +2004,7 @@ const hiradic_org =
 かわい/形容詞
 かわいが/五段ラ
 かわいそす
+かわいそー
 かわいらし/形容詞
 かわゆい
 かわりばんこ
@@ -2058,6 +2089,8 @@ const hiradic_org =
 きた
 きたい
 きたす
+きただろ
+きただろう
 きたな/形容詞
 きたまえ
 きたら
@@ -2222,6 +2255,7 @@ const hiradic_org =
 くっくっくっくっ
 くっくっくっくっくっ
 くっころ
+くっさぁ/形容詞
 くっそ
 くっちゃべ/五段ラ
 くっつ/五段カ
@@ -2297,8 +2331,10 @@ const hiradic_org =
 ぐしゃ
 ぐしゃぐしゃ
 ぐしゃり
+ぐしゅぐしゅ
 ぐしょぐしょ
 ぐじゃぐじゃ
+ぐじゅぐじゅ
 ぐすん
 ぐだつ/五段カ
 ぐちゃぐちゃ
@@ -2322,10 +2358,17 @@ const hiradic_org =
 ぐにゅぐにゅ
 ぐにょぐにょ
 ぐぬぬ
+ぐぬぬぬ
+ぐぬぬぬぬ
+ぐぬぬぬぬぬ
+ぐぬぬぬぬぬぬ
+ぐぬぬぬぬぬぬぬ
 ぐふふ
 ぐふふふ
 ぐふふふふ
 ぐふふふふふ
+ぐふふふふふふ
+ぐふふふふふふ
 ぐへへ
 ぐらい
 ぐらいのもの
@@ -2715,6 +2758,7 @@ const hiradic_org =
 さっきから
 さっくり
 さっさと
+さっすが
 さっそく
 さって
 さっと
@@ -2875,6 +2919,7 @@ const hiradic_org =
 しかもらえ/下一段
 しかり
 しかるべき
+しかーし
 しが/五段ラ
 しがた/形容詞
 しがち
@@ -2958,7 +3003,6 @@ const hiradic_org =
 していきなり
 していただ/五段カ
 していつでも
-してくる
 してくれ/下一段
 してた
 してたまるもの
@@ -3141,6 +3185,7 @@ const hiradic_org =
 じっくり
 じっと
 じっとり
+じつに
 じつは
 じて
 じとり
@@ -3201,6 +3246,7 @@ const hiradic_org =
 じゅるる
 じゅわっと
 じゅわり
+じゅー
 じゆうな
 じょうずな
 じょうぶな
@@ -3261,6 +3307,7 @@ const hiradic_org =
 すげな/形容詞
 すげない
 すげー
+すげ替
 すこし
 すこぶる
 すご/五段サ
@@ -3280,6 +3327,7 @@ const hiradic_org =
 すずめ
 すたこらさっさ
 すだ/五段タ
+すだれ
 すっからかん
 すっかり
 すっきり
@@ -3327,6 +3375,7 @@ const hiradic_org =
 すま/五段サ
 すま/五段ワ
 すまん
+すまーん
 すみっこ
 すみません
 すみませーん
@@ -3396,6 +3445,9 @@ const hiradic_org =
 ずしりと
 ずしん
 ずずい
+ずずずって
+ずずずっと
+ずずずと
 ずたぼろ
 ずっしり
 ずっと
@@ -3479,8 +3531,9 @@ const hiradic_org =
 ぜひ
 ぜひとも
 ぜんぶ
-そ？
 そ/五段ラ
+そーだった
+そ？
 そ/五段ワ
 そいつ
 そいつら
@@ -3621,6 +3674,7 @@ const hiradic_org =
 それらしき
 それを
 そろ/五段ワ
+そろっと
 そろばん
 そろり
 そんくらい
@@ -3789,6 +3843,8 @@ const hiradic_org =
 たわわ
 たん
 たんこぶ
+たんじょう
+たんじょうび
 たんたんと
 たんぱく
 たんぽぽ
@@ -3902,6 +3958,7 @@ const hiradic_org =
 だんまり
 だんらん
 だんろ
+だー。
 ちいさ/形容詞
 ちいさな
 ちか/形容詞
@@ -4049,6 +4106,7 @@ const hiradic_org =
 っ、
 っ。
 っから
+っこ;■暫定、要調査
 っけ
 っしょ
 っす、
@@ -4097,6 +4155,8 @@ const hiradic_org =
 つ/五段カ
 つ/五段マ
 つ/五段ラ
+つ[
+つ【
 つい
 ついぞ
 ついで
@@ -4104,6 +4164,9 @@ const hiradic_org =
 ついば/五段マ
 つうーって
 つうーっと
+つお湯
+つお茶
+つお酒
 つか/五段マ
 つか/五段ラ
 つか/五段ワ
@@ -4177,6 +4240,7 @@ const hiradic_org =
 つま先
 つむ/五段ガ
 つむ/五段ラ
+つむぎ茶
 つむじ
 つめた/形容詞
 つも/五段ラ
@@ -4195,7 +4259,29 @@ const hiradic_org =
 つんざく
 つんと
 つんのめる
+つウーロン
+つカップ
+つコップ
+つコーヒー
+つコーラ
+つビール
+つペットボトル
+つミルク
+つレモンティ
+つワイン
 つーか
+つ日本酒
+つ炭酸
+つ烏龍
+つ牛乳
+つ珈琲
+つ発泡酒
+つ白湯
+つ紅茶
+つ缶
+つ酒
+つ麦茶
+つ［
 づか/五段ワ
 づくり
 づくろい
@@ -4273,6 +4359,7 @@ const hiradic_org =
 できねぇ
 できねー
 できばえ
+できるんか
 でこぼこ
 でしゃば/五段ラ
 でしゅ
@@ -4431,8 +4518,7 @@ const hiradic_org =
 とのこと
 とは
 とはいうものの
-とはいえ
-とはいえず
+とはいえ/下一段
 とはしゃ/五段ガ
 とびきり
 とびっきり
@@ -4471,9 +4557,10 @@ const hiradic_org =
 とんでも
 とんでもなく
 とんと
+とんねん
 とんぼ
 ど/五段カ
-ど;■MEMO:ど田舎、ど素人などを「とりあえず」包括的に処理
+ど、;■MEMO:ど田舎、ど素人などを「とりあえず」包括的に処理
 どいつ
 どいて
 どう
@@ -4539,6 +4626,7 @@ const hiradic_org =
 どさって
 どさっと
 どさり
+どした
 どしん
 どじょう
 どす黒
@@ -4649,6 +4737,7 @@ const hiradic_org =
 なお
 なお/五段サ
 なお/五段ラ
+なおかげ
 なおさら
 なか
 なかった
@@ -4712,6 +4801,7 @@ const hiradic_org =
 なぞ/五段ラ
 なぞらえ/下一段
 なだめ/下一段
+なだらか
 なっ、
 なっ。
 なったっす
@@ -4869,6 +4959,7 @@ const hiradic_org =
 なんら
 なんらか
 なー
+なーるほど
 なーんて
 なーんにも
 なーんも
@@ -5079,6 +5170,7 @@ const hiradic_org =
 のどうする
 のどか
 のどなた
+のどぼとけ
 のどれか
 のに
 のにも
@@ -5086,6 +5178,10 @@ const hiradic_org =
 のはず
 のば/五段サ
 のひとが
+のび/上一段
+のびやか
+のびやかな
+のびん
 のべ/下一段
 のほほん
 のぼ/五段ラ
@@ -5102,6 +5198,7 @@ const hiradic_org =
 のもつ
 のもと
 のもの
+のもん
 のよ。
 のよう
 のよねえ
@@ -5189,9 +5286,20 @@ const hiradic_org =
 はなはだ
 はにかむ
 はね/下一段
+はねぇ
+はねぇぞ
+はねぇよ
+はねぇわ
 はねえ
+はねえぞ
+はねえよ
+はねえわ
+はねーぞ
 はねーよ
+はねーわ
 はは
+ははぁん
+ははあん
 ははは
 はははは
 ははははは
@@ -5286,12 +5394,15 @@ const hiradic_org =
 ばれてーら
 ばんざい
 ばんざーい
+ばんわ
 ばーか
 ばーさま
 ばーさん
 ばーちゃん
 ぱぁっと
 ぱあっと
+ぱかって
+ぱかっと
 ぱくって
 ぱくっと
 ぱくつく
@@ -5326,6 +5437,9 @@ const hiradic_org =
 ぱんと
 ひ/五段カ
 ひぃ〈、
+ひぃぃ
+ひいぃ
+ひいい
 ひいおじぃ
 ひいおじい
 ひいおじー
@@ -5366,6 +5480,7 @@ const hiradic_org =
 ひた走
 ひた隠
 ひだ
+ひっ、
 ひっか/五段カ
 ひっかえ
 ひっかか/五段ラ
@@ -5767,6 +5882,7 @@ const hiradic_org =
 ぴょこん
 ぴょん
 ぴょんぴょん
+ぴょーん
 ぴよん
 ぴん、
 ぴんっと
@@ -5796,6 +5912,7 @@ const hiradic_org =
 ふくら/五段マ
 ふくらはぎ
 ふくらみ
+ふくれ/下一段
 ふくれっ面
 ふぐり
 ふけ/下一段
@@ -5824,6 +5941,7 @@ const hiradic_org =
 ふっふーん
 ふっわふわ
 ふっ飛
+ふつう
 ふてぶてし/形容詞
 ふて腐
 ふと
@@ -5878,6 +5996,7 @@ const hiradic_org =
 ふんふふーん
 ふんわり
 ふーむ
+ふーっと
 ふーん
 ふ化
 ぶ/五段ラ
@@ -5921,6 +6040,7 @@ const hiradic_org =
 ぶっぱな/五段サ
 ぶっ倒
 ぶっ刺す
+ぶっ叩
 ぶっ壊
 ぶっ掛
 ぶっ放
@@ -6006,8 +6126,9 @@ const hiradic_org =
 へらって
 へらっと
 へん
-へんぴ
+へんじ
 へんな
+へんぴ
 へー、
 へーー、
 へーーー、
@@ -6113,6 +6234,10 @@ const hiradic_org =
 ほのぼの
 ほのめか/五段サ
 ほほ
+ほほほ
+ほほほほ
+ほほほほほ
+ほほほほほほ
 ほほう
 ほほえ/五段マ
 ほほえまし/形容詞
@@ -6141,12 +6266,14 @@ const hiradic_org =
 ぼかん
 ぼく/人称名詞
 ぼくっこ
+ぼくちゃん
 ぼけ
 ぼこり
 ぼさっと
 ぼそっと
 ぼそり
 ぼたん
+ぼちゃん
 ぼっかり
 ぼっきゅんぼん
 ぼっこぼこ
@@ -6280,10 +6407,12 @@ const hiradic_org =
 まちがえ/下一段
 まっ、
 まっさかさま
+まっさき
 まっさら
 まっしぐら
 まっしろな
 まっすぐ
+まっず/形容詞
 まったく
 まったり
 まっとう
@@ -6355,6 +6484,8 @@ const hiradic_org =
 みそ
 みそめ/下一段
 みそ汁
+みたい
+みたいな
 みたまえ
 みたらし
 みたろ
@@ -6383,6 +6514,7 @@ const hiradic_org =
 むくり
 むくりと
 むくれ/下一段
+むぐっ
 むげには
 むさぼ/上一段
 むさ苦
@@ -6430,6 +6562,7 @@ const hiradic_org =
 めがさめ/下一段
 めがね
 めく/五段ラ
+めくるめく
 めぐ/五段ラ
 めぐみ
 めぐら/五段サ
@@ -6654,6 +6787,7 @@ const hiradic_org =
 やるせない
 やるっきゃ
 やろう
+やろが
 やろやろ
 やわらか
 やわらか/形容詞
@@ -6661,6 +6795,7 @@ const hiradic_org =
 やんごと
 やんちゃ
 やんなきゃ
+やんの
 やんや
 やんよ
 やんわり
@@ -6730,7 +6865,11 @@ const hiradic_org =
 ようにも
 ようやく
 よぉ、
+よぉぉ
+よぉお
 よお、
+よおぉ
+よおお
 よかった
 よかったし
 よかったら
@@ -6784,6 +6923,7 @@ const hiradic_org =
 よよいのよい
 よりけり
 よりどりみどり
+よりなんと
 よりはまし
 よると
 よれば
@@ -6809,8 +6949,21 @@ const hiradic_org =
 らちが明
 らっしゃい
 らっしゃった
+らっしゃって
 らっしゃらない
+らっしゃらなかった
+らっしゃらなき
+らっしゃらなく
+らっしゃらなけれ
+らっしゃらなけれど
+らっしゃらなければ
+らっしゃり
+らっしゃりすぎ
+らっしゃりそう
 らっしゃる
+らっしゃれ
+らっしゃれど
+らっしゃれば
 らで
 らに
 られ
@@ -6914,6 +7067,7 @@ const hiradic_org =
 わっ、
 わっち/人称名詞
 わっと
+わっはっは
 わな
 わね
 わね。
@@ -6947,6 +7101,7 @@ const hiradic_org =
 をしに
 をへて
 ん、
+んか
 んかい
 んかいな
 んかなぁ
@@ -7017,6 +7172,8 @@ const hiradic_org =
 んやろ
 んやろう
 んやろか
+んん
+んんん
 んー
 んーー
 んーーー
@@ -7096,7 +7253,7 @@ const hira2dic_org = [
 'へ|ぃいぇえことなぼらろ',
 'べ|きこしたちとらりろん',
 'ぺ|かきこしたちとらりろん',
-'ほ|ぃいぅうぇえかくこじとどもやらりるれろわ',
+'ほ|ぃいぅうぇえかくげこじとどもやらりるれろわ',
 'ぼ|ぇえぅうぉおかきけこさそたちつとりろん',
 'ぽ|あいかきくこそたちつとふむやよりろわん',
 'ま|ぁあござじすずぜただちてねよるん',
@@ -7247,10 +7404,11 @@ const exdic_org =
 がけ#たたまし
 がた#くさん
 がた#くまし
-がた#びたび
 がた#どり
+がた#びたび
 がた#まに
 がた#まら
+がた#むろ
 がた#ゆん
 がた#る%まみむめもん
 がた#んまり
@@ -7283,6 +7441,7 @@ const exdic_org =
 くさ#せない
 くさ#まざま
 くさ#れて
+くそ#ぐわ%ずぬなん
 くそ#れ
 くそ#んな
 くみ#た
@@ -7371,6 +7530,7 @@ const exdic_org =
 それじゃあ#んまり
 それです#ご%いく
 それです#べて
+そんない#ろんな
 そんなや#りとり
 たか#ら
 たくなかったら#しい
@@ -7399,6 +7559,7 @@ const exdic_org =
 ついた#だき
 つく#らい
 つけ#れど
+てい#つか
 ているか#%いしつともら
 てか#しら
 ても#うじき
@@ -7408,13 +7569,16 @@ const exdic_org =
 ても#らお
 ても#らっ
 ても#らわ
+でか#くれんぼ
 でか#すか
 でか#らくも
 でか#わ%さしすせそ
 でか#わい
+でかく#れんぼ
 でき#ちん
 でき#ゃいきゃい
 でき#らめ%いかきくけこ
+できたく#るみ
 できるか#%いしつともら
 です#く%いうえっわ
 です#ぐ
@@ -7538,6 +7702,7 @@ const exdic_org =
 とした#まえ
 として#た
 として#る
+とたん#ぽぽ
 となり#ま%しす
 となり#ません
 とは#がき
@@ -7562,6 +7727,7 @@ const exdic_org =
 ないわ#たくし
 ないわ#たし
 なお#かあ
+なお#かず
 なお#じい
 なお#じさん
 なお#とう
@@ -7594,6 +7760,7 @@ const exdic_org =
 ならい#ただ%いかきくけこ
 ならい#つか
 ならい#つも
+ならい#らな%いかきくけ
 ならう#れし
 ならせ#めて
 ならばせ#めて
@@ -7605,6 +7772,8 @@ const exdic_org =
 に#ゅ
 に#ょ
 にえ#くぼ
+にく#ずおれ
+にく#まなく
 にく#たば%っらりるれろ
 にく#だら%ずなぬん
 にく#びれ
@@ -7623,8 +7792,10 @@ const exdic_org =
 にた#しなめ
 にた#じろ
 にた#たえ
+にた#たず%まみむめもん
 にた#てがみ
 にた#どり
+にた#またま
 にた#まに
 にた#むろ
 にた#めら
@@ -7791,6 +7962,7 @@ const exdic_org =
 はは#っきり
 はは#るかに
 はまった#く
+はめ#くるめく
 はめ#ぐ%らりるれろん
 はめ#げ
 はめ#ちゃくちゃ
@@ -7810,6 +7982,7 @@ const exdic_org =
 はやめ#ておけ
 はやめ#てほしい
 はやめて#ほしい
+へそ#ういう
 ほうばっ#かり
 ませんか#%いしつともら
 までも#う
@@ -7834,6 +8007,7 @@ const exdic_org =
 もう#ろ覚
 もうし#ばらく
 もうす#ごい
+もがん#ば%っらりるれろん
 もぐ#ちゃぐちゃ
 もぐ#んぐん
 もし#かたがない
@@ -8144,6 +8318,7 @@ const kanji_pre_dic_org =
 ズレ/上一段
 ダサ/形容詞
 ダメさ
+チビ/五段ラ
 チラり
 ッて/サ変
 ツッコ/五段マ
@@ -8172,6 +8347,7 @@ const kanji_pre_dic_org =
 ボケ/下一段
 ボケて
 ボロ/形容詞
+マズ/形容詞
 マツぼっくり
 ミス/五段ラ
 メンバーたち
@@ -8181,11 +8357,15 @@ const kanji_pre_dic_org =
 ヤバ/形容詞
 ヤベぇ
 ワザとらし/形容詞
+一人とて
 一切れ
 一切れずつ
+一匹とて
+一頭とて
 一目ぼれ
 一笑にふ/五段サ
 一緒くた
+一羽とて
 万事休す
 上/五段ラ
 上が/五段ラ
@@ -8440,6 +8620,7 @@ const kanji_pre_dic_org =
 切ら/五段サ
 切りげんまん
 切れ/下一段
+切れずつ
 刈/五段ラ
 列/サ変
 初っぱな
@@ -8484,6 +8665,8 @@ const kanji_pre_dic_org =
 努め/下一段
 励/五段マ
 励ま/五段サ
+労/五段ラ
+労り
 労/五段ワ
 効/五段カ
 勃/五段タ
@@ -8532,6 +8715,7 @@ const kanji_pre_dic_org =
 参/五段ラ
 参じ/上一段
 及/五段バ
+及ばさん;■活用形に追加？？
 及び
 及ぼ/五段サ
 友だち
@@ -8576,6 +8760,9 @@ const kanji_pre_dic_org =
 同じくらい
 名指し
 名指し/サ変
+名無しくん
+名無しさん
+名無しちゃん
 吐/五段カ
 吐しゃ
 向/五段カ
@@ -8671,6 +8858,8 @@ const kanji_pre_dic_org =
 固ま/五段ラ
 固め
 固め/下一段
+土くれ
+土くれたち
 土ぼこり
 在/五段ラ
 地べた
@@ -8977,6 +9166,7 @@ const kanji_pre_dic_org =
 彩り
 彫/五段ラ
 彷徨/五段ワ
+彼/人称名詞
 待/五段タ
 待ちぼうけ
 待つつもり
@@ -9087,6 +9277,8 @@ const kanji_pre_dic_org =
 愉し/形容詞
 意
 意地悪なからか/五段ワ
+愚かな
+愚かし/形容詞
 愚痴り
 愛/五段サ
 愛い
@@ -9129,6 +9321,8 @@ const kanji_pre_dic_org =
 成/五段ラ
 成すすべ
 成せるわざ
+我/人称名詞
+我我/人称名詞
 戒め
 戒め/下一段
 戦/五段ワ
@@ -9191,6 +9385,7 @@ const kanji_pre_dic_org =
 持たれつ
 持ちつ
 持ちつつ
+持ちな/五段ラ
 持ってい/五段イク
 指/五段サ
 指きりげんまん
@@ -9385,6 +9580,7 @@ const kanji_pre_dic_org =
 最た
 有/五段サ
 有/五段ラ
+朗らか
 望/五段マ
 望まし/形容詞
 望むらくは
@@ -9471,6 +9667,7 @@ const kanji_pre_dic_org =
 歯ぎしり
 死/五段ナ
 死にぞこな/五段ワ
+死にた/五段カ
 死になる
 死んじま/五段ワ
 殆ど
@@ -9539,10 +9736,13 @@ const kanji_pre_dic_org =
 泊/五段ラ
 泊ま/五段ラ
 泣/五段カ
+泣きっ;面
+泣きっつら
 泣きべそ
 泥んこ
 注/五段ガ
 泳/五段ガ
+泳ぎぬ/五段カ
 洗/五段ワ
 洗いざらい
 洗いざら/五段サ
@@ -9777,6 +9977,7 @@ const kanji_pre_dic_org =
 生え/下一段
 生か/五段サ
 生き/上一段
+生きのび/上一段
 生じ/上一段
 生まれ/下一段
 生まれたて
@@ -9822,6 +10023,7 @@ const kanji_pre_dic_org =
 痩せぎす
 痩せっぽち
 痩せっぽっち
+痩せほそ/五段ラ
 痴れ/下一段
 痴情のもつれ
 痺れ/下一段
@@ -9839,7 +10041,7 @@ const kanji_pre_dic_org =
 盗/五段ラ
 盛/五段ラ
 盛ん
-目ざとく
+目ざと/形容詞
 目ざめ/下一段
 目じり
 目ぼし/形容詞
@@ -9855,6 +10057,7 @@ const kanji_pre_dic_org =
 相まみえ
 相容れ/下一段
 省/五段カ
+眇め/下一段
 眇めつ
 看做/五段サ
 真っ
@@ -9972,6 +10175,7 @@ const kanji_pre_dic_org =
 籠り
 粗/形容詞
 粘/五段ラ
+粘っこ/形容詞
 糞ったれ
 糸たら/五段サ
 約分
@@ -10036,6 +10240,7 @@ const kanji_pre_dic_org =
 緩めな
 緩やか
 練/五段ラ
+縁どり
 縊/五段ラ
 縋/五段ラ
 縛/五段ラ
@@ -10156,8 +10361,13 @@ const kanji_pre_dic_org =
 色んな
 色色し/形容詞
 艶かし/形容詞
+艶め/五段カ
 艶めかし/形容詞
 艶艶し/形容詞
+艷かし/形容詞
+艷め/五段カ
+艷めかし/形容詞
+艷艷し/形容詞
 芋づる
 花びら
 花びん
@@ -10250,6 +10460,7 @@ const kanji_pre_dic_org =
 裏ごし
 補/五段ワ
 褒め/下一段
+褒めそや/五段サ
 褒めたたえ/下一段
 褪せ/下一段
 褪め/下一段
@@ -10358,6 +10569,7 @@ const kanji_pre_dic_org =
 誤魔化/五段サ
 説/五段カ
 読/五段マ
+誰そ
 課/五段サ
 誹/五段ラ
 調/五段ワ
@@ -10465,6 +10677,7 @@ const kanji_pre_dic_org =
 転が/五段ラ
 転げ/下一段
 転じ/上一段
+転ば/五段サ
 転生
 軽/形容詞
 軽め
@@ -10600,6 +10813,7 @@ const kanji_pre_dic_org =
 重り
 重んじ/上一段
 重重し/形容詞
+野たれ
 野暮ったい
 量/五段ラ
 金ぴか
@@ -10685,7 +10899,7 @@ const kanji_pre_dic_org =
 青ざめ/下一段
 静か
 静かな
-静かなる
+静かな/五段ラ
 静けさ
 静ま/五段ラ
 静め/下一段
@@ -10698,6 +10912,8 @@ const kanji_pre_dic_org =
 頂/五段カ
 預/五段ラ
 預か/五段ラ
+頑張/五段ラ
+頑張りんしゃい
 頬ずり
 頬っぺた
 頬ば/五段ラ
@@ -10855,15 +11071,15 @@ const one_kanji_dic_org =
 わ分大忘悪我私笑若解
 `;
 
-function bin_search_dic(dic, word){
-	var left = 0;
-	var right = dic.length;
+const bin_search_dic = function(dic, word){
+	let left = 0;
+	let right = dic.length - 1;
 	if(dic.length === 0){
 		return -1;
 	}
 	while(left <= right){
-		var center = Math.floor((left + right) / 2);
-		var val = dic[center];
+		const center = Math.floor((left + right) / 2);
+		const val = dic[center];
 		if(val === word){
 			return center;
 		}
@@ -10925,15 +11141,20 @@ const poi_list =
 ぽすぎ
 ぽそう
 `;
-function search_ex_dic(exdic, target, word){
+const search_ex_dic = function(exdic, target, word){
+	// return [value, target, index]
+	// value 1:登録許可(除外にヒットしなかった)
+	// value 0:不可(除外にヒットした)
+	// target '': 1のときtargetを返す
+	// index :target内のindex
 	if(target.length < word.length){
 		// たーげっとっ　「っゃゅょ」を検出
-		if('っゃゅょ'.indexOf(word.charAt(target.length)) !== -1){
+		if('っゃゅょ'.indexOf(word[target.length]) !== -1){
 			let tto = false;
-			if(word.charAt(target.length) === 'っ'){
+			if(word[target.length] === 'っ'){
 				if(target.length + 1 < word.length){
-					const c = word.charAt(target.length + 1);
-					if('てと。、，！？‼⁉」』】］〕≫〉'.indexOf(c) !== -1){
+					const c = word[target.length + 1];
+					if('てと。、，～〜…―–━─！？‼⁉!?」』】］〕≫〉'.indexOf(c) !== -1){
 						// ほいって
 						// よいしょっと
 						// ばかっ」　そうだっ！
@@ -10961,6 +11182,7 @@ function search_ex_dic(exdic, target, word){
 				}
 			}
 			if(tto === false){
+				// 不許可
 				return [0, '', 0];
 			}
 		}
@@ -10971,24 +11193,24 @@ function search_ex_dic(exdic, target, word){
 			const dic_suffix = dic_target[i];
 			if(0x21 === dic_suffix.charCodeAt(0)){
 				// 「いちゃ」「!つ」：「つ」以外の文字列だったら拒否
-				if(dic_target.length + dic_suffix.length - 1 <= word.length
-					&& dic_suffix.substr(1) !== word.substr(dic_target.length, dic_suffix.length - 1)){
+				if(target.length + dic_suffix.length - 1 <= word.length
+					&& dic_suffix.substr(1) !== word.substr(target.length, dic_suffix.length - 1)){
 					return [0, target, i];
 				}
 			}else if(0x25 === dic_suffix.charCodeAt(0)){
 				// 「するか」「%いも」
-				if(dic_target.length + 1 <= word.length
-					&& -1 != dic_suffix.indexOf(word.charAt(dic_target.length))){
+				if(target.length + 1 <= word.length
+					&& -1 != dic_suffix.indexOf(word[dic_target.length])){
 					return [0, target, i];
 				}
 			}
-			var x = dic_suffix.indexOf('%');
+			const x = dic_suffix.indexOf('%');
 			if(-1 != x){
-				var w = dic_suffix.substr(0, x);
-				var y = dic_suffix.substr(x + 1);
+				const w = dic_suffix.substr(0, x);
+				const y = dic_suffix.substr(x + 1);
 				if(target.length + w.length + 1 <= word.length
 					&& w === word.substr(target.length, w.length)
-					&& -1 != y.indexOf(word.charAt(target.length + w.length))){
+					&& -1 != y.indexOf(word[target.length + w.length])){
 					// 「あいう」「え%いかきくけこ」
 					return [0, target, i];
 				}
@@ -11003,75 +11225,104 @@ function search_ex_dic(exdic, target, word){
 	return [1, '', 0];
 }
 
-function hira2dic_expand(arr, dic){
-	for(var i = 0; i < arr.length; i++){
-		var len = arr[i].length;
-		for(var k = 1; k < len; k++){
-			if(arr[i].charAt(k) == '|'){
+const hira2dic_expand = function(arr, dic){
+	for(let i = 0; i < arr.length; i++){
+		const len = arr[i].length;
+		let k = 1;
+		for(; k < len; k++){
+			if(arr[i][k] == '|'){
 				break;
 			}
 		}
-		var head = arr[i].substr(0, k);
+		const head = arr[i].substr(0, k);
 		for(k++; k < len; k++){
-			dic.push(head + arr[i].charAt(k) + head + arr[i].charAt(k));
+			dic.push(head + arr[i][k] + head + arr[i][k]);
 		}
 	}
 	return dic;
 }
 
 const jyosi_set = new Set();
-function expand_word_info(dic_info, word, suffix, exdic_){
-	var errors = [];
-	var ret = [-1, -1, ''];
-	function expand_word_ex_convert(a, suffix){
-		var ex2 = null;
-		var rematch = false;
-		var rematch_new = false;
-		var last = a.charAt(a.length-1);
-		if(last === 'る'){
-			ex2 = ['るし', 'んかーい', 'んかい', 'んじゃ', 'んじゃね', 'んじゃねぇ', 'んじゃねえ', 'んじゃねーか', 'んじゃねぇか', 'んじゃねえか', 'んじゃない',
-					'んじゃん', 'んぞ', 'んだ', 'んだい', 'んだもん', 'んだよ', 'んだろ', 'んだろう',
-					'んの', 'んのが', 'んのな', 'んのに', 'んのは', 'んのよ', 'んな', 'んなぁ', 'んなら'];
-		}else if(last === 'た'){
-			ex2 = ['たし', 'たら', 'たり'];
-			rematch_new = true;
-		}else if(last === 'だ'){
-			ex2 = ['だし', 'だら', 'だり'];
-			rematch_new = true;
-		}if(ex2 !== null){
-			var a_ = a;
-			for(var m = 0; m < ex2.length; m++){
-				var a2 = a_.substr(0, a_.length - 1) + ex2[m];
-				if(a2 === suffix.substr(0, a2.length)){
-					if(a.length < a2.length){
-						a = a2;
-						if(ex2[m] === 'るし'){
-							rematch = true;
-						}else{
-							rematch = rematch_new;
-						}
+const global_5dan_ext_set1_arr = []; // 中身new Set()
+const global_5dan_ext_set1_arr_max_lengths = []; // 中身int length
+// 連濁版
+const global_5dan_ext_set2_arr = [];
+const global_5dan_ext_set2_arr_max_lengths = [];
+const global_5dan_ext_arr = [];
+const global_1dan_ext_set = new Set();
+const global_sahen_ext_arr = [];
+const global_keiyou_siku_ext_arr = [];
+const global_keiyou_ku_ext_arr = [];
+
+const expand_word_info = function(dic_info, word, suffix, exdic_){
+	let errors = [];
+	// ret[0]: 活用タイプ
+	//		int -2:error
+	//		-1: nohit
+	//	0以上: どれかにヒット
+	// ret[1]: HITしたdic_infoのindex int
+	// ret[2]: マッチ文字列(重要) String
+	let ret = [-1, -1, ''];
+
+	const str_arr_arr = function(str){
+		return str.replace(/\/\*[\s\S]*?\*\//g, '').replace(/[\r\n\s]+/g, '').split('●')
+			.map(item => item.split(','));
+	};
+	const expand_word_ex_convert = function(ext_table){
+	// 活用表の「xxxる」を「xxxる」「xxxるし」「xxxんかーい」と展開
+		const expands = `
+る, るかしら, るから, るか, るし, んかーい, んかい, んじゃ, んじゃね, んじゃねぇ, んじゃねえ,
+んじゃねーか, んじゃねぇか, んじゃねえか, んじゃない,
+んじゃん, んぞ, んだ, んだい, んだもん, んだよ, んだろ, んだろう,
+んの, んのが, んのな, んのに, んのは, んのよ, んな, んなぁ, んなら
+●
+た, たし, たらしい, だらしく, だらしすぎ, だらしそう, たらしく, たらし, たら, たり
+●
+だ, だし, だらしい, だらしく, だらしすぎ, だらしそう, だらしく, だらし, だら, だり
+`;
+		const arr_arr = str_arr_arr(expands);
+		const table = [];
+		for(const ex of ext_table) {
+			// ex = 「だった」「る」「て」「なり」
+			// last_char「た」
+			let last_char = ex.charAt(ex.length - 1); // 空文字列対応
+			let left = ex.substr(0, ex.length - 1);
+			if(last_char === 'x'){
+				// 「たx」だった
+				last_char = ex.at(ex.length - 2) // 空文字列対応
+				left =  ex.substr(0, ex.length - 2);
+				// 「xx」は空なので未対応
+			}
+			for(const prefix of arr_arr) {
+				if(prefix[0] === last_char){
+					for(let i = 1; i < prefix.length; i++){
+						// 「だっ」＋「たし」
+						const right = prefix[i];
+						const str = left + right;
+						table.push(str);
 					}
 				}
 			}
+			table.push(ex);
 		}
-		return {ex:a, rematch:rematch};
-	}
-	function exclue_match(exclude, a, suffix){
-		for(var p = 0; p < exclude.length; p++){
-			var per = exclude[p].indexOf('%');
-			var slash = exclude[p].indexOf('/');
-			var arr;
+		return table;
+	};
+	const exclue_match = function(exclude, a, suffix){
+		for(let p = 0; p < exclude.length; p++){
+			const per = exclude[p].indexOf('%');
+			const slash = exclude[p].indexOf('/');
+			const arr = [];
 			if(-1 !== per){
-				arr = [];
-				var len = exclude[p].length - per - 1;
-				for(var r = 0; r < len; r++){
-					arr.push(exclude[p].substr(0, per) + exclude[p].charAt(per + r + 1));
+				arr.length = 0;
+				let len = exclude[p].length - per - 1;
+				for(let r = 0; r < len; r++){
+					arr.push(exclude[p].substr(0, per) + exclude[p][per + r + 1]);
 				}
 			}else{
-				arr = [exclude[p]];
+				arr.push(exclude[p]);
 			}
-			for(var r = 0; r < arr.length; r++){
-				var match = a.substr(a.length - slash) + '/' + suffix.substr(a.length, arr[r].length - slash - 1);
+			for(let r = 0; r < arr.length; r++){
+				let match = a.substr(a.length - slash) + '/' + suffix.substr(a.length, arr[r].length - slash - 1);
 				if(match === arr[r]){
 					return false;
 				}
@@ -11079,17 +11330,18 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 		}
 		return true;
 	}
-	for(var i = 0; i < dic_info.length; i++){
+	for(let i = 0; i < dic_info.length; i++){
 		if(dic_info[i] === ''){
 			if(ret[2].length < word.length){
-				var ex_ret = search_ex_dic(exdic_, word, word+suffix);
+				const ex_ret = search_ex_dic(exdic_, word, word+suffix);
 				if(ex_ret[0]){
 					ret = [0, i, word];
 				}
 			}
-		}else if(dic_info[i] === '人称名詞'){
-			var ret_word = word;
-			const c = suffix.charAt(0);
+		}else if(dic_info[i] === '人'){
+			// 人称名詞
+			let ret_word = word;
+			const c = suffix[0];
 			if(c === 'ら'){
 				ret_word = word + 'ら';
 			}else if(c === 'め'){
@@ -11112,24 +11364,26 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 				}
 			}
 			if(ret[2].length < ret_word.length){
-				var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
+				const ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
 				if(ex_ret[0]){
-					ret = [0, i, ret_word];
+					ret = [1, i, ret_word];
 				}
 			}
-		}else if(dic_info[i].substr(0,2) === '末尾'){
-			// d ; 末尾黒, word:どす→どす黒
-			var d = dic_info[i];
-			var ext = d.substr(2);
+		}else if(dic_info[i][0] === '末'){
+			// [末尾]
+			// d :末黒, word:どす→どす黒
+			let d = dic_info[i];
+			const ext = d.substr(1);
 			if(ext === suffix.substr(0, ext.length)){
 				if(ret[2].length < word.length){
-					var ex_ret = search_ex_dic(exdic_, word, word+suffix);
+					const ex_ret = search_ex_dic(exdic_, word, word+suffix);
 					if(ex_ret[0]){
-						ret = [0, i, word];
+						ret = [2, i, word];
 					}
 				}
 			}
-		}else if(dic_info[i].substr(0, 4) === '助詞後続'){
+		}else if(dic_info[i] === '助'){
+			// [助詞後続]
 			if( jyosi_set.size === 0 ){
 				const jyosi_str = 
 `
@@ -11156,38 +11410,48 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 					}
 				}
 				if(0 < v){
-					ret = [0, i, word];
+					ret = [3, i, word];
 				}else if(!is_hiragana(suffix.charCodeAt(0))){
 					// 後続がひらがな以外の時も許可しておく
-					ret = [0, i, word];
+					ret = [3, i, word];
 				}
 			}
-		}else if(dic_info[i].substr(0,2) === '五段'){
-			var gyou = dic_info[i].substr(2);
-			var data = [
-				['カ',     '_かこきいくけ', 0,0],
-				['イク',   '_かこきっくけ', 0,0],
-				['ガ',     '_がごぎいぐげ', 0,1],
-				['サ',     '_さそししすせ', 1,0],
-				['タ',     '_たとちっつて', 0,0],
-				['ナ',     '_なのにんぬね', 0,1],
-				['バ',     '_ばぼびんぶべ', 0,1],
-				['マ',     '_まもみんむめ', 0,1],
-				['ラ',     '_らろりっるれん', 2,0], // わからない → わかんない
-				['ナサル', '_らろりっるれい', 3,0],
-				['ワ',     '_わおいっうえ', 0,0],
-				['トウ',   '_わおいううえ', 4,0]];
-			var match = false;
-			for(var m = 0; m < data.length; m++){
-				if(data[m][0] === gyou){
-					var katuyou_type = data[m][1].indexOf(suffix.charAt(0)) - 1;
+		}else if(dic_info[i][0] === '五'){
+			// [五段]
+			// 「五カ」「五ル」「五ト」形式から取り出し
+			// →「カ」「ル」「ト」
+			const gyou = dic_info[i][1];
+			const gyou_retu = [
+				// 行、活用、ext_mapのindex、連濁
+				['カ', '_かこきいくけ', 0,0],
+				['イ', '_かこきっくけ', 0,0], // イク
+				['ガ', '_がごぎいぐげ', 0,1],
+				['サ', '_さそししすせ', 1,0],
+				['タ', '_たとちっつて', 0,0],
+				['ナ', '_なのにんぬね', 0,1],
+				['バ', '_ばぼびんぶべ', 0,1],
+				['マ', '_まもみんむめ', 0,1],
+				['ラ', '_らろりっるれん', 2,0], // わからない → わかんない
+				['ル', '_らろりっるれい', 3,0], // ナサル
+				['ワ', '_わおいっうえ', 0,0],
+				['ト', '_わおいううえ', 4,0]]; // トウ「問う」
+			let match = false;
+			for(let gyou_index = 0; gyou_index < gyou_retu.length; gyou_index++){
+				const this_gyou = gyou_retu[gyou_index];
+				if(this_gyou[0] === gyou){
+					// suffix[0].length == 0の時に0が返るので_を置いて-1でnohitにする
+					const katuyou_type = this_gyou[1].indexOf(suffix.charAt(0)) - 1;
+					const gyou_map_index = this_gyou[2];
+					const gyou_is_rendaku = this_gyou[3];
 					if(-1 < katuyou_type){
-						var ext = [
+						if(global_5dan_ext_set1_arr.length === 0){
+							const dou_5dan_ext0 = [
 							/* 0書か */ ['されず', 'されそう', 'された', 'されていた', 'されている', 'されてた', 'されてて', 'されてる', 'されてろ', 'されて', 'される', 'され',
 								'させられちゃ', 'させられそう', 'させられた', 'させられてろ', 'させられて', 'させられる', 'させられ', 'せず', 'せたい', 'せたく',
 								'せた', 'せてた', 'せてて', 'せてる', 'せてろ', 'せて', 'せない',
 								'せなかった', 'せなく', 'せよう', 'せよ', 'せるかどうか','せりゃ', 'せる', 'せろよ', 'せろ', 'せん', 'せ',
-								'れず', 'れそう', 'れたい', 'れたくて', 'れたく', 'れちゃあ', 'れちゃ', 'れたきり', 'れたっきり', 'れた', 'れっぱなし', 'れては', 'れない', 'れなった', 'れなくて', 'れなく',
+								'れず', 'れそう', 'れたい', 'れたくて', 'れたく', 'れちゃあ', 'れちゃ', 'れたきり', 'れたっきり', 'れた',
+								'れっぱなし', 'れては', 'れない', 'れなった', 'れなくて', 'れなく',
 								'れてた', 'れてて', 'れてる', 'れてろ', 'れて', 'れど', 'れぬ', 'れる', 'れよう', 'れん', 'れ', 'んとし', 'んとする', 'んとす'],
 							/* 1書こ */ ['うっか', 'うぜ', 'う', 'っか'],
 							/* 2書き */ ['いただかない', 'いただかなく', 'いただき', 'いただく', 'いただけた', 'いただける', 'いただけ', 'いただこう', 
@@ -11197,23 +11461,26 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 								'たければ', 'たげなら', 'たげな', 'たげ', 'たそう', 'っぱなし',
 								'なくらい', 'なく', 'ながら', 'なさい', 'なさらない', 'なさらなかった', 'なさらなく', 'なさらなければ', 'なさり', 'なさる', 'なされ',
 								'まくら', 'まくりんぐ', 'まくり', 'まくる', 'まくれば', 'まくれ', 'まくれろう', 'まくれろ',
-								'ようのない', 'よう', 'ゃ', ''],
-							/* 3書い書け */ ['たから', 'たきり', 'たし', 'たっけ', 'たっきり', 'たのち', 'たの', 'たら', 'た', 'ていかない', 'ていかなく', 'ていたい', 'ていたく', 'ていた', 'ているし', 'ている',
-								'ていろ', 'てかない', 'てかなく', 'てかなきゃ', 'てきた', 'てきてた', 'てきてる', 'てきて', 'てくるし', 'てくる',
-								'てくれちゃ', 'てくれず', 'てくれた', 'てくれてて', 'てくれてた', 'てくれてる', 'てくれて', 'てくれば', 'てくれた', 'てくれぬ', 'てくれりゃ', 'てくれる', 'てくれん', 'てくれ', 'てくんない', 'てくんなく', 'てくんねえ', 'てくんねぇ', 'てく',
+								'ようのない', 'よう', 'ゃ', 'x'],
+							// ↓連濁で先頭の「た」が「だ」になる「死んた」→「死んだ」
+							/* 3書い書け */ ['たから', 'たきり', 'たし', 'たっけ', 'たっきり', 'たぞ', 'たのち', 'たの', 'たら', 'た',
+								'ていかない', 'ていかなく', 'ていたい', 'ていたく', 'ていた', 'ている',
+								'ていろ', 'てかない', 'てかなく', 'てかなきゃ', 'てきた', 'てきてた', 'てきてる', 'てきて', 'てくる',
+								'てくれちゃ', 'てくれず', 'てくれた', 'てくれてて', 'てくれてた', 'てくれてる', 'てくれて', 'てくれば', 'てくれた',
+								'てくれぬ', 'てくれりゃ', 'てくれる', 'てくれん', 'てくれ', 'てくんない', 'てくんなく', 'てくんねえ', 'てくんねぇ', 'てく',
 								'てた', 'てちゃ', 'てった', 'てって', 'てても', 'てて', 'ても', 'てない', 'てなくて', 'てなく', 'てみたい', 'ては',
 								'てみたく', 'てみた', 'てみない', 'てみなかった', 'てみなくては', 'てみなく', 'てみる',
-								'てられた', 'てられて', 'てられる', 'てられ',
-								'てら', 'てりゃ', 'てる', 'てれば', 'てろ', 'て', 'といたら', 'といた', 'といて', 'といで', 'とくれ', 'とく', 'ときゃ', 'とけば', 'とけ', 'とらん',
+								'てられた', 'てられて', 'てられる', 'てられ', 'てら', 'てりゃ', 'てる', 'てれば', 'てろ', 'て',
+								'といたら', 'といた', 'といて', 'といで', 'とくれ', 'とく', 'ときゃ', 'とけば', 'とけ', 'とらん',
 								'ちまい', 'ちまう', 'ちまった', 'ちまってた', 'ちまってる', 'ちまって', 'ちまえば', 'ちまえ', 'ちまおう',
 								'ちゃいそう', 'ちゃう', 'ちゃえば', 'ちゃえ', 'ちゃおう', 'ちゃお', 'ちゃだめ', 'ちゃやだ', 'ちゃった',
 								'ちゃってた', 'ちゃっても', 'ちゃってる', 'ちゃってろ', 'ちゃって', 'ちゃわない', 'ちゃわなくて','ちゃわなく', 'ちゃ'],
-							/* 4書く*/ ['うちに', 'から', 'かも', 'か', 'ぜよ', 'ぜ', 'つもり', 'なり', 'なんて', 'べく', 'まい', 'まじ', 'より', 'みたい', 'みたかった', 'みたく', ''],
+							/* 4書く*/ ['うちに', 'から', 'かも', 'か', 'ぜよ', 'ぜ', 'つもり', 'なり', 'なんて', 'べく', 'まい', 'まじ', 'より', 'みたい', 'みたかった', 'みたく', 'x'],
 							
 							/* 5書き書く書け */ ['そうだから', 'そうだった', 'そうだ', 'そうです', 'そうで', 'そうなら','そうな', 'そう'],
 							/* 6書け */ ['うる','っつうか',  'っつうのか', 'っつうのが', 'っつうのも', 'っつうのは', 'っつうの', 'つつ', 'なんて',
-								'るから', 'るかも', 'るから', 'るか', 'るし', 'るわきゃ', 'るわけ', 'るわね', 'るわ', 'る',
-								'れちゃ', 'れば', 'ろ', 'ば', 'まい', 'まじ', 'ども', 'ど', 'りゃあな', 'りゃあね', 'りゃ', ''],
+								'るかも', 'るから', 'るか', 'るわきゃ', 'るわけ', 'るわね', 'るわ', 'る',
+								'れちゃ', 'れば', 'ろ', 'ば', 'まい', 'まじ', 'ども', 'ど', 'りゃあな', 'りゃあね', 'りゃ', 'x'],
 							/* 7なさい */ ['ましたから', 'ましたから', 'ましたか', 'ました', 'ましても', 'まして', 'ましょうから', 'ましょうか', 'ましょう', 'ましょ', 'ますから',
 								'ますから', 'ますか', 'ますし', 'ます', 'まーす', 'ませぬ', 'ませんから', 'ませんか', 'ませんし', 'ません', 'ませ', 'まっせ'],
 							/* 8書か書け */ ['ざる', 'ず', 'にゃ', 'ぬ', 'ねば', 'んから', 'んか', 'んし', 'ん'],
@@ -11221,50 +11488,92 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 								'なかった', 'ねぇぞ', 'ねぇ', 'ねえ', 'ねえぞ', 'ねーぞ', 'ねーのか', 'ねー'],
 							/*10 書き書く分かん*/ ['なや', 'なよ', 'ならば', 'なら', 'な', ],
 							/*11 書く書け*/ ['んかい', 'んかーい', 'んだから', 'んだか', 'んだろうから', 'んだろうから', 'んだろうか', 'んだろう', 'んだろ','んだわ', 'んだ', 'んでしょう', 'んでしょ', 'んですから', 'んですか', 'んです', 'んで'],
-							/*12 書く書け*/ ['']]; // 語尾なし
-						var ext_map = [[[0,8,9],[1],[2,5,7,10],  [3], [4,5,10,11,12],[3,5,6,7,8,9,11,12]], // カイガナバマタ
+							/*12 書く書け*/ ['x']]; // 語尾なし
+						const ext0map= [[[0,8,9],[1],[2,5,7,10],  [3], [4,5,10,11,12],[3,5,6,7,8,9,11,12]], // カイガナバマタ
 						               [[0,8,9],[1],[2,3,5,7,10],[],[4,5,10,11,12],[3,5,6,7,8,9,11,12]], // サ
 						               [[0,8,9],[1],[2,5,7,10],  [3], [4,5,10,11,12],[3,5,6,7,8,9,11,12],[9,10]], // ラ
 						               [[0,8,9],[1],[2,5,6,10],  [3], [4,5,10,11,12],[3,5,6,8,9,11,12],  [7,12]], // トワ
 						               [[0,8,9],[1],[2,5,7,10],  [3,4,5,10,11,12],[], [3,5,6,7,8,9,11,12]]]; // ナサル
-						var ext_indexs = ext_map[data[m][2]][katuyou_type];
-						for(var n = 0; n < ext_indexs.length; n++){
-							var ext_arr = ext[ext_indexs[n]];
-							var ex_prev = '';
-							var ex_rematch = false;
-							for(var k = 0; k < ext_arr.length; k++){
-								var ex = ext_arr[k];
-								// '脱いだ'
-								if(data[m][3] === 1 && katuyou_type === 3 && ext_indexs[n] === 3){
-									var one = ex.charAt(0);
-									if(one === 'た'){
-										ex = 'だ' + ex.substr(1);
-									}else if(one === 'て'){
-										ex = 'で' + ex.substr(1);
-									}else if(one === 'と'){
-										ex = 'ど' + ex.substr(1);
-									}else if(ex.substr(0,2) === 'ちま'){
-										ex = 'じ' + ex.substr(1);
-									}else if(ex.substr(0,2) === 'ちゃ'){
-										ex = 'じ' + ex.substr(1);
+							// テーブルをSetに初期化
+							const org_table = dou_5dan_ext0;
+							const func_rendaku = (ex) => {
+								// 連濁版
+								// '走った' => '脱いだ'
+								const one = ex[0];
+								const two = ex.substr(0,2);
+								if(one === 'た'){           // 書いた→死んだ
+									ex = 'だ' + ex.substr(1);
+								}else if(one === 'て'){     // 書いてた→死んでた
+									ex = 'で' + ex.substr(1);
+								}else if(one === 'と'){
+									ex = 'ど' + ex.substr(1); // 書くとく→死んどく
+								}else if(two === 'ちま'){
+									ex = 'じ' + ex.substr(1); // 書いちまう→死んじまう
+								}else if(two === 'ちゃ'){
+									ex = 'じ' + ex.substr(1); // 書いちゃう→死んじゃう
+								}
+								return ex;
+							};
+							const rendaku_table = [];
+							for(const ex1 of org_table){
+								const sub = [];
+								for(const ex2 of ex1){
+									sub.push(func_rendaku(ex2));
+								}
+								rendaku_table.push(sub);
+							}
+							const func_create_ext_table = (main_table) => {
+								const ret_table = [];
+								for(const ex1 of main_table){
+									ret_table.push(expand_word_ex_convert(ex1));
+								}
+								return ret_table;
+							}
+							const table1 = func_create_ext_table(org_table);
+							const table2 = func_create_ext_table(rendaku_table);
+							const func_new_set = (x_table, idx, global_arr, global_lengths, converter) => {
+								const s = global_arr[idx] = new Set();
+								let length = 0;
+								for(let m = 0; m < x_table[idx].length; m++){
+									let ex = x_table[idx][m];
+									s.add(ex);
+									const len = ex.length;
+									if(length < len){
+										length = len;
 									}
 								}
-								if(ex_rematch){
-									ex = ex_prev;
-									ex_rematch = false;
-								}else{
-									var a = expand_word_ex_convert(ex, suffix.substr(1));
-									if(a.rematch){
-										ex_prev = ex;
-										ex_rematch = true;
-										k--;
-									}
-									ex = a.ex;
-								}
-								if(ex === suffix.substr(1, ex.length)){
-									var ret_word = word + suffix.substr(0, ex.length + 1);
-									var enable = true;
-									var exclude = [
+								global_lengths[idx] = length;
+							};
+							for(let n = 0; n < table1.length; n++){
+								func_new_set(table1, n, global_5dan_ext_set1_arr,
+									global_5dan_ext_set1_arr_max_lengths);
+								func_new_set(table2, n, global_5dan_ext_set2_arr,
+									global_5dan_ext_set2_arr_max_lengths);
+							}
+							global_5dan_ext_arr.push(...ext0map);
+						} // 初期化ここまで
+						const ext_map = global_5dan_ext_arr;
+						const ext_indexs = ext_map[gyou_map_index][katuyou_type];
+						let ex_prev = '';
+						let ex_rematch = false;
+						for(const ext_index of ext_indexs){
+							// 連濁：連濁する行&&「活用」=3=「っ」「ん」&& /* 3書い書け */ のとき
+							const is_rendaku = (gyou_is_rendaku === 1 && katuyou_type === 3);
+							const ext_sets = is_rendaku ? global_5dan_ext_set2_arr : global_5dan_ext_set1_arr;
+							const ext_max_lengths = is_rendaku ? global_5dan_ext_set2_arr_max_lengths : global_5dan_ext_set1_arr_max_lengths;
+							const max_len = Math.min(ext_max_lengths[ext_index], suffix.length);
+							let ex = '';
+							for(let w_len = max_len; 0 <= w_len; w_len--){
+								// 文字列の長さ順で検索
+								const key0 = (w_len === 0) ? '' : suffix.substr(1, w_len);
+								const key1 = (w_len === 0) ? 'x': key0;
+								const hit_ex = ext_sets[ext_index].has(key1);
+								ex = key0;
+								// console.log(hit_ex + ':' + key1 + ' / ' + key0 + ' ' + is_rendaku);
+								if(hit_ex && ex === suffix.substr(1, ex.length)){
+									let ret_word = word + suffix.substr(0, ex.length + 1);
+									let enable = true;
+									const exclude = [
 									 	'ては/るばる',
 										'ても/ら%わいうえおっ', 'でも/ら%わいうえおっ', 'ていた/だ%かきくけこい', 'でいた/だ%かきくけこい',
 										'てく/ださ%らりるれろいっ', 'でく/ださ%らりるれろいっ', 'し/こり', 'たら/し%いかきく', 'だら/し%いかきく',
@@ -11285,15 +11594,15 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 									}else if(ex === '' && suffix.substr(0,3) === 'けれど'){
 										// あるけ/れど => ある/けれど
 										enable = false;
-									}else if(ex.charAt(ex.length-1) === 'た' && suffix.charAt(ex.length+1) === 'が' &&
-										0 < '_らりるれろっ'.indexOf(suffix.charAt(ex.length+2))){
+									}else if(ex[ex.length-1] === 'た' && suffix[ex.length+1] === 'が' &&
+										0 < '_らりるれろっ'.indexOf(suffix[ex.length+2])){
 										// skip 入れた/がる => 入れ/たがる
 										ex = ex.substr(0, ex.length-1);
 										ret_word = word + suffix.substr(0, ex.length + 1);
 									}else if(ex === 'て' || ex === 'で'){
-										var desu = ['ましたから', 'ましたか', 'ましたし', 'ました', 'ましても', 'まして', 'ましょうから', 'ましょうか',
+										const desu = ['ましたから', 'ましたか', 'ましたし', 'ました', 'ましても', 'まして', 'ましょうから', 'ましょうか',
 											'ましょう', 'ましょ', 'ますから', 'ますか', 'ますし', 'ます', 'ませんから', 'ませんか', 'ませんし', 'ません', 'ませ'];
-										for(var p = 0; p < desu.length; p++){
+										for(let p = 0; p < desu.length; p++){
 											if(desu[p] === suffix.substr(2, desu[p].length)){
 												// '書けてます', '脱いでます'
 												ret_word += desu[p];
@@ -11302,10 +11611,10 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 										}
 									}
 									if(enable){
-										var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
+										const ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
 										if(ex_ret[0]){
 											if(ret[2].length < ret_word.length){
-												ret = [katuyou_type + 1, i, ret_word];
+												ret = [katuyou_type + 4, i, ret_word];
 											}
 										}
 										break;
@@ -11321,10 +11630,11 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 			if(!match){
 				errors.push('未知の五段活用 ' + word + '/' + dic_info[i]);
 			}
-		}else if(dic_info[i] === '上一段' || dic_info[i] === '下一段'){
+		}else if(dic_info[i] === '一'){
 			// 見る(上一段), 食べる(下一段)
-			var ext = [['き', 'った', 'ってる', 'って', 'り', 'る', 'れた', 'れて', 'れちゃ', 'れぬ', 'れず', 'れる', 'れ', 'ろうか', 'ろう'],
-				['た', 'いです', 'い', 'かしら', 'かもしれない', 'かも', 'きり', 'くない', 'くなる', 'くて', 'く', 'げ', 'っきり', 'ひと', ''],
+			if(global_1dan_ext_set.size === 0){
+			const ext0_1dan = [['き', 'った', 'ってる', 'って', 'り', 'る', 'れた', 'れて', 'れちゃ', 'れぬ', 'れず', 'れる', 'れ', 'ろうか', 'ろう'],
+				['た', 'いです', 'い', 'かしら', 'かもしれない', 'かも', 'きり', 'くない', 'くなる', 'くて', 'く', 'げ', 'っきり', 'ひと', 'x'],
 				['ち', 'まう', 'まった', 'まってた', 'まってる', 'まえば', 'まえ', 'まおう', 
 				'ゃいそう', 'ゃいた', 'ゃいる', 'ゃいました', 'ゃいます', 'ゃう', 'ゃえば', 'ゃえ', 'ゃおう', 'ゃお', 'ゃだめ', 'ゃやだ', 'ゃった',
 				'ゃってた', 'ゃっても', 'ゃってる', 'ゃってろ', 'ゃって', 'ゃわない', 'ゃ'],
@@ -11338,13 +11648,13 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 				'た', 'った', 'って', 'て', 'ちゃ',
 				'はくれまい',
 				'もろた', 'もろて',
-				'られない', 'られぬ', 'られん', 'らんない', 'らんなかった', 'らんなく', 'りゃ', 'る', 'ろ', ''],
+				'られない', 'られぬ', 'られん', 'らんない', 'らんなかった', 'らんなく', 'りゃ', 'る', 'ろ', 'x'],
 				['と', 'く', 'らん'],
 				['な', 'いから', 'いか', 'い', 'かろうから', 'かろうか', 'かろう', 'かった', 'がら',
 				'きゃ', 'くなる', 'くちゃ', 'くても', 'くて', 'く', 'ければ', 'さい', 'さそう', 'さ', 'り'],
 				['に', 'ゃ'],
 				['す', 'ぎず', 'ぎた', 'ぎだぜ', 'ぎだよ', 'ぎだわ', 'ぎだ', 'ぎてた', 'ぎてる', 'ぎて', 'ぎでした', 'ぎでしょう', 'ぎです', 'ぎぬ', 'ぎる', 'ぎん', 'ぎ'],
-				['ず', ''], ['ぬ', ''],
+				['ず', 'x'], ['ぬ', 'x'],
 				['さ', 'せた', 'せてたくない', 'せてた', 'せてる', 'せてろ', 'せて', 'せない', 'せなかった', 'せる'],
 				['ら', 'れず', 'れたい','れたく','れた', 'れっこ', 'れぬ', 'れん',
 				'れちゃあ', 'れちゃ', 'れてしまう', 'れてた', 'れてる', 'れてろ', 'れて', 'れない', 'れなくて', 'れなく', 
@@ -11354,66 +11664,88 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 				['れ', 'ない', 'なかった', 'なくて', 'なく', 'ませんでした', 'ません', 'ず', 'ぬ', 
 				'ました', 'ます', 'まっせ', 'たよう', 'たよ', 'たわよ', 'たわ', 'た', 'てた', 'てら', 'てる', 'てれば', 'てろ', 'て', 'てしまう',
 				'ず', 'る', 'ば'],
-				['る', 'かもしれない', 'とき', 'はず', 'ひとつ', 'ひとる', 'ひと', 'んかい', ''],
-				['ろ', 'よ', ''],
-				['よ', 'うか', 'う', 'っか', ''],
+				['る', 'かもしれない', 'とき', 'はず', 'ひとつ', 'ひとる', 'ひと', 'んかい', 'x'],
+				['ろ', 'よ', 'x'],
+				['よ', 'うか', 'う', 'っか', 'x'],
 				['り', 'ゃ'],
-				['ん', 'なよ', 'なら', 'な', 'の', ''],
-				['', '']];
-			var ex_prev = '';
-			var ex_rematch = false;
-			for(var k = 0; k < ext.length; k++){
-				var ex_first = ext[k][0];
-				if(suffix.substr(0,1) === ex_first || ex_first === ''){
-					for(var m = 1; m < ext[k].length; m++){
-						var ex = ex_first + ext[k][m];
-						if(ex_rematch){
-							ex = ex_prev;
-							ex_rematch = false;
-						}else{
-							var a = expand_word_ex_convert(ex, suffix);
-							if(a.rematch){
-								ex_prev = ex;
-								ex_rematch = true;
-								m--;
-							}
-							ex = a.ex;
-						}
-						if(ex === suffix.substr(0, ex.length)){
-							var ret_word = word + ex;
-							var exclude = ['ても/ら%わいうえおっ', 'ていた/だ%かきくけこい', 'てく/ださ%らりるれろいっ','し/こり', 'たら/し%いかきく', 
+				['ん', 'なよ', 'なら', 'な', 'の', 'x'],
+				['x', 'x']];
+				const ext_table_temp = [];
+				for(const one_char_list of ext0_1dan){
+					const one = one_char_list[0];
+					for(let x = 1; x < one_char_list.length; x++){
+						const right = one_char_list[x];
+						ext_table_temp.push(one + right);
+					}
+				}
+				const ext_table = expand_word_ex_convert(ext_table_temp);
+				for(const item of ext_table){
+					global_1dan_ext_set.add(item);
+				}
+			}
+			const ext_set = global_1dan_ext_set;
+			const max_len = Math.min(10, suffix.length); //仮
+			let hit_1dan = false;
+			for(let len = max_len; 0 <= len ; len--){
+				const key_one = suffix.substr(0, 1);
+				const key_one1 = key_one === '' ? 'x' : key_one;
+				const key_right = suffix.substr(1, len);
+				const key_right1 = key_right === '' ? 'x' : key_right;
+				const hit = ext_set.has(key_one1 + key_right1);
+				const ex = key_one + key_right;
+				if(hit){
+					const ret_word = word + key_one + key_right;
+							const exclude = ['ても/ら%わいうえおっ', 'ていた/だ%かきくけこい', 'てく/ださ%らりるれろいっ','し/こり', 'たら/し%いかきく', 
 								'た/まえ', 'た/め息', 'た/めいき', 'たい/くつ', 'たく/らい', 'たく/せ', 'か/ぎり', 'か/しら', 'か/もしれ',
 								'てちゃ/んと', 'てく/れ', 'ちゃ/%わいうえおっ', 
 								'た/が%っらりるれろ'];
-							var enable = exclue_match(exclude, ex, suffix);
-							if(false == enable){
-							}else{
-								var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
-								if(ex_ret[0]){
-									if(ret[2].length < ret_word.length){
-										ret = [7, i, ret_word];
-									}
-									break;
-								}
+					const enable = exclue_match(exclude, ex, suffix);
+					if(false == enable){
+					}else{
+						const ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
+						if(ex_ret[0]){
+							hit_1dan = true;
+							if(ret[2].length < ret_word.length){
+								ret = [17, i, ret_word];
 							}
+							break;
 						}
 					}
 				}
 			}
-		}else if(dic_info[i].substr(0,2) === 'サ変' || dic_info[i].substr(0,2) === 'ザ変'){
+			if(!hit_1dan){
+				const ex_ret = search_ex_dic(exdic_, word, word+suffix);
+				if(ex_ret[0]){
+					// 語幹だけヒット
+					if(ret[2].length < word.length){
+						ret = [18, i, word];
+					}
+				}
+			}
+		}else if(dic_info[i] === 'サ' || dic_info[i] === 'ザ'){
 			// サ変：愛する, 食する, 属する, 得する, 涙する, 排する, 配する, 廃する, 約する, 訳する, 略する
 			// ザ変：論ずる, 講ずる, 信ずる, 転ずる
-			var ext = [
-				['さ', 'れる', 'れたい', 'れたらしい', 'れたらしく', 'れたら', 'れた', 'れても', 'せて', 'せる', 'せた', 'せても', 'せて'],
-				['し', 'た', 'っぱなし', 'っぱ', 'て', 'ない', 'なく', 'たい', 'よう', 'ろ', 'ますれば', 'ます', 'ました', 'まして', 'ませぬ',  'ません', ''],
-				['す', 'るとき', 'るひとり', 'るひとつ', 'るひと',  'るものの', 'るもの', 'る', 'れば', 'れど', 'れ'],
-				['せ', 'ず', 'ない', 'ぬ', 'よ'],
-				['', '']];
-			var b_zahen = dic_info[i].substr(0,2) === 'ザ変';
-			var ex_prev = '';
-			var ex_rematch = false;
-			for(var k = 0; k < ext.length; k++){
-				var ex_first = ext[k][0];
+			if(global_sahen_ext_arr.length === 0){
+				const ext_sahen0 = [
+				['さ', ['れる', 'れたい', 'れたらしく', 'れたら', 'れた', 'れても', 'せて', 'せる', 'せた', 'せても', 'せて']],
+				['し', ['た', 'っぱなし', 'っぱ', 'て', 'ない', 'なく', 'たい', 'よう', 'ろ', 'ますれば', 'ます', 'ました', 'まして', 'ませぬ',  'ません', 'x']],
+				['す', ['るとき', 'るひとり', 'るひとつ', 'るひと',  'るものの', 'るもの', 'る', 'れば', 'れど', 'れ']],
+				['せ', ['ず', 'ない', 'ぬ', 'よ']],
+				['x', ['x']]];
+				const sahen_table = [];
+				for(const exts of ext_sahen0){
+					const temp = [];
+					sahen_table.push(temp);
+					const r = expand_word_ex_convert(exts[1]);
+					temp.push(exts[0]);
+					temp.push(r);
+				};
+				global_sahen_ext_arr.push(...sahen_table);
+			}
+			const ext_list = global_sahen_ext_arr;
+			const b_zahen = dic_info[i] === 'ザ';
+			for(const exts of ext_list){
+				let ex_first = exts[0];
 				if(b_zahen){
 					if(ex_first == 'さ'){ ex_first = 'ざ'}
 					if(ex_first == 'し'){ ex_first = 'じ'}
@@ -11421,26 +11753,14 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 					if(ex_first == 'せ'){ ex_first = 'ぜ'}
 				}
 				if(suffix.substr(0,1) === ex_first || ex_first === ''){
-					for(var m = 1; m < ext[k].length; m++){
-						var ex = ex_first + ext[k][m];
-						if(ex_rematch){
-							ex = ex_prev;
-							ex_rematch = false;
-						}else{
-							var a = expand_word_ex_convert(ex, suffix);
-							if(a.rematch){
-								ex_prev = ex;
-								ex_rematch = true;
-								m--;
-							}
-							ex = a.ex;
-						}
-						var ret_word = word + ex;
+					for(const ex_item of exts[1]){
+						let ex = ex_first + ex_item;
+						const ret_word = word + ex;
 						if(ex === suffix.substr(0, ex.length)){
-							var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
+							const ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
 							if(ex_ret[0]){
 								if(ret[2].length < ret_word.length){
-									ret = [7, i, ret_word];
+									ret = [b_zahen ? 21 : 20, i, ret_word];
 								}
 								break;
 							}
@@ -11448,10 +11768,12 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 					}
 				}
 			}
-		}else if(dic_info[i] === '形容詞'){
+		}else if(dic_info[i] === '形'){
+			// [形容詞]
 			// うれし/い よ/い
-			var ext = [
-				'いし', 'いぞう', 'いぞ',
+			if(global_keiyou_siku_ext_arr.length === 0){
+				const ext_keiyou0 = [
+				'いかしら', 'いし', 'いぞう', 'いぞ',
 				'いのが', 'いのでしたし', 'いのでしたら', 'いのでしたり', 'いのでした', 'いのですし', 'いのです', 'いので', 'いのは',
 				'いですから', 'いですか', 'いですし', 'いです', 'いとき', 'いところ', 'いはず', 'いまま', 'い',
 				'うございましたし', 'うございました', 'うございますし', 'うございます', 'うございませんし', 'うございません', 'うござるし', 'うござる',
@@ -11486,37 +11808,51 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 				'すぎん', 'すぎ',
 				'めだから', 'めでは', 'めでした', 'めです', 'め', 'み',
 				''
-			];
-			if(word.charAt(word.length - 1) != 'し'){
-				// [う]ございます系は、前の音も変化することがあるがここでは未サポート
-				// はやい→はよう, 重たい→重とう, 大きく→大きゅう
-				// 「ク活用」の時は「よし」「悪し」の活用がある
-				ext = ext.concat(['し']);
-			}else{
-				var ext2 = [
+				];
+				const ext_keiyou2 = [
 					'ゅうございました', 'ゅうございます', 'ゅうございません', 'ゅうござる', 'ゅうござらん',
 					'ゅうぞんじた', 'ゅうぞんじて', 'ゅうぞんじ', 'ゅうぞんずる', 'ゅうない', 'ゅう'
 				];
-				ext = ext.concat(ext2);
+				// 注：pushの戻り値はlength
+				global_keiyou_siku_ext_arr.push(...ext_keiyou0);
+				global_keiyou_siku_ext_arr.push(...ext_keiyou2);
+				global_keiyou_ku_ext_arr.push(...ext_keiyou0)
+				global_keiyou_ku_ext_arr.push(...['し']);
 			}
-			for(var k = 0; k < ext.length; k++){
-				var a = ext[k];
+			let ext;
+			if(word[word.length - 1] !== 'し'){
+				// [う]ございます系は、前の音も変化することがあるがここでは未サポート
+				// はやい→はよう, 重たい→重とう, 大きく→大きゅう
+				// 「ク活用」の時は「よし」「悪し」の活用がある
+				ext = global_keiyou_ku_ext_arr;
+			}else{
+				// 「うれしい」→シク活用
+				ext = global_keiyou_siku_ext_arr;
+			}
+			for(let k = 0; k < ext.length; k++){
+				const a = ext[k];
 				if(a === suffix.substr(0, a.length)){
-					var ret_word = word + a;
+					const ret_word = word + a;
 					if(a.substr(a.length-2, 2) === 'たら' && suffix.substr(a.length-2, 4) == 'しい'){
 						// skip
 					}else if(a === 'く' && suffix.substr(1, 2) === 'らい'){
 						// skip おなじく/らい →おなじ/くらい
 					}else{
-						var ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
+						const ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
 						if(ex_ret[0]){
 							if(ret[2].length < ret_word.length){
-								ret = [9, i, ret_word];
+								ret = [22, i, ret_word];
 							}
 						}
 					}
 				}
 			}
+//		}else if(dic_info[i] === 'X' ) { // TODO:新しい品詞、タグ名を決める
+//			const ret_word = word + suffix;
+//			if(ret[2].length < ret_word.length){
+//				// 番号は23以降
+//				ret = [23, i, ret_word];
+//			}
 		}else{
 			errors.push('未知の単語情報 ' + word + '/' + dic_info[i]);
 		}
@@ -11527,13 +11863,13 @@ function expand_word_info(dic_info, word, suffix, exdic_){
 	return ret;
 }
 
-function exdic_add_hiradic2(exdic_arr, hiradic2_arr, hiradic_arr, error_info)
+const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_info)
 {
 	const my_add = function(keylen){
 		hiradic2_arr.filter(item => keylen * 2 == item.length)
 			.forEach(item => {
 				const end = 'ん'.charCodeAt(0);
-				const n = item.charAt(0);
+				const n = item[0];
 				for(let c = 'ぁ'.charCodeAt(0); c <= end; c++){
 					const prefix = String.fromCharCode(c) + n; // 「ぁほ」→「んほ」
 					if(bin_search_dic(hiradic_arr, prefix) !== -1 ){ // かほ
@@ -11551,22 +11887,34 @@ function exdic_add_hiradic2(exdic_arr, hiradic2_arr, hiradic_arr, error_info)
 	my_add(3);
 }
 
-function output_main(param_text){
+const output_main = function(param_text){
 	last_check_type = 0;
 
-	var hoge = '';
-	var error_info = [];
-	var dic_type = document.getElementById('book').value;
-	var hiradic;
-	var exdic;
-	var warndic;
-	var warndic_del = [];
-	var kanji_pre_dic;
-	const exdic_arr = exdic_org.replace(/\r\n/g, '\n').replace(/#/g, '\n').split('\n');
+	let hoge = '';
+	const error_info = [];
+	const dic_type = get_id('book').value;
+	const hiradic = [];
+	const hiradic_info = [];
+	const warndic = [];
+	const warndic_info = [];
+	const exdic_map = new Map();
+	const one_kanji_dic = [];
+	const kanji_pre_one_dic = [];
+	const kanji_pre_two_dic = [];
+	const kanji_pre_info = [];
+	let hiradic_len = 0;
+	let max_kanji = 0;
+
+	(() => {
+	// 初期化範囲でのみ使う変数
 	const hiradic_arr = hiradic_org.replace(/\r\n/g, '\n').split('\n').map(item => item.replace(/;.+$/, ''));
 	const hiradic2_arr = hira2dic_expand(hira2dic_org, []);
+	const exdic = [];
+	const warndic_del = [];
+	let kanji_pre_dic = [];
 
-	{
+	// ==> hiradic_arr
+	(() => {
 		//「あーちゃん」「わーちゃん」とか登録
 		const chan_list = 
 `
@@ -11584,34 +11932,37 @@ function output_main(param_text){
 		const chan2_list = chan_list.replace(/[\r\n]/g, '');
 		for(let c = 0; c < chan2_list.length; c++){
 			const my_push = function(d, e){
-				hiradic_arr.push(chan2_list.charAt(d) + e);
+				hiradic_arr.push(chan2_list[d] + e);
 			}
 			my_push(c, 'ーちゃん');
 			my_push(c, 'ーさん');
 			my_push(c, 'ーくん');
 			my_push(c, 'ーさま');
 		}
-	}
+	})();
+
+	(() => {
+	const exdic_arr = exdic_org.replace(/\r\n/g, '\n').replace(/#/g, '\n').split('\n');
+	hiradic.length = 0;
+	exdic.length = 0;
+	warndic.length = 0;
+	kanji_pre_dic.length = 0;
 
 	if(dic_type == 'include'){
-		hiradic = hiradic_arr.concat(hiradic2_arr);
-		exdic = exdic_arr;
-		warndic = warndic_org.replace(/\r\n/g, '\n').split('\n');
-		kanji_pre_dic = kanji_pre_dic_org.replace(/\r\n/g, '\n').split('\n').map(item => item.replace(/;.+$/, ''));
+		hiradic.push(...hiradic_arr.concat(hiradic2_arr));
+		exdic.push(...exdic_arr);
+		warndic.push(...warndic_org.replace(/\r\n/g, '\n').split('\n'));
+		kanji_pre_dic.push(...kanji_pre_dic_org.replace(/\r\n/g, '\n').split('\n').map(item => item.replace(/;.+$/, '')));;
 	}else{
-		var userdic = document.getElementById('userdic').value;
-		userdic = userdic.replace(/\r\n/g, '\n').split('\n');
+		const userdic = get_id('userdic').value
+			.replace(/\r\n/g, '\n').split('\n');
 		if(dic_type == 'userdata'){
-			hiradic = [];
-			exdic = [];
-			warndic = [];
-			kanji_pre_dic = [];
-			for(var i = 0; i < userdic.length; i++){
-				var first_char = userdic[i].charAt(0);
+			for(let i = 0; i < userdic.length; i++){
+				const first_char = userdic[i][0];
 				if(first_char === '*'){
-					var x = userdic[i].substr(1).split('/');
+					const x = userdic[i].substr(1).split('/');
 					if(2 <= x.length){
-						for(var a = 0; a < x.length - 1; a++){
+						for(let a = 0; a < x.length - 1; a++){
 							exdic.push(x[0], x[a+1]);
 						}
 					}else{
@@ -11634,19 +11985,16 @@ function output_main(param_text){
 				}
 			}
 		}else if(dic_type == 'mixdata'){
-			hiradic = [];
-			exdic = [];
-			warndic = warndic_org.replace(/\r\n/g, '\n').split('\n');
-			kanji_pre_dic = [];
-			var deldic = [];
-			var delexdic = [];
-			var len = userdic.length;
-			for(var i = 0; i < len; i++){
-				var first_char = userdic[i].charAt(0);
+			warndic.push(...warndic_org.replace(/\r\n/g, '\n').split('\n'));
+			const deldic = [];
+			const delexdic = [];
+			const len = userdic.length;
+			for(let i = 0; i < len; i++){
+				const first_char = userdic[i][0];
 				if(first_char === '*'){
-					var x = userdic[i].substr(1).split('/');
+					let x = userdic[i].substr(1).split('/');
 					if(2 <= x.length){
-						for(var a = 0; a < x.length - 1; a++){
+						for(let a = 0; a < x.length - 1; a++){
 							exdic.push(x[0], x[a+1]);
 						}
 					}else{
@@ -11669,13 +12017,13 @@ function output_main(param_text){
 				}
 			}
 
-			var hira_temp = hira2dic_expand(hira2dic_org, hiradic_arr.concat());
-			var len2 = hira_temp.length;
-			var len3 = deldic.length;
-			for(var i = 0; i < len2; i++){
-				var delhit = false;
-				var word = hira_temp[i];
-				for(var k = 0; k < len3; k++){
+			const hira_temp = hira2dic_expand(hira2dic_org, hiradic_arr.concat());
+			let len2 = hira_temp.length;
+			let len3 = deldic.length;
+			for(let i = 0; i < len2; i++){
+				let delhit = false;
+				let word = hira_temp[i];
+				for(let k = 0; k < len3; k++){
 					if(word === deldic[k]){
 						delhit = true;
 						break;
@@ -11685,13 +12033,12 @@ function output_main(param_text){
 					hiradic.push(word);
 				}
 			}
-			hira_temp = null;
-			var len4 = exdic_arr.length;
-			var len5 = delexdic.length;
-			for(var i = 0; i < len4; i+=2){
-				var delhit = false;
-				var word = exdic_arr[i] + '/' + exdic_arr[i+1];
-				for(var k = 0; k < len5; k++){
+			let len4 = exdic_arr.length;
+			let len5 = delexdic.length;
+			for(let i = 0; i < len4; i+=2){
+				let delhit = false;
+				let word = exdic_arr[i] + '/' + exdic_arr[i+1];
+				for(let k = 0; k < len5; k++){
 					if(word === delexdic[k]){
 						delhit = true;
 						break;
@@ -11705,19 +12052,26 @@ function output_main(param_text){
 				replace(/\r\n/g, '\n').split('\n').
 				map(item => item.replace(/;.+$/, '')));
 		}
-		userdic = '';
 	}
+	})();
 
-	for(var i = 0; i < hiradic.length; i++){
-		var n = 0;
-		var sep = hiradic[i].indexOf('/');
+	// hiradic ==> hiradic変換
+	for(let i = 0; i < hiradic.length; i++){
+		const sep = hiradic[i].indexOf('/');
 		if(-1 == sep){
+			let n = 0;
 			for(; n < hiradic[i].length; n ++){
-				if(is_kanji(hiradic[i].charCodeAt(n))){
+				// 後方の文字種。漢字だけじゃなくて、カタカナ、記号とかも考慮
+				//　特殊文字「、」「。」「〈」考慮(そのまま残す)
+				const n1 = hiradic[i].charCodeAt(n);
+				const c1 = hiradic[i][n];
+				// if(is_kanji(hiradic[i].charCodeAt(n)))
+				if(!(is_hiragana(n1) || -1 != '、。〈゛゜ー'.indexOf(c1))){
 					break;
 				}
 			}
 			if(n != hiradic[i].length){
+				// 「どす黒」→「どす/末尾黒」に変換
 				hiradic[i] = hiradic[i].substr(0, n) + '/' + '末尾' + hiradic[i].substr(n);
 			}
 		}
@@ -11727,64 +12081,100 @@ function output_main(param_text){
 	// 例外辞書に擬音を登録
 	exdic_add_hiradic2(exdic, hiradic2_arr, hiradic_arr, error_info);
 
-	var hiradic_temp = [];
-	var tango_prev = 'x';
-	for(var i = 0; i < hiradic.length; i++){
-		var word = hiradic[i];
-		if(tango === tango_prev){
+	// 品詞
+	const hinsi_converter = function(hinsi){
+		let short_name = '不';
+		if(hinsi === '人称名詞'){
+			short_name = '人';
+		}else if(hinsi.substr(0,2) === '末尾'){
+			// 「ど田舎」「お茶」「どす黒」
+			// →「末ど」「末お」「末黒」
+			short_name = '末' + hinsi.substr(2);
+		}else if(hinsi.substr(0,2) === '五段'){
+			// 「五段ハ」「五段ナサル」「五段トウ」など
+			//  →「五ハ」「五ル」「五ト」
+			let gyou = hinsi.substr(2);
+			if(gyou == 'ナサル'){
+				gyou = 'ル'; // ナもサもあるのでルにする
+			}else{
+				// 未知のデータはそのまま載せておく
+			}
+			short_name = '五' + gyou;
+		}else if(hinsi === '下一段' || hinsi === '上一段'){
+			short_name = '一'; // 上下の区別なし
+		}else if(hinsi === 'サ変'){
+			short_name = 'サ';
+		}else if(hinsi === 'ザ変'){
+			short_name = 'ザ';
+		}else if(hinsi === '形容詞'){
+			short_name = '形';
+		}else if(hinsi === '助詞後続'){
+			short_name = '助';
 		}else{
-			hiradic_temp.push(word);
-			tango_prev = word;
+			short_name = hinsi; // とりあえずそのまま突っ込んでおく
 		}
-	}
-	hiradic = [];
-	var hiradic_info = [];
-	var hiradic_len = 0;
-	tango_prev = 'x';
-	for(var i = 0; i < hiradic_temp.length; i++){
-		var word = hiradic_temp[i];
-		var sep = word.indexOf('/');
-		var tango;
-		var info;
-		if(-1 != sep){
-			tango = word.substr(0, sep);
-			info = word.substr(sep + 1);
-		}else{
-			tango = word;
-			info = '';
+		return short_name;
+	};
+
+	(() => {
+		const hiradic_temp = [];
+		let word_prev = 'x';
+		for(let i = 0; i < hiradic.length; i++){
+			const word = hiradic[i];
+			if(word === word_prev){
+			}else{
+				hiradic_temp.push(word);
+				word_prev = word;
+			}
 		}
-		if(tango === tango_prev){
-			hiradic_info[hiradic_info.length - 1].push(info);
-		}else{
-			hiradic.push(tango);
-			hiradic_info.push([info]);
-			tango_prev = tango;
+		hiradic.length = 0;
+		let tango_prev = 'x';
+		tango_prev = 'x';
+		for(let i = 0; i < hiradic_temp.length; i++){
+			const word = hiradic_temp[i];
+			const sep = word.indexOf('/');
+			let tango;
+			let info; // short name
+			if(-1 !== sep){
+				tango = word.substr(0, sep);
+				info = hinsi_converter(word.substr(sep + 1));
+			}else{
+				tango = word;
+				info = '';
+			}
+			if(tango === tango_prev){
+				hiradic_info[hiradic_info.length - 1].push(info);
+			}else{
+				hiradic.push(tango);
+				hiradic_info.push([info]);
+				tango_prev = tango;
+			}
+			// TODO:後で確認して変更する
+			let len = 0; // 最大の後方参照文字数
+			if(info === '人'){
+				len = 3; // 「たちめ」の3文字
+			}else if(info[1] === '五'){
+				len = 12;
+			}else if(info === '一'){
+				len = 12;
+			}else if(info === '形'){
+				len = 12;
+			}else if(info === '助'){
+				len = 2;
+			}
+			len += tango.length;
+			if(hiradic_len < len){
+				hiradic_len = len;
+			}
 		}
-		// TODO:後で確認して変更する
-		let len = 0; // 最大の後方参照文字数
-		if(info === '人称名詞'){
-			len = 3; // 「たちめ」の3文字
-		}else if(info.substr(0,2) === '五段'){
-			len = 12;
-		}else if(info === '下一段' || info === '上一段'){
-			len = 12;
-		}else if(info === '形容詞'){
-			len = 12;
-		}else if(info === '助詞後続'){
-			len = 12;
-		}
-		len += tango.length;
-		if(hiradic_len < len){
-			hiradic_len = len;
-		}
-	}
+	})();
+
 	// exdic sort
-	hiradic_temp = null;
 	if(exdic.length % 2 != 0 ){
 		alert('例外辞書項目数不正' + exdic.length);
-		return;
+		return -1;
 	}
-	const exdic_map = new Map();
+	// const exdic_map = new Map();
 	{
 		const exdic_length = exdic.length;
 		for(let i = 0; i < exdic_length; i+=2){
@@ -11800,28 +12190,28 @@ function output_main(param_text){
 			}
 		}
 	}
-	// exdic_arr = null;
-	// exdic = null;
 
 	warndic.sort();
 	kanji_pre_dic.sort();
-	var kanji_pre_one_dic = [];
-	var kanji_pre_two_dic = [];
-	var kanji_pre_info = [];
-	var pre_char = 'ｘ';
-	var pre_two = 'x';
-	var max_kanji = 0;
-	for(var i = 0; i < kanji_pre_dic.length; i++){
-		var k = 0;
+	(() => {
+	// kanji_pre_one_dic = [];
+	// kanji_pre_two_dic = [];
+	// kanji_pre_info = [];
+	kanji_pre_one_dic.length = 0;
+	kanji_pre_two_dic.length = 0;
+	kanji_pre_info.length = 0;
+	let pre_char = 'ｘ';
+	let pre_two = 'x';
+	// max_kanji = 0;
+	for(let i = 0; i < kanji_pre_dic.length; i++){
+		let k = 0;
 		for(; is_kanji(kanji_pre_dic[i].charCodeAt(k)) || is_katakana(kanji_pre_dic[i].charCodeAt(k)); k++){}
-		var one = kanji_pre_dic[i].substr(0, k);
-		var two = kanji_pre_dic[i].substr(k);
-		var hinsi = '';
-		var pos = two.indexOf('/');
-		if(-1 != pos){
-			hinsi = two.substr(pos + 1);
-			two = two.substr(0, pos);
-		}
+		const one = kanji_pre_dic[i].substr(0, k);
+		const two0 = kanji_pre_dic[i].substr(k);
+		const pos = two0.indexOf('/');
+		const long_name = (-1 !== pos) ? two0.substr(pos + 1) : '';
+		const two = (-1 != pos) ? two0.substr(0, pos) : two0;
+		const hinsi = hinsi_converter(long_name);
 		if(pre_char != one){
 			pre_char = one;
 			pre_two = two;
@@ -11832,8 +12222,8 @@ function output_main(param_text){
 				max_kanji = one.length;
 			}
 		}else{
-			var x = kanji_pre_info;
-			var y = x[x.length - 1];
+			const x = kanji_pre_info;  // Array
+			const y = x[x.length - 1]; // Array
 			if(pre_two != two){
 				kanji_pre_two_dic[kanji_pre_two_dic.length - 1].push(two);
 				y.push([hinsi]);
@@ -11843,32 +12233,34 @@ function output_main(param_text){
 			}
 		}
 	}
-	kanji_pre_dic = null;
+	kanji_pre_dic.length = 0;
+	})();
 
 	warndic_del.sort();
-	var warndic_temp = warndic;
-	var warndic_sort = [];
-	for(var i = 0; i < warndic_temp.length; i++){
-		var s = warndic_temp[i];
+	(() => {
+	const warndic_temp = warndic;
+	const warndic_sort = [];
+	for(let i = 0; i < warndic_temp.length; i++){
+		const s = warndic_temp[i];
 		if(-1 != bin_search_dic(warndic_del, s)){
 			continue;
 		}
-		var pos = s.indexOf('/');
+		const pos = s.indexOf('/');
 		if(-1 != pos){
 			// 'つず[か,き,く]' => ['つずか', 'つずき', 'つずく']
-			var word = s.substr(0, pos);
-			var info = s.substr(pos+1);
-			var pos2 = word.indexOf('[');
-			var pos3 = word.indexOf(']');
+			const word = s.substr(0, pos);
+			const info = s.substr(pos+1);
+			const pos2 = word.indexOf('[');
+			const pos3 = word.indexOf(']');
 			if(-1 != pos2 && pos2 < pos3){
-				var prev = word.substr(0, pos2);
-				var multi = word.substr(pos2 + 1, pos3 - pos2 - 1).split(',');
-				for(var k = 0; k < multi.length; k++){
-					var word2 = prev + multi[k];
+				const prev = word.substr(0, pos2);
+				const multi = word.substr(pos2 + 1, pos3 - pos2 - 1).split(',');
+				for(let k = 0; k < multi.length; k++){
+					const word2 = prev + multi[k];
 					if(-1 != bin_search_dic(warndic_del, word2)){
 						continue;
 					}
-					var info2 = info.replace(/%/g, multi[k]);
+					const info2 = info.replace(/%/g, multi[k]);
 					warndic_sort.push([word2, info2]);
 				}
 			}else{
@@ -11878,24 +12270,27 @@ function output_main(param_text){
 			warndic_sort.push([s, '']);
 		}
 	}
-	warndic_temp = null;
-	warndic_sort.sort(function(a, b){
+	warndic_sort.sort((a, b) => {
 		if(a[0] < b[0]){
 			return -1;
 		}
 		return 1;
 	});
-	var warndic_info = [];
-	warndic = [];
-	for(var i = 0; i < warndic_sort.length; i++){
+	// warndic_info = [];
+	// warndic = [];
+	warndic_info.length = 0;
+	warndic.length = 0;
+	for(let i = 0; i < warndic_sort.length; i++){
 		warndic.push(warndic_sort[i][0]);
 		warndic_info.push(warndic_sort[i][1]);
 	}
-	warndic_sort = null;
+	// warndic_sort.length = 0;
+	})();
 
-	let one_kanji_dic = [];
+	// one_kanji_dic = [];
+	one_kanji_dic.length = 0;
 	{
-		let d = one_kanji_dic_org.replace(/\r\n/g, '\n').split('\n');
+		const d = one_kanji_dic_org.replace(/\r\n/g, '\n').split('\n');
 		d.forEach((item) =>{
 			if(0 < item.length){
 				const key = item.substr(0, 1);
@@ -11904,53 +12299,55 @@ function output_main(param_text){
 		});
 	}
 
-	var option_linenum = document.getElementById("option_linenum").checked;
-	var option_noneonly = document.getElementById("option_noneonly").checked;
-	var option_nospace = document.getElementById("option_nospace").checked;
-	var option_prev_kanji = false;
+	// 初期化変数スコープここまで
+	})();
 
-	var concat_mode = false;
+	const option_linenum = get_id('option_linenum').checked;
+	const option_noneonly = get_id('option_noneonly').checked;
+	const option_nospace = get_id('option_nospace').checked;
+	const option_prev_kanji = false;
+
+	let concat_mode = false;
 	if(0 < book.length){
-		var bookname = book[current_page].name;
+		const bookname = book[current_page].name;
 		if(bookname === concat_page_name || bookname === (concat_page_name + str_update)){
 			concat_mode = true;
 		}
 	}
 
-	var text = param_text;
+	let text = param_text;
 	text = text.replace(/\r\n/g, '\n');
 	text = html_escape(text);
 
-	var part_titles = [];
-	var part_num = 1;
-	var part_title_line = false;
-	var concat_head = get_id('concat_head').value;
+	let part_titles = [];
+	let part_num = 1;
+	let part_title_line = false;
+	let concat_head = get_id('concat_head').value;
 
-	var line_num = 1;
-	var word_start = -1;
-	var color_type = 0;
-	var line_none_hit = false;
-	var lines = [];
-	var line_start = 0;
-	var line_start2 = 0;
-	var line_get = true;
-	var line;
-	var diff = 0;
-	var line_tag = '';
-	var spaceline = false;
-	var ruby_end_r = -1;
-	var ruby_end_diff = -1;
+	let line_num = 1;
+	let word_start1 = -1;
+	let color_type = 0;
+	let line_none_hit = false;
+	let lines = [];
+	let line_start = 0;
+	let line_start2 = 0;
+	let line_get = true;
+	let line;
+	let diff = 0;
+	let line_tag = '';
+	let spaceline = false;
+	let ruby_end_r = -1;
+	let ruby_end_diff = -1;
 	let hit_count = 0;
 	let	is_strip = false;
-	for(var i = 0; i < text.length; i++){
+
+	// let t0 = performance.now();
+	let t1 = 0;
+	for(let i = 0; i < text.length; i++){
 		if(line_get){
-			var line_end = text.length;
-			for(var p = i; p < text.length; p++){
-				if(0x0a === text.charCodeAt(p)){
-					line_end = p + 1;
-					break;
-				}
-			}
+			const newline_pos = text.indexOf('\n', i);  // i から検索開始
+			const line_end = newline_pos !== -1 ? newline_pos + 1 : text.length;
+
 			line = text.substr(line_start, line_end - line_start);
 			line_get = false;
 			line_start2 = line_start;
@@ -11964,7 +12361,7 @@ function output_main(param_text){
 			}
 			if(concat_mode){
 				if(line.substr(0, concat_head.length) === concat_head){
-					var part = '';
+					let part = '';
 					part += '　　　・<a href="#part' + part_num + '">';
 					part += line.replace('\n', '').substr(concat_head.length) + '</a>';
 					part_titles.push(part);
@@ -11978,12 +12375,12 @@ function output_main(param_text){
 			}
 			diff = 0;
 		}
-		var r = i - line_start2 + diff;
-		var word_end = -1;
-		var word_period = false;
-		var this_char = line.charCodeAt(r);
-		var is_kana =false;
-		var end_check = false;
+		let r = i - line_start2 + diff;
+		let word_end = -1;
+		let word_period = false;
+		let this_char = line.charCodeAt(r);
+		let is_kana =false;
+		let end_check = false;
 		// TODO: HTML <ruby> </ruby>への対応
 		if(0 < ruby_end_r){
 			if(r === ruby_end_r + (diff - ruby_end_diff)){
@@ -11991,14 +12388,14 @@ function output_main(param_text){
 			}
 		}else if((0x3041 <= this_char && this_char <= 0x3094) || this_char == 0x30fc){
 			is_kana = true;
-			if(word_start < 0){
-				word_start = r;
+			if(word_start1 < 0){
+				word_start1 = r;
 			}
 		}else if(this_char === 0x7c || this_char === 0xff5c){
 			// 縦棒だったら
-			var ruby_mode = 1;
-			var char1 = line.charCodeAt(r + 1);
-			var r1 = 1;
+			let ruby_mode = 1;
+			let char1 = line.charCodeAt(r + 1);
+			let r1 = 1;
 			while(char1 !== 0x0a && r + r1 < line.length){
 				if(char1 === 0x7c || char1 === 0xff5c){
 					break;
@@ -12035,15 +12432,15 @@ function output_main(param_text){
 			end_check = true;
 		}
 		if(end_check){
-			if(0 <= word_start){
+			if(0 <= word_start1){
 				word_end = r;
 				// {[
-				if( -1 != '　、。，．！？・…―〜～」』）】｝］〕＞≫〉》 .,}]"\';:!\?/)\n'.indexOf(line.charAt(r)) ){
+				if( -1 != '　、。，．！？⁉‼・…―–─━〜～」』）】｝］〕＞≫〉》 .,}]"\';:!\?/)\n'.indexOf(line[r]) ){
 					word_period = true;
 				}
 			}
 		}
-		if(r === line.length - 1 && 0 <= word_start){
+		if(r === line.length - 1 && 0 <= word_start1){
 			if(is_kana){
 				word_end = r + 1;
 			}else{
@@ -12052,30 +12449,31 @@ function output_main(param_text){
 			word_period = true;
 		}
 		if(0 < word_end){
-			var word = line.substr(word_start, word_end - word_start);
-			var word_len = word.length;
+			const word_init = line.substr(word_start1, word_end - word_start1);
+			let word_len_init = word_init.length;
 			// 末尾の'ー'2つ目以降を省略(1つめは後で考慮)
-			for(var q = word.length - 1; 1 < q; q--){
-				if(0x30fc === word.charCodeAt(q)){
-					word_len--;
+			for(let q = word_init.length - 1; 1 < q; q--){
+				if(0x30fc === word_init.charCodeAt(q)){
+					word_len_init--;
 				}else{
 					break;
 				}
 			}
+			const word_len = word_len_init;
 			// 先頭の'ー'省略
-			var k = 0;
+			let k = 0;
 			for(; k < word_len; k++){
-				if(0x30fc === word.charCodeAt(k)){
+				if(0x30fc === word_init.charCodeAt(k)){
 				}else{
 					break;
 				}
 			}
-			word = word.substr(0, word_len);
-			var word_start2 = word_start;
-			word_start = -1;
-			var prev_kanji = false;
-			var prev_kata = false;
-			var prev_char = '　';
+			const word = word_init.substr(0, word_len);
+			let word_start2 = word_start1;
+			word_start1 = -1;
+			let prev_kanji = false;
+			let prev_kata = false;
+			let prev_char = '　';
 			if(0 < word_start2){
 				prev_char = line.charCodeAt(word_start2 - 1);
 				if(is_kanji(prev_char)){
@@ -12084,16 +12482,16 @@ function output_main(param_text){
 					prev_kata = true;
 				}
 			}
-			var prematch = false;
-			var prev_str_kanji = '';
-			var prev_str_kanji_org = '';
-			var max_word = '';
-			var word_type = '';
-			var warn_info = '';
-			var str_num = '零一二三四五六七八九十百千万億兆〇１２３４５６７８９０1234567890';
-			if((word.charAt(0) === 'つ' || word.charAt(0) === 'こ')&& -1 != str_num.indexOf(String.fromCharCode(prev_char)) ){
+			let prematch = false;
+			let prev_str_kanji = '';
+			let prev_str_kanji_org = '';
+			let max_word = '';
+			let word_type = '';
+			let warn_info = '';
+			const str_num = '零一二三四五六七八九十百千万億兆〇１２３４５６７８９０1234567890';
+			if((word[0] === 'つ' || word[0] === 'こ')&& -1 != str_num.indexOf(String.fromCharCode(prev_char)) ){
 				// 「三つ」などのつ
-				if(word.charAt(1) === 'め'){
+				if(word[1] === 'め'){
 					k = 2;
 				}else{
 					k = 1;
@@ -12102,17 +12500,14 @@ function output_main(param_text){
 				if(!option_prev_kanji){
 					prev_kanji = false;
 				}
-				var max_len = word_start2;
-				if(max_kanji < word_start2){
-					max_len = max_kanji;
-				}
-				var m = -1;
-				for(var n = 1; n <= max_len; n++){
-					var prev_char2 = line.charCodeAt(word_start2 - n);
+				const max_len = (max_kanji < word_start2) ? max_kanji: word_start2;
+				let m = -1;
+				for(let n = 1; n <= max_len; n++){
+					let prev_char2 = line.charCodeAt(word_start2 - n);
 					if((!prev_kata && is_kanji(prev_char2)) || (prev_kata && is_katakana(prev_char2))){
-						var str_kanji_org = line.substr(word_start2 - n, n);
-						var str_kanji = str_kanji_org.replace(/(.)々/g, '$1$1');
-						var p = bin_search_dic(kanji_pre_one_dic, str_kanji);
+						let str_kanji_org = line.substr(word_start2 - n, n);
+						let str_kanji = str_kanji_org.replace(/(.)々/g, '$1$1');
+						let p = bin_search_dic(kanji_pre_one_dic, str_kanji);
 						if(-1 != p){
 							m = p;
 							prev_str_kanji = str_kanji;
@@ -12121,22 +12516,22 @@ function output_main(param_text){
 					}
 				}
 				if(-1 != m){
-					var two = kanji_pre_two_dic[m];
-					for(var n = 0; n < two.length; n++){
+					let two = kanji_pre_two_dic[m];
+					for(let n = 0; n < two.length; n++){
 						if(two[n].length <= word.length && two[n] === word.substr(0, two[n].length)){
-							var word2 = prev_str_kanji + two[n];
-							var info_ret = expand_word_info(kanji_pre_info[m][n], word2, line.substr(word_start2 + k + word2.length - prev_str_kanji.length), exdic_map);
+							let word2 = prev_str_kanji + two[n];
+							let info_ret = expand_word_info(kanji_pre_info[m][n], word2, line.substr(word_start2 + k + word2.length - prev_str_kanji.length), exdic_map);
 							if(0 <= info_ret[0]){
 								// hit
 								if(max_word.length < info_ret[2].length){
 									max_word = prev_str_kanji_org.substr(0, prev_str_kanji_org.length) + info_ret[2].substr(prev_str_kanji_org.length);
 									word_type = '';
 									// warn判定
-									for(var a = max_word.length; 0 < a; a--){
-										var word3 = max_word.substr(0, a);
-										var b = bin_search_dic(warndic, word3);
+									for(let a = max_word.length; 0 < a; a--){
+										let word3 = max_word.substr(0, a);
+										let b = bin_search_dic(warndic, word3);
 										if(-1 != b){
-											var ex_ret = search_ex_dic(exdic_map, word3, word3)
+											const ex_ret = search_ex_dic(exdic_map, word3, word3)
 											if(ex_ret[0]){
 												word_type = 'warn';
 												warn_info = warndic_info[b];
@@ -12145,7 +12540,7 @@ function output_main(param_text){
 									}
 								}
 							}else if(-2 === info_ret[0]){
-								for(var x = 0; x < info_ret[2].length; x++){
+								for(let x = 0; x < info_ret[2].length; x++){
 									if(-1 === bin_search_dic(error_info, info_ret[2][x])){
 										error_info.push(info_ret[2][x]);
 										error_info.sort();
@@ -12160,11 +12555,12 @@ function output_main(param_text){
 				}
 			}
 			for(; k < word.length; k++){
-				var n = hiradic_len;
-				if(word.length - k < n){
-					n = word.length - k;
+				let n = hiradic_len;
+				const word_k_len = k;
+				if(word.length - word_k_len < n){
+					n = word.length - word_k_len;
 				}
-				var hit = false;
+				let hit = false;
 				if(prematch){
 					prematch = false;
 				}else{
@@ -12174,20 +12570,18 @@ function output_main(param_text){
 					word_type = '';
 				}
 				for(; 0 < n ; n-- ){
-					var word2 = word.substr(k, n);
-					var word_period3 = false;
-					var word_period4 = false;
-					if(k + n == word.length){
+					const word2 = word.substr(word_k_len, n);
+					let word_period3 = false;
+					let word_period4 = false;
+					if(word_k_len + n == word.length){
 						if(word_period){
 							word_period4 = true;
 						}
 						word_period3 = true;
 					}
-					var word3 = word2 + '、';
-					var word4 = word2 + '。';
-					var m = bin_search_dic(warndic, word2);
+					let m = bin_search_dic(warndic, word2);
 					if(-1 != m){
-						var ex_ret = search_ex_dic(exdic_map, word2, word.substr(k))
+						const ex_ret = search_ex_dic(exdic_map, word2, word.substr(word_k_len))
 						if(ex_ret[0] &&
 								max_word.length - prev_str_kanji.length < word2.length){
 							word_type = 'warn';
@@ -12198,7 +12592,7 @@ function output_main(param_text){
 					}
 					m = bin_search_dic(hiradic, word2);
 					if(-1 != m){
-						var info_ret = expand_word_info(hiradic_info[m], word2, line.substr(word_start2 + k + word2.length), exdic_map);
+						const info_ret = expand_word_info(hiradic_info[m], word2, line.substr(word_start2 + word_k_len + word2.length), exdic_map);
 						if(0 <= info_ret[0]){
 							// hit
 							if(max_word.length - prev_str_kanji.length < info_ret[2].length){
@@ -12207,7 +12601,7 @@ function output_main(param_text){
 								warn_info = '';
 							}
 						}else if(-2 === info_ret[0]){
-							for(var x = 0; x < info_ret[2].length; x++){
+							for(let x = 0; x < info_ret[2].length; x++){
 								if(-1 === bin_search_dic(error_info, info_ret[2][x])){
 									error_info.push(info_ret[2][x]);
 									error_info.sort();
@@ -12218,17 +12612,19 @@ function output_main(param_text){
 							m = -1; // hit取り消し
 						}
 					}
+					const word3 = word2 + '、';
+					const word4 = word2 + '。';
 					if(-1 === m && word_period3){
 						m = bin_search_dic(hiradic, word3);
 						if(-1 === m && word_period4){
 							m = bin_search_dic(hiradic, word4);
 						}
 					}
-					if(-1 === m && k === 0){
-						var word5 = word2 + '〈';
-						var word6 = word5 + '、';
-						var word7 = word5 + '。';
-						var m = bin_search_dic(hiradic, word5);
+					if(-1 === m && word_k_len === 0){
+						const word5 = word2 + '〈';
+						const word6 = word5 + '、';
+						const word7 = word5 + '。';
+						let m = bin_search_dic(hiradic, word5);
 						if(-1 === m && word_period3){
 							m = bin_search_dic(hiradic, word6);
 							if(-1 === m && word_period4){
@@ -12237,7 +12633,7 @@ function output_main(param_text){
 						}
 					}
 					if(-1 != m){
-						var ex_ret = search_ex_dic(exdic_map, word2, word.substr(k));
+						const ex_ret = search_ex_dic(exdic_map, word2, word.substr(word_k_len));
 						if(ex_ret[0]){
 							if(max_word.length - prev_str_kanji.length < word2.length){
 								max_word = word2;
@@ -12249,18 +12645,18 @@ function output_main(param_text){
 				}
 				if(max_word.length - prev_str_kanji.length <= 0){
 					// 未ヒット
-					if(k === 0){
+					if(word_k_len === 0){
 						// 「う、うかつ」のような最初の言葉を色分けする
-						var n = 1;
+						let n = 1;
 						for(; n + word_start2 < line.length; n++){
 							// 「うーー、うかつ」のような「ー」をスキップ
-							if('ー' !== line.charAt(word_start2 + n)){
+							if('ー' !== line[word_start2 + n]){
 								break;
 							}
 						}
-						var n2 = n;
+						let n2 = n;
 						for(; n + word_start2 < line.length; n++){
-							var a = line.charAt(word_start2 + n);
+							const a = line[word_start2 + n];
 							if(-1 === '、，。…・―–'.indexOf(a)){
 								// 「あ、あんこ」「あ。。。あんこ」などをスキップ
 								break;
@@ -12268,8 +12664,8 @@ function output_main(param_text){
 						}
 						if(0 < n - n2){
 							let filler = false;
-							const left1 = word.charAt(0);
-							const right1 = line.charAt(word_start2 + n);
+							const left1 = word[0];
+							const right1 = line[word_start2 + n];
 							const left1code = left1.charCodeAt(0);
 							const right1code = right1.charCodeAt(0);
 							if(-1 !== 'ぁあん'.indexOf(left1)){
@@ -12296,8 +12692,8 @@ function output_main(param_text){
 					}
 				}
 				if(0 <  max_word.length - prev_str_kanji.length){
-					var p = prev_str_kanji.length;
-					var s1;
+					const p = prev_str_kanji.length;
+					let s1;
 					if(word_type==='warn'){
 						if(0 < warn_info.length){
 							s1 = '<span class="colorwarn" title="' + html_escape(warn_info) + '">'
@@ -12309,9 +12705,10 @@ function output_main(param_text){
 						s1 = '<span class="color' + (color_type + 1) + '">';
 						color_type = (color_type + 1) % 3;
 					}
-					var s2 = '</span>';
-					var s_ = s1 + max_word + s2;
-					line = line.substr(0, word_start2 + k - p) + s_ + line.substr(word_start2 + k + max_word.length - p);
+					const s2 = '</span>';
+					const s_ = s1 + max_word + s2;
+					line = line.substr(0, word_start2 + word_k_len - p) + s_ +
+						line.substr(word_start2 + word_k_len + max_word.length - p);
 					word_start2 += s1.length + s2.length;
 					diff += s1.length + s2.length;
 					k += max_word.length - p - 1;
@@ -12320,14 +12717,14 @@ function output_main(param_text){
 				if(hit){
 					prev_kanji = false;
 				}else if(false === prev_kanji){
-					var word3 = word.substr(k,1);
-					if(word2 === 'ー' && k == word_len + 1){
+					const word3 = word.substr(k,1);
+					if(word3 === 'ー' && k == word_len + 1){
 						// 末尾のーを赤くしない
 					}else{
-						var n2 = word3.length;
-						var s1 = '<span class="colornone">';
-						var s2 = '</span>';
-						var s_ = s1 + word3 + s2;
+						const n2 = word3.length;
+						const s1 = '<span class="colornone">';
+						const s2 = '</span>';
+						const s_ = s1 + word3 + s2;
 						line = line.substr(0, word_start2 + k) + s_ + line.substr(word_start2 + k + n2);
 						word_start2 += s1.length + s2.length;
 						diff += s1.length + s2.length;
@@ -12362,9 +12759,9 @@ function output_main(param_text){
 					is_strip = true;
 				}
 				if( option_linenum ){
-					var s4 = '<span class="linenum">';
-					var s5 = ': </span>';
-					var num = '';
+					let s4 = '<span class="linenum">';
+					let s5 = ': </span>';
+					let num = '';
 					if(option_noneonly){
 						// 特徴行のみ→通常表示
 					}else if(line_hit){
@@ -12377,17 +12774,18 @@ function output_main(param_text){
 						num += (part_num - 1) + '/';
 					}
 					num += fixnum(line_num);
-					var s_ = s4 + num + s5;
+					const s_ = s4 + num + s5;
+					const add_line = ((line) => lines.push(line + '<br>'));
 					if(0 < line_tag.length){
-						lines.push(s_ + line_tag + line_strip + '</a>');
+						add_line(s_ + line_tag + line_strip + '</a>');
 					}else{
-						lines.push(s_ + line_strip);
+						add_line(s_ + line_strip);
 					}
 				}else{
 					if(0 < line_tag.length){
-						lines.push(line_tag + line_strip + '</a>');
+						add_line(line_tag + line_strip + '</a>');
 					}else{
-						lines.push(line_strip);
+						add_line(line_strip);
 					}
 				}
 				line_none_hit = false;
@@ -12397,12 +12795,14 @@ function output_main(param_text){
 		}
 	}
 
+	
+
 	text = '';
-	var out_error = new Array(error_info.length);
-	for(var i = 0;i < error_info.length; i++){
+	const out_error = new Array(error_info.length);
+	for(let i = 0;i < error_info.length; i++){
 		out_error[i] = html_escape(error_info[i]);
 	}
-	var err_str = out_error.join('<br>');
+	const err_str = out_error.join('<br>');
 	if(0 < err_str.length){
 		text += err_str + '<hr>';
 	}
@@ -12425,7 +12825,7 @@ function output_main(param_text){
 	}else{
 		text += '';
 	}
-	text += lines.join('<br>');
+	text += lines.join('');
 	hoge = hoge.replace(/\n/g, '<br>');
 
 	document.getElementById("result").innerHTML = '<div class="resultext">' + text + '<br>' + hoge + '</div>';
@@ -12468,52 +12868,53 @@ const kanji_list_ex = [
 
 	last_check_type = 1;
 
-	var hoge = '';
-	var error_info = [];
+	let hoge = '';
+	const error_info = [];
 
-	var option_linenum = document.getElementById("option_linenum").checked;
-	var option_noneonly = document.getElementById("option_noneonly").checked;
-	var option_nospace = document.getElementById("option_nospace").checked;
+	const option_linenum = get_id('option_linenum').checked;
+	const option_noneonly = get_id('option_noneonly').checked;
+	const option_nospace = get_id('option_nospace').checked;
 
-	var concat_mode = false;
+	let concat_mode = false;
 	if(0 < book.length){
-		var bookname = book[current_page].name;
+		const bookname = book[current_page].name;
 		if(bookname === concat_page_name || bookname === (concat_page_name + str_update)){
 			concat_mode = true;
 		}
 	}
 
-	var text = param_text;
+	let text = param_text;
 	text = text.replace(/\r\n/g, '\n');
 	text = html_escape(text);
 
-	var part_titles = [];
-	var part_num = 1;
-	var part_title_line = false;
-	var concat_head = get_id('concat_head').value;
+	let part_titles = [];
+	let part_num = 1;
+	let part_title_line = false;
+	const concat_head = get_id('concat_head').value;
 
-	var line_num = 1;
-	var word_start = -1;
-	var line_none_hit = false;
-	var lines = [];
-	var line_start = 0;
-	var line_start2 = 0;
-	var line_get = true;
-	var line;
-	var diff = 0;
-	var line_tag = '';
-	var spaceline = false;
-	var is_strip = false;
-	var hit_count = 0;
-	for(var i = 0; i < text.length; i++){
+	let line_num = 1;
+	let word_start = -1;
+	let line_none_hit = false;
+	const lines = [];
+	let line_start = 0;
+	let line_start2 = 0;
+	let line_get = true;
+	let line;
+	let diff = 0;
+	let line_tag = '';
+	let spaceline = false;
+	let is_strip = false;
+	let hit_count = 0;
+	for(let i = 0; i < text.length; i++){
 		if(line_get){
-			var line_end = text.length;
-			for(var p = i; p < text.length; p++){
+			let line_end_init = text.length;
+			for(let p = i; p < text.length; p++){
 				if(0x0a === text.charCodeAt(p)){
-					line_end = p + 1;
+					line_end_init = p + 1;
 					break;
 				}
 			}
+			const line_end = line_end_init;
 			line = text.substr(line_start, line_end - line_start);
 			line_get = false;
 			line_start2 = line_start;
@@ -12527,7 +12928,7 @@ const kanji_list_ex = [
 			}
 			if(concat_mode){
 				if(line.substr(0, concat_head.length) === concat_head){
-					var part = '';
+					let part = '';
 					part += '　　　・<a href="#part' + part_num + '">';
 					part += line.replace('\n', '').substr(concat_head.length) + '</a>';
 					part_titles.push(part);
@@ -12541,15 +12942,15 @@ const kanji_list_ex = [
 			}
 			diff = 0;
 		}
-		var r = i - line_start2 + diff;
-		var word_end = -1;
-		var word_period = false;
-		var this_char = line.charCodeAt(r);
-		var this_char2 = line.charAt(r);
+		let r = i - line_start2 + diff;
+		const word_end = -1;
+		let word_period = false;
+		const this_char = line.charCodeAt(r);
+		const this_char2 = line[r];
 		let sinjoyou = false;
 		if(is_kanji(this_char) && this_char != 0x3005){
-			var hit = false;
-			for(var k = 0; k < kanji_list.length; k++){
+			let hit = false;
+			for(let k = 0; k < kanji_list.length; k++){
 				if(-1 != kanji_list[k].indexOf(this_char2)){
 					hit = true;
 					if(9 <= k){
@@ -12559,25 +12960,25 @@ const kanji_list_ex = [
 				}
 			}
 			if(!hit || sinjoyou){
-				var hit_ex = false;
+				let hit_ex = false;
 				if(!hit){
-					for(var k = 0; k < kanji_list_ex.length; k++){
+					for(let k = 0; k < kanji_list_ex.length; k++){
 						if(-1 != kanji_list_ex[k].indexOf(this_char2)){
 							hit_ex = true;
 							break;
 						}
 					}
 				}
-				var s1 = '<span class="kanjiext">';
+				let s1 = '<span class="kanjiext">';
 				if(sinjoyou){
 					s1 = '<span class="kanjisin">';
 				}
 				if(hit_ex){
 					s1 = '<span class="kanjizinmei">';
 				}
-				var s2 = '</span>';
-				var word = this_char2;
-				var s_ = s1 + word + s2;
+				const s2 = '</span>';
+				const word = this_char2;
+				const s_ = s1 + word + s2;
 				line = line.substr(0, r) + s_ + line.substr(r + word.length);
 				diff += s1.length + s2.length;
 				line_none_hit = true;
@@ -12603,9 +13004,9 @@ const kanji_list_ex = [
 					is_strip = true;
 				}
 				if(option_linenum){
-					var s4 = '<span class="linenum">';
-					var s5 = ': </span>';
-					var num = '';
+					let s4 = '<span class="linenum">';
+					let s5 = ': </span>';
+					let num = '';
 					if(option_noneonly){
 						// 特徴行のみ→通常表示
 					}else if(line_hit){
@@ -12618,7 +13019,7 @@ const kanji_list_ex = [
 						num += (part_num - 1) + '/';
 					}
 					num += fixnum(line_num);
-					var s_ = s4 + num + s5;
+					const s_ = s4 + num + s5;
 					if(0 < line_tag.length){
 						lines.push(s_ + line_tag + line_strip + '</a>');
 					}else{
@@ -12638,10 +13039,10 @@ const kanji_list_ex = [
 		}
 	}
 
+	let parts = [];
+	
 	if(concat_mode){
-		text = '<span id="titles"></span>' + part_titles.join('<br>') + '<hr>';
-	}else{
-		text = '';
+		parts.push('<span id="titles"></span>' + part_titles.join('<br>') + '<hr>');
 	}
 	let headtext = '';
 	headtext += '■常用漢字テスト<br>';
@@ -12660,8 +13061,15 @@ const kanji_list_ex = [
 	}
 	headtext += '<hr>';
 	headtext += '■結果テキスト<br>';
-	text += headtext + lines.join('<br>');
-	hoge = hoge.replace(/\n/g, '<br>');
-
-	document.getElementById("result").innerHTML = '<div class="resultext">' + text + '<br>' + hoge + '</div>';
+	parts.push(headtext);
+	parts.push(...lines);
+	if(0 < hoge.length){
+		hoge = hoge.replace(/\n/g, '<br>');
+	}
+	parts.push('<div class="resultext">');
+	parts.push(text);
+	parts.push('<br>');
+	parts.push(hoge);
+	parts.push('</div>');
+	get_id('result').innerHTML = parts.join('');
 }
