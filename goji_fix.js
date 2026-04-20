@@ -16479,32 +16479,10 @@ const cnv_list =
 	//■本体、置換開始
 
 	t = t.replace(combinedRegex, (match, ...groups) => {
-  const idx = groups.findIndex(g => g !== undefined);
 			const idx = arr0_2.length;
 			arr0_2.push(match);
 		return `＜a_${idx}＞`;
 	});
-	/*
-	for(let a=0; a<arr0_list_end;++a){
-		let word = arr0_list[a];
-		arr0_list[a] = [];
-		arr0_list[a][0] = word;
-		arr0_list[a][1] = '＜a_' + a + '＞';
-		try {
-			arr0_list[a][2] = new RegExp(word, 'g');
-		} catch (e) {
-			str_error += 'arr0_listパターン構文不正　' + word + '\n';
-		}
-		arr0_list[a][3] = new RegExp(arr0_list[a][1], 'g');
-	}
-	error_alert(str_error);
-	for(let k=0;k<arr0_list_end;++k){
-		if(0 < arr0_list[k][0].length){
-			t = t.replaceAll(arr0_list[k][2], arr0_list[k][1]);
-		}
-	}
-*/
-	// ret = t;
 	let func_add_doll = function(word){
 		let add_doll = '';
 		let doll_pos = word.indexOf('$');
