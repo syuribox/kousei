@@ -7180,7 +7180,7 @@ const fix_kanji_list =
 塩騒の香り■潮騒の香り
 墓本■基本
 増棒■増俸
-墳((めし|メシ|飯)(もの|モノ|物))■噴$1[確認]%{funmesi}
+墳((めし|メシ|飯)(もの|モノ|物))■噴$1[確認]%{ref_funmesi}
 墾親■懇親
 壁から除([いかきくけこ])■壁から覗$1
 声が枯れ■声が嗄れ
@@ -7644,7 +7644,7 @@ const fix_kanji_list =
 感違い■勘違い
 慈([味賀養])■滋$1
 慢然■漫然
-憤((めし|メシ|飯)(もの|モノ|物))■噴$1[確認]%{funmesi}
+憤((めし|メシ|飯)(もの|モノ|物))■噴$1[確認]%{ref_funmesi}
 憶(する|し)■臆する(／億する？)
 憶づつ■億ずつ%{gendai}
 憶ドルづつ■億ドルずつ%{gendai}
@@ -10322,7 +10322,8 @@ const nandoku_list =
 漉([いかきくけこ])■す$1
 漲([っらりるれろん])■みなぎ$1
 焙([っらりるれろん])■あぶ$1
-熾([こさしすせそ])■お$1
+熾(こ[さしすせそ])■お$1
+熾([さしすせそ])■おこ$1
 熾([っらりるれろん])■おこ$1／いこ$1
 燬([いかきくけこ])■や$1
 爛(れ%{itidan2})■た$1
@@ -14983,7 +14984,7 @@ const aimai_list =
 にましだが■にましたが？
 の一旦■の一端？
 ひましだが■ひましたが？
-ふん((めし|メシ|飯)(もの|モノ|物))■[確認]%{funmesi}<!-- $1 -->
+ふん((めし|メシ|飯)(もの|モノ|物))■[確認]%{ref_funmesi}<!-- $1 -->
 ぼそぼそ■[擬音語]／ほそぼそ[細々][確認]？
 まんじり■[確認]%{ref_manjiri}
 まんじりともしない■[確認]%{ref_manjiri}
@@ -15026,7 +15027,7 @@ const aimai_list =
 フィーチャ■[feature特徴強調機能／フューチャ未来futre]
 フォーム■[<a href="yourei/home_form.html" target="webdic">📚form/ホームhome</a>]
 フューチャ■[未来futre／フィーチャfeature特徴強調機能]
-フン((めし|メシ|飯)(もの|モノ|物))■[確認]%{funmesi}<!-- $1 -->
+フン((めし|メシ|飯)(もの|モノ|物))■[確認]%{ref_funmesi}<!-- $1 -->
 ブレット■[銃弾bullet／ブレッドbread(パン)]
 ブレッド■[パンbread／ブレット銃弾bullet]
 プラットフォーム■[<a href="yourei/home_form.html" target="webdic">📚プラットホーム/platform</a>]
@@ -15102,7 +15103,7 @@ const aimai_list =
 命の選択■命の洗濯？[ことわざ]
 咒■呪%{ref_sinzyouyou}
 喩え■たとえ[仮令]？
-噴((めし|メシ|飯)(もの|モノ|物))■[確認]%{funmesi}<!-- $1 -->
+噴((めし|メシ|飯)(もの|モノ|物))■[確認]%{ref_funmesi}<!-- $1 -->
 在([っらりるれろん])■あ$1[推奨：%{ref_hiraku}]
 報償■褒賞[確認]？
 堽■岡%{ref_sinzyouyou}
@@ -15240,8 +15241,8 @@ const aimai_list =
 let dummy_warn2_list = function(){};
 const warn2_list =
 `
-(?<![a-zA-Z])OL(?=a-zA-Z)[])■女性社員[表現注意:男女平等]
-(?<![a-zA-Z])SS(?=a-zA-Z)[])■[表現注意:ナチス]
+(?<![a-zA-Z])OL(?![a-zA-Z])■女性社員[表現注意:男女平等]
+(?<![a-zA-Z])SS(?![a-zA-Z])■[表現注意:ナチス]
 卍■[表現注意:ナチス]
 卐■[表現注意:ナチス]
 おざなり■なおざり[確認]？<a href="https://www.nhk.or.jp/bunken/summary/kotoba/term/075.html" target="webdic">🌎NHK</a>
@@ -16259,6 +16260,18 @@ const cnv_list =
 			throw new Error(str_error);
 		}
 	}
+	let html_escape = function(s){
+		return s.replaceAll(/[&<>'"]/g, match => {
+			switch(match) {
+					case '&': return '&amp;';
+					case '<': return '&lt;';
+					case '>': return '&gt;';
+					case "'": return '&#39;';
+					case '"': return '&#34;';
+			}
+			return match;
+		});
+	}
 
 	var cxxxx = 0;
 	const fixnum = function(i){
@@ -16277,7 +16290,7 @@ const cnv_list =
 		  }
 		}
 		return retx;
-		// return str.replace(/\([^\()]+?\)/g, '');
+		// return str.replaceAll(/\([^\()]+?\)/g, '');
 	};
 	let func_sort_length = function(a, b){
 		let r = b.length - a.length;
@@ -16301,7 +16314,7 @@ const cnv_list =
 		if(r != 0){ return r;}
 		return a > b;
 	};
-	let rep_arr = rep_list.replace(/\r\n/g, '\n').split('\n');
+	let rep_arr = rep_list.replaceAll('\r\n', '\n').split('\n');
 	let func_rep_apply = function(list, arr){
 		const length = arr.length;
 		for(let a = 0; a < length; a++){
@@ -16313,28 +16326,28 @@ const cnv_list =
 		return list;
 	};
 	let ret = '';
-	let cnv0_list = cnv_list.replace(/\r\n/g, '\n').split('\n');
+	let cnv0_list = cnv_list.replaceAll('\r\n', '\n').split('\n');
 	for(let a=0; a<cnv0_list.length;++a){
 		let word_arr = cnv0_list[a].split('■');
 		cnv0_list[a] = word_arr;
 		cnv0_list[a][2] = new RegExp(word_arr[0], 'g');
 	}
-	let t = ('' + input_data).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	let t = html_escape('' + input_data);
 	for(let k=0; k<cnv0_list.length;++k){
 		if(0 < cnv0_list[k][0].length){
-			t = t.replace(cnv0_list[k][2], cnv0_list[k][1]);
+			t = t.replaceAll(cnv0_list[k][2], cnv0_list[k][1]);
 		}
 	}
 	if(line_flag){
-		t = t.replace(/◆/g, '◆_').replace(/■/g, '◆=');
+		t = t.replaceAll('◆', '◆_').replaceAll('■', '◆=');
 	}
-	t = t.replace(/＜/g, '◆a_').replace(/＞/g, '◆b_');
+	t = t.replaceAll('＜', '◆a_').replaceAll('＞', '◆b_');
 
 	let fix_hira2_list = '';
 	{
 		const fix_hira2_arr = [];
 		let make_hira2 = function(target, hira_list, out_arr){
-			hira_list.replace(/\r\n/g, '\n').split('\n').forEach(item => {
+			hira_list.replaceAll('\r\n', '\n').split('\n').forEach(item => {
 				if(0 < item.length){
 					const left = item.replace('ん', 'んん');
 					out_arr.push(left + '■' + item + '[衍字]');
@@ -16350,10 +16363,10 @@ const cnv_list =
 	let families_list;
 	const families_out_set = new Set();
 	{
-		const out_array = families_out_list.replace(/\r\n/g, '\n').split('\n');
-		out_array.forEach(item => {
-	  	families_out_set.add(item);
-		});
+		const out_array = families_out_list.replaceAll('\r\n', '\n').split('\n');
+		for(const item of out_array){
+			families_out_set.add(item);
+		}
 		/**************
 		// カナリストの単語は自動除外から除外
 		let expand_sub_pattern = function(original) {
@@ -16373,7 +16386,7 @@ const cnv_list =
 			const expanded = options.map(opt => prefix + opt);
 			return expanded;
 		}
-		let kana_out_list = fix_kana_list.replace(/\r\n/g, '\n').split('\n');
+		let kana_out_list = fix_kana_list.replaceAll('\r\n', '\n').split('\n');
 		const kana_out_list_end = kana_out_list.length;
 		for(let a=0; a<kana_out_list_end;++a){
 			kana_out_list[a] = kana_out_list[a].split('■');
@@ -16400,15 +16413,16 @@ const cnv_list =
 				families_set.add(family2_match[1]);
 			}
 		}
-//		families_list = 'テスト\nデバッグ\n';
+//	families_list = 'テスト\nデバッグ\n';
 		families_list = Array.from(families_set).join('\n') + '\n';
 	}
 	let musi2_list = [];
 	let fixadd_list = [];
 	{
-		let musi_temp = musi_list.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\r\n/g, '\n').split('\n');
-		musi2_list = musi_temp.filter(item => item.charAt(0) !== '+').join('\n') + '\n';
-		fixadd_list = musi_temp.filter(item => item.charAt(0) === '+')
+		let musi_temp = musi_list.replaceAll('\r\n', '\n');
+		musi2_list = html_escape(musi_temp).split('\n')
+			.filter(item => item.charAt(0) !== '+').join('\n') + '\n';
+		fixadd_list = musi_temp.split('\n').filter(item => item.charAt(0) === '+')
 			.map(item => {
 				const v = item.substr(1);
 				if(v.indexOf('■') !== -1){
@@ -16419,7 +16433,7 @@ const cnv_list =
 	}
 
 	let arr0_list = func_rep_apply(pre_list + ruby_list + families_list + musi2_list, rep_arr)
-		.replace(/\r\n/g, '\n').split('\n').sort(func_sort_length);
+		.replaceAll('\r\n', '\n').split('\n').sort(func_sort_length);
 	const arr0_list_end = arr0_list.length;
 	const arr0_2 = [];
 	const combinedRegex = new RegExp(
@@ -16437,8 +16451,35 @@ const cnv_list =
 	  'g'
 	);
 	error_alert(str_error);
+
+	const utf8_byte_length = function(str) {
+		let size = 0;
+		const length = str.length;
+		for (let i = 0; i < length; i++) {
+			const code = str.charCodeAt(i);
+			if (code < 0x80) {
+				size += 1;
+			} else if (code < 0x800) {
+				size += 2;
+			} else if (code < 0xD800 || code > 0xDFFF) {
+				size += 3;
+			} else {
+				// サロゲートペア
+				size += 4;
+				i++;  // next skip
+		  }
+		}
+		return size;
+	}
+
+	const char_count = t.length;
+	const file_size = utf8_byte_length(t);
+	const file_size_kb = Math.floor((file_size + 1023) / 1024);
+
+	//■本体、置換開始
+
 	t = t.replace(combinedRegex, (match, ...groups) => {
-//	  const idx = groups.findIndex(g => g !== undefined);
+  const idx = groups.findIndex(g => g !== undefined);
 			const idx = arr0_2.length;
 			arr0_2.push(match);
 		return `＜a_${idx}＞`;
@@ -16459,7 +16500,7 @@ const cnv_list =
 	error_alert(str_error);
 	for(let k=0;k<arr0_list_end;++k){
 		if(0 < arr0_list[k][0].length){
-			t = t.replace(arr0_list[k][2], arr0_list[k][1]);
+			t = t.replaceAll(arr0_list[k][2], arr0_list[k][1]);
 		}
 	}
 */
@@ -16475,45 +16516,45 @@ const cnv_list =
 
 	let nobasi_fix_list = [];
 	{
-		let nobasi_work = nobasi_list.replace(/\r\n/g, '\n').split('\n');
+		let nobasi_work = nobasi_list.replaceAll('\r\n', '\n').split('\n');
 		const work_end = nobasi_work.length;
 		for(let x = 0; x < work_end; x++){
 			const word_org = nobasi_work[x];
-			const word_replace = nobasi_work[x].replace(/ー/g, '－');
-			const word_replace2 = nobasi_work[x].replace(/ー/g, '―');
-			const word_replace3 = nobasi_work[x].replace(/ー/g, '─');
-			nobasi_work[x] = word_replace + '■' + word_org + '[長音]\n' + word_replace2 + '■' + word_org + '[長音]\n' + word_replace3 + '■' + word_org + '[長音]';
+			const word_replace1  = nobasi_work[x].replaceAll('ー', '－');
+			const word_replace2 = nobasi_work[x].replaceAll('ー', '―');
+			const word_replace3 = nobasi_work[x].replaceAll('ー', '─');
+			nobasi_work[x] = `${word_replace1}■${word_org}[長音]\n${word_replace2}■${word_org}[長音]\n${word_replace3}■${word_org}[長音]`;
 		}
 		nobasi_fix_list = nobasi_work.join('\n') + '\n';
 	}
 
-	let arr_betuji = betuji_list.replace(/\n/g, betuji_suffix + '\n');
-	let arr_nandoku = nandoku_list.replace(/\n/g, nandoku_suffix + '\n');
-	let arr_animal_rendaku = animal_rendaku_list.replace(/\n/g, animal_rendaku_suffix + '\n');
+	let arr_betuji = betuji_list.replaceAll('\n', betuji_suffix + '\n');
+	let arr_nandoku = nandoku_list.replaceAll('\n', nandoku_suffix + '\n');
+	let arr_animal_rendaku = animal_rendaku_list.replaceAll('\n', animal_rendaku_suffix + '\n');
 	let arr_list = func_rep_apply(fix_0_list + fix_busyu_list + fix_hira_list
 		+ fix_kana_list + fix_kana2_list + fix_kanji_list + arr_animal_rendaku
 		+ arr_betuji + arr_nandoku + ka_tikara_list + pe_list + ni_list
 		+ fixadd_list + fix_hira2_list
 		+ he_hira_kata_list + country_list + vb_list + nobasi_fix_list, rep_arr)
-		.replace(/\r\n/g, '\n').split('\n').sort(func_sort_sikaku);
+		.replaceAll('\r\n', '\n').split('\n').sort(func_sort_sikaku);
 	const arr_list_end = arr_list.length;
 	for(let a=0; a<arr_list_end;++a){
 		arr_list[a] = arr_list[a].split('■');
 		if(arr_list[a][0].length <= 0){
 			continue;
 		}
-		try {
+	try {
 			arr_list[a][2] = new RegExp(arr_list[a][0], 'gu');
-		} catch (e) {
-			str_error += 'パターン構文不正　' + arr_list[a][0] + '\n';
-		}
+	} catch (e) {
+		str_error += 'パターン構文不正　' + arr_list[a][0] + '\n';
+	}
 		arr_list[a][3] = '＜b_' + a + '＞';
 		let add_doll = '';
-		try{
+	try {
 			add_doll = func_add_doll(arr_list[a][1]);
-		} catch (e) {
-				str_error += 'パターン構文不正　' + arr_list[a][0] + '\n';
-		}
+	} catch (e) {
+			str_error += 'パターン構文不正　' + arr_list[a][0] + '\n';
+	}
 		if(0 < add_doll.length){
 			arr_list[a][4] = new RegExp(arr_list[a][3] + '◆\\(([^\\n\\r\\(\\)]*?)\\)', 'g');
 		}else{
@@ -16528,22 +16569,22 @@ const cnv_list =
 		}
 		let add_doll = func_add_doll(arr_list[k][1]);
 		if(0 < add_doll.length){
-			t = t.replace(arr_list[k][2], arr_list[k][3] + '◆(' + add_doll + ')');
+			t = t.replaceAll(arr_list[k][2], arr_list[k][3] + '◆(' + add_doll + ')');
 		}else{
-			t = t.replace(arr_list[k][2], arr_list[k][3]);
+			t = t.replaceAll(arr_list[k][2], arr_list[k][3]);
 		}
 	}
 	// ret += '<hr>' + t;
 	let arr_aimai = [];
 	if(aimai_flag){
 		const hiraganaToKatakana = function(str) {
-			return str.replace(/[ぁ-ゔ]/g, function(match) {
+			return str.replaceAll(/[ぁ-ゔ]/g, function(match) {
 				return String.fromCharCode(match.charCodeAt(0) + 0x60);
 			});
 		};
-		let arr_nandoku2 = nandoku2_list.replace(/\n/g, nandoku2_suffix + '\n');
-		const goin_kata_list = hiraganaToKatakana(gion_list.replace(/★/g, ''));
-		arr_aimai = func_rep_apply(aimai_list + katuyo_list + gion_list + goin_kata_list + arr_nandoku2, rep_arr).replace(/\r\n/g, '\n').split('\n').sort(func_sort_sikaku);
+		let arr_nandoku2 = nandoku2_list.replaceAll('\n', nandoku2_suffix + '\n');
+		const goin_kata_list = hiraganaToKatakana(gion_list.replaceAll('★', ''));
+		arr_aimai = func_rep_apply(aimai_list + katuyo_list + gion_list + goin_kata_list + arr_nandoku2, rep_arr).replaceAll('\r\n', '\n').split('\n').sort(func_sort_sikaku);
 		const aimai_list_end = arr_aimai.length;
 		for(let a=0; a<aimai_list_end;++a){
 			arr_aimai[a] = arr_aimai[a].split('■');
@@ -16557,7 +16598,7 @@ const cnv_list =
 			}
 			arr_aimai[a][3] = '＜c_' + a + '＞';
 			let add_doll = '';
-			try{
+			try {
 				add_doll = func_add_doll(arr_aimai[a][1]);
 			} catch (e) {
 				str_error += 'arr_aimaiパターン構文不正　' + arr_aimai[a][0] + '\n';
@@ -16576,17 +16617,17 @@ const cnv_list =
 			}
 			let add_doll = func_add_doll(arr_aimai[k][1]);
 			if(0 < add_doll.length){
-				t = t.replace(arr_aimai[k][2], arr_aimai[k][3] + '◆(' + add_doll + ')');
+				t = t.replaceAll(arr_aimai[k][2], arr_aimai[k][3] + '◆(' + add_doll + ')');
 			}else{
-				t = t.replace(arr_aimai[k][2], arr_aimai[k][3]);
+				t = t.replaceAll(arr_aimai[k][2], arr_aimai[k][3]);
 			}
 		}
 	}
 	let arr_warn2 = [];
 	if(warn2_flag){
-		let arr_nandoku2 = nandoku2_list.replace(/\n/g, nandoku2_suffix + '\n');
+		let arr_nandoku2 = nandoku2_list.replaceAll('\n', nandoku2_suffix + '\n');
 		var temp_list_concat = warn2_list + arr_nandoku2;
-		arr_warn2 = func_rep_apply(temp_list_concat, rep_arr).replace(/\r\n/g, '\n').split('\n').sort(func_sort_sikaku);
+		arr_warn2 = func_rep_apply(temp_list_concat, rep_arr).replaceAll('\r\n', '\n').split('\n').sort(func_sort_sikaku);
 		temp_list_concat = '';
 		const arr_warn2_end = arr_warn2.length;
 		for(let a=0; a<arr_warn2_end;++a){
@@ -16598,16 +16639,16 @@ const cnv_list =
 		// ret += '<hr>' + t;
 		for(let k=0; k<arr_warn2_end;++k){
 			if(0 < arr_warn2[k][0].length){
-				t = t.replace(arr_warn2[k][2], arr_warn2[k][3]);
+				t = t.replaceAll(arr_warn2[k][2], arr_warn2[k][3]);
 			}
 		}
 	}
 
 	if(yure_flag){
 		const yure_array = (yure_list)
-			.replace(/\r\n/g, '\n').split('\n').sort();
+			.replaceAll('\r\n', '\n').split('\n').sort();
 		const yure_lenght = yure_array.length;
-		t = t.replace(new RegExp('＄', 'g'), '＄x');
+		t = t.replaceAll(new RegExp('＄', 'g'), '＄x');
 		for(let y = 0; y < yure_lenght; y++){
 			if(yure_array[y] === ''){
 				continue;
@@ -16616,8 +16657,8 @@ const cnv_list =
 			const a = (t.match(new RegExp(item[0], 'g')) || []).length;
 			const b = (t.match(new RegExp(item[1], 'g')) || []).length;
 			if (0 < a && 0 < b) {
-				t = t.replace(new RegExp(item[0], 'g'), '＄' + y + 'a');
-				t = t.replace(new RegExp(item[1], 'g'), '＄' + y + 'b');
+				t = t.replaceAll(new RegExp(item[0], 'g'), '＄' + y + 'a');
+				t = t.replaceAll(new RegExp(item[1], 'g'), '＄' + y + 'b');
 			}
 		}
 		for(let y = 0; y < yure_lenght; y++){
@@ -16625,23 +16666,23 @@ const cnv_list =
 				continue;
 			}
 			const item = yure_array[y].split('/');
-			t = t.replace(new RegExp('＄' + y + 'a', 'g'),
+			t = t.replaceAll(new RegExp('＄' + y + 'a', 'g'),
 				 '<span class="color-hit">' + item[0] +
 				'</span><span class="color-pink">■↔(' + item[1] + '[表記ゆれ])</span>'
 			);
-			t = t.replace(new RegExp('＄' + y + 'b', 'g'),
+			t = t.replaceAll(new RegExp('＄' + y + 'b', 'g'),
 				 '<span class="color-hit">' + item[1] +
 				'</span><span class="color-pink">■↔(' + item[0] + '[表記ゆれ])</span>'
 			);
 		}
-		t = t.replace(new RegExp('＄x', 'g'), '＄');
+		t = t.replaceAll(new RegExp('＄x', 'g'), '＄');
 	}
 
 	if(warn2_flag){
 		const arr_warn2_end = arr_warn2.length;
 		for(let k=0; k<arr_warn2_end;++k){
 			if(0 < arr_warn2[k][0].length){
-				t = t.replace(arr_warn2[k][4], '<span class="color-hit">' + func_esq_regex(arr_warn2[k][0]) +
+				t = t.replaceAll(arr_warn2[k][4], '<span class="color-hit">' + func_esq_regex(arr_warn2[k][0]) +
 					'</span><span class="color-green">■🔍('+ arr_warn2[k][1] + ')</span>');
 			}
 		}
@@ -16663,7 +16704,7 @@ const cnv_list =
 				re_to = '<span class="color-hit">' + func_esq_regex(arr_aimai[k][0]) +
 					'</span><span class="color-orange">■⚠('+ arr_aimai[k][1] + ')</span>';
 			}
-			t = t.replace(arr_aimai[k][4], re_to);
+			t = t.replaceAll(arr_aimai[k][4], re_to);
 		}
 		// ret += '<hr>' + t;
 	}
@@ -16681,21 +16722,23 @@ const cnv_list =
 			re_to = '<span class="color-hit">' + func_esq_regex(arr_list[k][0]) +
 				'</span><span class="color-red">■🐛('+ arr_list[k][1] + ')</span>';
 		}
-		t = t.replace(arr_list[k][4], re_to);
+		t = t.replaceAll(arr_list[k][4], re_to);
 	}
 
 	// ret += '<hr>' + t;
 	{
 		let idx = 0;
-		t = t.replace(/＜a_\d+＞/g, (match) => {
+		t = t.replaceAll(/＜a_\d+＞/g, (match) => {
 		  const idx = parseInt(match.match(/\d+/)[0]);
 		  return arr0_2[idx];
 		});
 	}
 
+	let line_count = 0;
 	{
 		// 行番号
 		const lines = t.split('\n');
+		line_count = lines.length;
 		const outputs = [];
 		lines.forEach((line_str, index) => {
 			outputs.push(fixnum(index + 1) + ': ' + line_str);
@@ -16704,40 +16747,40 @@ const cnv_list =
 	}
 
 	// ret += '<hr>' + t;
-	t = t.replace(/◆a_/g, '＜').replace(/◆b_/g, '＞');
-	let bug_count = (t.match(/■🐛/g) || []).length;
-	let warn_count = (t.match(/■⚠/g) || []).length;
-	let warn2_count = (t.match(/■🔍/g) || []).length;
-	let yure_count = (t.match(/■↔/g) || []).length;
-	let re_
+	t = t.replaceAll('◆a_', '＜').replaceAll('◆b_', '＞');
+	let bug_count = t.split('■🐛').length - 1;
+	let warn_count = t.split('■⚠').length - 1;
+	let warn2_count = t.split('■🔍').length - 1;
+	let yure_count = t.split('■↔').length - 1;
 	if(line_flag){
 		let ret2 = '';
-		t.replace(/^.*■.*$/gm, function(str){
+		t.replaceAll(/^.*■.*$/gm, function(str){
 			ret2 += str + '\n';
 			return str;
 		});
-		t = ret2.replace(/◆=/g, '■').replace(/◆_/g, '◆');
+		t = ret2.replaceAll('◆=', '■').replace('◆_', '◆');
 	}
 
 	//  出力メイン開始
 	if(0 < error_out.length){
-		ret += error_out.replace(/&/g, '&amp;' ).replace(/</g, '&lt;').replace(/>/g, 'gt;') + '<hr>';
+		ret += html_escape(error_out) + '<hr>';
 	}
 
-	ret += '凡例：・<span class="color-hit">発見箇所</span><span class="color-red">■🐛(修正候補[説明])</span>　' + bug_count + '個' + ret;
+	ret += `${file_size_kb}KB　${line_count}行　約${char_count}文字
+凡例：・<span class="color-hit">発見箇所</span><span class="color-red">■🐛(修正候補[説明])</span>　${bug_count}個`;
 	if(aimai_flag){
-				ret += '<br>　　　・<span class="color-hit">発見箇所</span><span class="color-orange">■⚠(警告情報)</span>　' + warn_count + '個';
+				ret += `<br>　　　・<span class="color-hit">発見箇所</span><span class="color-orange">■⚠(警告情報)</span>　${warn_count}個`;
 	}
 	if(warn2_flag){
-				ret += '<br>　　　・<span class="color-hit">発見箇所</span><span class="color-green">■🔍(注意情報)</span>　' + warn2_count + '個';
+				ret += `<br>　　　・<span class="color-hit">発見箇所</span><span class="color-green">■🔍(注意情報)</span>　${warn2_count}個`;
 	}
 	if(yure_flag){
-				ret += '<br>　　　・<span class="color-hit">発見箇所</span><span class="color-pink">■↔(表記ゆれ情報)</span>　' + yure_count + '個';
+				ret += `<br>　　　・<span class="color-hit">発見箇所</span><span class="color-pink">■↔(表記ゆれ情報)</span>　${yure_count}個`;
 	}
 
 	ret += '<br>※注意：出力文字列は全角英数は半角英数に置換されています。<hr>';
 	ret += t;
-	ret = ret.replace(/\n/g, '<br>\n');
+	ret = ret.replaceAll('\n', '<br>\n');
 	return ret;
 }
 
