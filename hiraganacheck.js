@@ -11009,6 +11009,7 @@ const kanji_pre_dic_org =
 黙りこく/五段ラ
 齎/五段サ
 齧/五段ラ
+𠮟/五段ラ
 `;
 
 function dummy_one_kanji_dic_org(){}
@@ -11341,25 +11342,23 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 		}else if(dic_info[i] === '人'){
 			// 人称名詞
 			let ret_word = word;
-			const c = suffix[0];
-			if(c === 'ら'){
+			if(suffix.startsWith('ら')){
 				ret_word = word + 'ら';
-			}else if(c === 'め'){
+			}else if(suffix.startsWith('め')){
 				ret_word = word + 'め';
-			}else if(c === 'ち'){
+			}else if(suffix.startsWith('ち')){
 				ret_word = word + 'ち'; // 家「君ち」
 			}else{
-				const c2 = suffix.substr(0,2);
-				if(c2 === 'たち'){
+				if(suffix.startsWith('たち')){
 					const c3 = suffix.substr(2, 1);
 					if(c3 === 'め'){
 						ret_word = word + 'たちめ';
 					}else{
 						ret_word = word + 'たち';
 					}
-				}else if(c2 === 'ども'){
+				}else if(suffix.startsWith('ども')){
 					ret_word = word + 'ども';
-				}else if(c2 === 'らめ'){
+				}else if(suffix.startsWith('らめ')){
 					ret_word = word + 'らめ';
 				}
 			}
@@ -11369,12 +11368,12 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 					ret = [1, i, ret_word];
 				}
 			}
-		}else if(dic_info[i][0] === '末'){
+		}else if(dic_info[i].startsWith('末')){
 			// [末尾]
 			// d :末黒, word:どす→どす黒
 			let d = dic_info[i];
 			const ext = d.substr(1);
-			if(ext === suffix.substr(0, ext.length)){
+			if(suffix.startsWith(ext)){
 				if(ret[2].length < word.length){
 					const ex_ret = search_ex_dic(exdic_, word, word+suffix);
 					if(ex_ret[0]){
@@ -11499,17 +11498,15 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 							const func_rendaku = (ex) => {
 								// 連濁版
 								// '走った' => '脱いだ'
-								const one = ex[0];
-								const two = ex.substr(0,2);
-								if(one === 'た'){           // 書いた→死んだ
+								if(ex.startsWith('た')){           // 書いた→死んだ
 									ex = 'だ' + ex.substr(1);
-								}else if(one === 'て'){     // 書いてた→死んでた
+								}else if(ex.startsWith('て')){     // 書いてた→死んでた
 									ex = 'で' + ex.substr(1);
-								}else if(one === 'と'){
+								}else if(ex.startsWith('と')){
 									ex = 'ど' + ex.substr(1); // 書くとく→死んどく
-								}else if(two === 'ちま'){
+								}else if(ex.startsWith('ちま')){
 									ex = 'じ' + ex.substr(1); // 書いちまう→死んじまう
-								}else if(two === 'ちゃ'){
+								}else if(ex.startsWith('ちゃ')){
 									ex = 'じ' + ex.substr(1); // 書いちゃう→死んじゃう
 								}
 								return ex;
@@ -11570,7 +11567,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 								const hit_ex = ext_sets[ext_index].has(key1);
 								ex = key0;
 								// console.log(hit_ex + ':' + key1 + ' / ' + key0 + ' ' + is_rendaku);
-								if(hit_ex && ex === suffix.substr(1, ex.length)){
+								if(hit_ex && suffix.startsWith(ex, 1)){
 									let ret_word = word + suffix.substr(0, ex.length + 1);
 									let enable = true;
 									const exclude = [
@@ -11585,16 +11582,16 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 										'んのよ/く'];
 									enable = exclue_match(exclude, ex, suffix.substr(1));
 									if(false === enable){
-									}else if(suffix.substr(0,2) === 'する'){
+									}else if(suffix.startsWith('する')){
 										// (運)動す/る => 運動/する
 										enable = false;
-//									}else if(suffix.substr(0,3) === 'すべき'){
+//									}else if(suffix.startsWith('すべき')){
 //										// (運)動す/べき => 動/すべき
 //										enable = false;
-									}else if(ex === '' && suffix.substr(0,3) === 'けれど'){
+									}else if(ex === '' && suffix.startsWith('けれど')){
 										// あるけ/れど => ある/けれど
 										enable = false;
-									}else if(ex[ex.length-1] === 'た' && suffix[ex.length+1] === 'が' &&
+									}else if(ex.endsWith('た') && suffix[ex.length+1] === 'が' &&
 										0 < '_らりるれろっ'.indexOf(suffix[ex.length+2])){
 										// skip 入れた/がる => 入れ/たがる
 										ex = ex.substr(0, ex.length-1);
@@ -11603,7 +11600,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 										const desu = ['ましたから', 'ましたか', 'ましたし', 'ました', 'ましても', 'まして', 'ましょうから', 'ましょうか',
 											'ましょう', 'ましょ', 'ますから', 'ますか', 'ますし', 'ます', 'ませんから', 'ませんか', 'ませんし', 'ません', 'ませ'];
 										for(let p = 0; p < desu.length; p++){
-											if(desu[p] === suffix.substr(2, desu[p].length)){
+											if(suffix.startsWith(2, desu[p])){
 												// '書けてます', '脱いでます'
 												ret_word += desu[p];
 												break;
@@ -11752,11 +11749,11 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 					if(ex_first == 'す'){ ex_first = 'ず'}
 					if(ex_first == 'せ'){ ex_first = 'ぜ'}
 				}
-				if(suffix.substr(0,1) === ex_first || ex_first === ''){
+				if(suffix.startsWith(ex_first) || ex_first === ''){
 					for(const ex_item of exts[1]){
 						let ex = ex_first + ex_item;
 						const ret_word = word + ex;
-						if(ex === suffix.substr(0, ex.length)){
+						if(suffix.startsWith(ex)){
 							const ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
 							if(ex_ret[0]){
 								if(ret[2].length < ret_word.length){
@@ -11831,11 +11828,11 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 			}
 			for(let k = 0; k < ext.length; k++){
 				const a = ext[k];
-				if(a === suffix.substr(0, a.length)){
+				if(suffix.startsWith(a)){
 					const ret_word = word + a;
-					if(a.substr(a.length-2, 2) === 'たら' && suffix.substr(a.length-2, 4) == 'しい'){
+					if(a.endsWith('たら') && suffix.startsWith('しい', 1)){
 						// skip
-					}else if(a === 'く' && suffix.substr(1, 2) === 'らい'){
+					}else if(a === 'く' && suffix.startsWith('らい', 1) ){
 						// skip おなじく/らい →おなじ/くらい
 					}else{
 						const ex_ret = search_ex_dic(exdic_, ret_word, word+suffix);
@@ -12008,7 +12005,7 @@ const output_main = function(param_text){
 					warndic.push(userdic[i].substr(1));
 				}else if(first_char === '='){
 					warndic_del.push(userdic[i].substr(1));
-				}else if(is_kanji(first_char.charCodeAt(0))){
+				}else if(is_kanji(first_char.codePointAt(0))){
 					kanji_pre_dic.push(userdic[i]);
 				}else if(is_katakana(first_char.charCodeAt(0))){
 					kanji_pre_dic.push(userdic[i]);
@@ -12945,7 +12942,7 @@ const kanji_list_ex = [
 		let r = i - line_start2 + diff;
 		const word_end = -1;
 		let word_period = false;
-		const this_char = line.charCodeAt(r);
+		const this_char = line.codePointAt(r);
 		const this_char2 = line[r];
 		let sinjoyou = false;
 		if(is_kanji(this_char) && this_char != 0x3005){
