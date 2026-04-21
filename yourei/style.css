@@ -43,6 +43,15 @@
 .pc-mode {
     display: inline-block;
 }
+.only-mswindows, .only-apple, .only-macos, .only-android, .only-linux {
+    display: none;
+}
+body.os-mswindows .only-mswindows { display: inline-block; }
+body.os-macos .only-macos { display: inline-block; }
+body.os-apple .only-apple { display: inline-block; }
+body.os-android .only-android { display: inline-block; }
+body.os-linux .only-linux { display: inline-block; }
+
 body {
     line-height: 1.8;
     margin: 0;
