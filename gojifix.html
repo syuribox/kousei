@@ -5,6 +5,9 @@
 <title>小説誤字fix(js)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" type="text/css" href="yourei/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDMincho:wght@400&amp;display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="container2">
@@ -18,7 +21,6 @@
 <input type="button" id="button_clear" value="クリア　">
 　<input type="button" id="button_sample" value="サンプル" >
 <br class="mobile-only"><span class="pc-mode">　</span>
-<br class="mobile-only"><span class="pc-mode">　</span>
 <input type="button" id="button_memo_save" value="メモ保存" >
 　<input type="button" id="button_memo_load" value="ロード　" >
 <br>
@@ -27,6 +29,59 @@
 <br class="mobile-only"><span class="pc-mode">　</span>
 <input type="checkbox" id="check_yure" value="1"><label for="check_yure">表記ゆれ</label>
 　<input type="checkbox" id="check_line" value="1" checked><label for="check_line">情報行のみ</label>
+<br>
+<label for="font_select">Font</label>
+<select id="font_select">
+<option value="sans-serif" selected>■ゴシック</option>
+<option value="'Meiryo', sans-serif" class="pc-mode">メイリオ</option>
+<option value="'Yu Gothic', 'YuGothic', sans-serif" class="pc-mode">游ゴシック</option>
+<option value="'Hiragino Sans', sans-serif" class="only-apple">Hiragino Sans</option>
+<option value="'Hiragino Kaku Gothic Pr6', 'Hiragino Kaku Gothic Pro', sans-serif" class="only-apple">ヒラギノ角ゴPro</option>
+<option value="'Hiragino Kaku Gothic Pr6N', 'Hiragino Kaku Gothic ProN', sans-serif" class="only-apple">ヒラギノ角ゴProN</option>
+<option value="sans-serif" class="only-apple">ヒラギノ角ゴPr6N</option>
+<option value="'Noto Sans JP', 'Source Han Sans JP', 'Noto Sans CJK JP', sans-serif">Noto Sans</option>
+<option value="'BIZ UDPGothic', sans-serif" class="pc-mode">BIZ UDPゴシック</option>
+<option value="'MS Gothic', sans-serif" class="only-mswindows">MSゴシック</option>
+<option value="'MSP Gothic', sans-serif" class="only-mswindows">MS Pゴシック</option>
+<option value="'Osaka', sans-serif" class="only-macos">osaka</option>
+<option value="'IPAGothic', sans-serif" class="only-linux">IPAゴシック</option>
+<option value="'IPAexGothic', sans-serif" class="only-linux">IPAexゴシック</option>
+<option value="'IPAPGothic', sans-serif" class="only-linux">IPA Pゴシック</option>
+<option value="'TakaoGothic', sans-serif" class="only-linux">Takaoゴシック</option>
+<option value="'Kochi Gothic', sans-serif" class="only-linux">東風ゴシック</option>
+<option value="'Sazanami Gothic', sans-serif" class="only-linux">さざなみゴシック</option>
+<option value="'VL Gothic', sans-serif" class="only-linux">VL ゴシック</option>
+<option value="'VL PGothic', sans-serif" class="only-linux">VL Pゴシック</option>
+<option value="serif">■明朝</option>
+<option value="'Yu Mincho', 'YuMincho', serif" class="pc-mode">游明朝</option>
+<option value="'Hiragino Mincho Pr6', 'Hiragino Mincho Pro', serif" class="only-apple">ヒラギノ明朝Pro</option>
+<option value="'Hiragino Mincho Pr6N', 'Hiragino Mincho ProN', serif" class="only-apple">ヒラギノ明朝ProN</option>
+<option value="'Noto Serif JP', 'Source Han Serif JP', 'Noto Serif CJK JP', serif">Noto Serif</option>
+<option value="'BIZ UDMincho', serif">BIZ UD明朝</option>
+<option value="'UD Digi Kyokasho', 'Yu Kyokasho', serif" class="pc-mode">UDデジタル教科書体</option>
+<option value="'MS Mincho', serif" class="only-mswindows">MS明朝</option>
+<option value="'MS PMincho', serif" class="only-mswindows">MS P明朝</option>
+<option value="'IPAMincho', serif" class="only-linux">IPA明朝</option>
+<option value="'IPAexMincho', serif" class="only-linux">IPAex明朝</option>
+<option value="'IPAPMincho', serif" class="only-linux">IPA P明朝</option>
+<option value="'TakaoMincho', serif" class="only-linux">Takao明朝</option>
+<option value="'Kochi Mincho', serif" class="only-linux">東風明朝</option>
+<option value="'Sazanami Mincho', serif" class="only-linux">さざなみ明朝</option>
+<option value="monospace">■等幅</option>
+<option value="'Noto Sans Mono JP', 'Noto Sans Mono CJK JP', monospace" class="pc-mode">Noto Sans Mono JP</option>
+<option value="'Source Han Code JP', monospace" class="pc-mode">Source Han Code JP</option>
+<option value="system-ui">■system-ui</option>
+</select>
+<select id="font_size">
+<option value="50%">50%</option>
+<option value="80%">80%</option>
+<option value="90%">90%</option>
+<option value="100%" selected>100%</option>
+<option value="120%">120%</option>
+<option value="150%">150%</option>
+<option value="200%">200%</option>
+<option value="300%">300%</option>
+</select>
 </div>
 <textarea id="text_main" rows="8" style="width:95%"
  placeholder="ここにテキスト(小説)を貼り付けてください。
@@ -40,10 +95,17 @@
 　<input type="button" id="button_set_musi" value="無視サンプル">
 </form>
 <hr>
-<div id="result" style="margin:1rem; border:1px"></div>
+<div id="result" style="margin:1rem; border:1px">
+ここに結果が表示されます。<br>
+あいうえお、がぎぐげご、ぱぴぷぺぽ、パピプペポ<br>
+新しい朝が来た、希望の朝だ。<br>
+ABCabciW 0123456789 ＡＢＣ　０１２<br>
+バリュー、――依怙贔屓、饕餮<br>
+※OSに搭載されているフォントだけ利用できます。<br>
+</div>
 <hr>
 [<a href="./yourei/index.html">ヒント</a>]　[<a href="./yourei/help.html">ヘルプ</a>]　[<a href="#top">上へ</a>]<br>
-2026-4-20 ver0.1<br>
+2026-4-22 ver0.1<br>
 <br>
 <a href="index.html">index</a><br>
 <br>
@@ -132,6 +194,16 @@ $('button_goji').addEventListener('click', function(){
 $('set_file').addEventListener('change', function(){
 	read_files($('text_main'), event.target.files);
 });
+function changeFont() {
+     $('result').style.fontFamily = $('font_select').value;
+     $('result').style.fontSize = $('font_size').value;
+}
+window.addEventListener('load', () => {
+	changeFont();
+});
+$('font_select').addEventListener('change', changeFont);
+$('font_size').addEventListener('change', changeFont);
+
 $('button_set_musi').addEventListener('click', function(){
 	const t = `+ほげ■テスト
 にも関わらず
@@ -180,6 +252,32 @@ $('button_set_musi').addEventListener('click', function(){
 `;
 	$('text_musi').value = t;
 });
+(() => {
+	const info = navigator.userAgent.toLowerCase();
+	const bodyTag = document.getElementsByTagName('body')[0];
+	let pcmac = false;
+	if (info.indexOf('iphone') !== -1) {
+		bodyTag.classList.add('os-apple');
+	} else if (info.indexOf('ipad') !== -1) {
+		bodyTag.classList.add('os-apple');
+	} else if (info.indexOf('mac os x') !== -1) {
+		bodyTag.classList.add('os-apple');
+		bodyTag.classList.add('os-macos');
+		pcmac = true;
+	} else if (info.indexOf('android')  !== -1) {
+		bodyTag.classList.add('os-android');
+	} else if (info.indexOf('linux')  !== -1) {
+		bodyTag.classList.add('os-linx');
+		pcmac = true;
+	} else {
+		bodyTag.classList.add('os-mswindows');
+		pcmac = true;
+	}
+	$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
+もしくは、ファイルまたはD＆Dから開くこともできます。
+`
+})()	
+</script>
 </script>
 </body>
 </html>

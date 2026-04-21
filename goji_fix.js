@@ -2292,7 +2292,7 @@ const fix_0_list =
 (?<=%{kagyou}|裏)課業■稼業%{ref_kagyou}
 (?<=対応|判断|采配)が謝り■対応を誤り
 (?<=対応|判断|采配|道)を謝([っらりるれろん])■対応を誤$1
-(?<=(?:日以上|日|月以上|月|年代|年以上|年|時代|年代|期間|全域|世代|世紀|現代|エリア|私事|長き)に)渡([っらりるれろん])■亘$1%{ref_wataru}
+(?<=(?:日以上|日|月以上|月|年代|年以上|年|時代|年代|期間|全域|世代|世紀|現代|エリア|私事|長き)に)渡(っ[てた]|[っらりるれろん])■亘$1%{ref_wataru}
 (?<=%{country}(?:に|へ))亘([っらりるれろん])■渡$1%{ref_wataru}
 (?<=%{wataru_hasi}(?:を|は)|晴れ|人手に|向こう側に)亘([っらりるれろん])■渡$1%{ref_wataru}
 (?<=(?:響き|冴え|知れ|申し|行き|染み))亘([っらりるれろん])■渡$1
@@ -16959,15 +16959,15 @@ const cnv_list =
 	}
 
 	ret += `${file_size_kb}KB　${line_count}行　約${char_count}文字
-凡例：・<span class="color-hit">発見箇所</span><span class="color-red">■🐛(修正候補[説明])</span>　${bug_count}個`;
+・<span class="color-hit">該当箇所</span><span class="color-red">■🐛(候補)</span>　${bug_count}個`;
 	if(aimai_flag){
-				ret += `<br>　　　・<span class="color-hit">発見箇所</span><span class="color-orange">■⚠(警告情報)</span>　${warn_count}個`;
+				ret += `<br>・<span class="color-hit">該当箇所</span><span class="color-orange">■⚠(警告)</span>　${warn_count}個`;
 	}
 	if(warn2_flag){
-				ret += `<br>　　　・<span class="color-hit">発見箇所</span><span class="color-green">■🔍(注意情報)</span>　${warn2_count}個`;
+				ret += `<br>・<span class="color-hit">該当箇所</span><span class="color-green">■🔍(注意)</span>　${warn2_count}個`;
 	}
 	if(yure_flag){
-				ret += `<br>　　　・<span class="color-hit">発見箇所</span><span class="color-pink">■↔(表記ゆれ情報)</span>　${yure_count}個`;
+				ret += `<br>・<span class="color-hit">該当箇所</span><span class="color-pink">■↔(表記ゆれ)</span>　${yure_count}個`;
 	}
 
 	ret += '<br>※注意：出力文字列は全角英数は半角英数に置換されています。<hr>';
