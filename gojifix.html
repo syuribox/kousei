@@ -5,24 +5,26 @@
 <title>小説誤字fix(js)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" type="text/css" href="yourei/style.css">
+<!--
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=BIZ+UDMincho:wght@400&amp;display=swap" rel="stylesheet">
+-->
 </head>
 <body>
 <div class="container2">
 <h1 id="top">小説誤字fix</h1>
 <form name="mainform">
-<input type="button" id="button_view_options" value="オプション表示▼">
+<button type="button" id="button_view_options">オプション表示▼</button>
 <br>
 <div id="view_options" style="display:none">
 ファイル読込<input type="file" id="set_file" accept="text/*">
 <br>
-<input type="button" id="button_clear" value="クリア　">
-　<input type="button" id="button_sample" value="サンプル" >
+<button type="button" id="button_clear">クリア　</button>
+　<button type="button" id="button_sample">サンプル</button>
 <br class="mobile-only"><span class="pc-mode">　</span>
-<input type="button" id="button_memo_save" value="メモ保存" >
-　<input type="button" id="button_memo_load" value="ロード　" >
+<button type="button" id="button_memo_save">メモ保存</button>
+　<button type="button" id="button_memo_load">ロード　</button>
 <br>
 <input type="checkbox" id="check_warning" value="1" checked><label for="check_warning">警告情報</label>
 　<input type="checkbox" id="check_warning2" value="1"><label for="check_warning2">注意情報</label>
@@ -36,9 +38,8 @@
 <option value="'Meiryo', sans-serif" class="pc-mode">メイリオ</option>
 <option value="'Yu Gothic', 'YuGothic', sans-serif" class="pc-mode">游ゴシック</option>
 <option value="'Hiragino Sans', sans-serif" class="only-apple">Hiragino Sans</option>
-<option value="'Hiragino Kaku Gothic Pr6', 'Hiragino Kaku Gothic Pro', sans-serif" class="only-apple">ヒラギノ角ゴPro</option>
-<option value="'Hiragino Kaku Gothic Pr6N', 'Hiragino Kaku Gothic ProN', sans-serif" class="only-apple">ヒラギノ角ゴProN</option>
-<option value="sans-serif" class="only-apple">ヒラギノ角ゴPr6N</option>
+<option value="'Hiragino Kaku Gothic Pr6', 'Hiragino Kaku Gothic Pro', sans-serif" class="only-apple">ヒラギノ角ゴ(jis90)</option>
+<option value="'Hiragino Kaku Gothic Pr6N', 'Hiragino Kaku Gothic ProN', sans-serif" class="only-apple">ヒラギノ角ゴ(jis2004)</option>
 <option value="'Noto Sans JP', 'Source Han Sans JP', 'Noto Sans CJK JP', sans-serif">Noto Sans</option>
 <option value="'BIZ UDPGothic', sans-serif" class="pc-mode">BIZ UDPゴシック</option>
 <option value="'MS Gothic', sans-serif" class="only-mswindows">MSゴシック</option>
@@ -71,12 +72,17 @@
 <option value="'Noto Sans Mono JP', 'Noto Sans Mono CJK JP', monospace" class="pc-mode">Noto Sans Mono JP</option>
 <option value="'Source Han Code JP', monospace" class="pc-mode">Source Han Code JP</option>
 <option value="system-ui">■system-ui</option>
+<!--
+<option value="sans-serif">■Web Fonts</option>
+<option value="'BIZ UDMincho', sans-serif">BIZ UDMincho</option>
+-->
 </select>
 <select id="font_size">
 <option value="50%">50%</option>
 <option value="80%">80%</option>
 <option value="90%">90%</option>
 <option value="100%" selected>100%</option>
+<option value="110%">110%</option>
 <option value="120%">120%</option>
 <option value="150%">150%</option>
 <option value="200%">200%</option>
@@ -91,8 +97,8 @@
 警告無視リスト：<br>
 <textarea id="text_musi" rows="3" style="width:95%">
 </textarea><br>
-　<input type="button" id="button_goji" value="誤字確認" class="hit-button">
-　<input type="button" id="button_set_musi" value="無視サンプル">
+　<button type="button" id="button_goji" class="hit-button">誤字確認</button>
+　<button type="button" id="button_set_musi">無視サンプル</button>
 </form>
 <hr>
 <div id="result" style="margin:1rem; border:1px">
@@ -233,7 +239,8 @@ $('button_set_musi').addEventListener('click', function(){
 無さそう
 無さすぎ
 無さ過ぎ
-周り
+無すぎ
+無過ぎ
 履
 穿
 篭
@@ -276,7 +283,7 @@ $('button_set_musi').addEventListener('click', function(){
 	$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
 もしくは、ファイルまたはD＆Dから開くこともできます。
 `
-})()	
+})();
 </script>
 </script>
 </body>
