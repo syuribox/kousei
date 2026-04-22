@@ -113,7 +113,8 @@ textarea {
 
 input[type="button"],
 input[type="submit"],
-input[type="reset"] {
+input[type="reset"],
+button {
     margin: 0.3rem;
     padding: 0.4rem;
 }
