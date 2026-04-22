@@ -15,9 +15,10 @@
 <h1 id="top">ひらがなチェッカー</h1>
 <form name="mainform">
 <div id="droptarget">
-<input type="button" id="option_split" value="オプション▼">
-<input id="file_open" type="file" multiple accept="text/*"><br>
+<button type="button" id="option_split">オプション▼</button>
 <div id="option_split_view" style="display:none">
+<input id="file_open" type="file" multiple accept="text/*"><br>
+<div style="display:none">
 ファイルのページ分割：
 <select id="split_type">
 <option value="auto">自動認識</option>
@@ -28,6 +29,7 @@
 <option value="none">無効</option>
 <option value="concat">結合モード</option>
 </select>
+</div>
 <span id="split_regex" style="display:none">
 区切り記号<input type="text" id="split_regex_head" size="10" value="^第?[0-9０-９〇一二三四五六七八九十百千]">
 </span>
@@ -35,29 +37,85 @@
 結合見出し文字列<input type="text" id="concat_head" size="10" value="■●■">
 </span>
 <br>
-　<input type="button" id="clear" value="入力枠クリア">
-　<input type="button" id="sample" value="サンプル">
+<button type="button" id="clear">入力枠クリア</button>
+　<button type="button" id="sample">サンプル</button>
 <br class="mobile-only">
-　<input type="button" id="memosave" value="メモ保存">
-　<input type="button" id="memoload" value="ロード">
+　<button type="button" id="memosave">メモ保存</button>
+　<button type="button" id="memoload">ロード</button>
 <span style="display:none">
-　<input type="button" id="area_split" value="入力枠をページ分割">
+　<button type="button" id="area_split">入力枠をページ分割</button>
 </span>
 <br>
-表示：<input type="checkbox" id="option_linenum" value="1" checked><label for="option_linenum">行番号</label>
+<input type="checkbox" id="option_linenum" value="1" checked><label for="option_linenum">行番号</label>
 　<input type="checkbox" id="option_noneonly" value="1" checked><label for="option_noneonly">特徴行のみ</label>
 　<input type="checkbox" id="option_nospace" value="1" checked><label for="option_nospace">空白行略</label>
+<br>
+<label for="font_select">Font</label>
+<select id="font_select">
+<option value="sans-serif" selected>■ゴシック</option>
+<option value="'Meiryo', sans-serif" class="pc-mode">メイリオ</option>
+<option value="'Yu Gothic', 'YuGothic', sans-serif" class="pc-mode">游ゴシック</option>
+<option value="'Hiragino Sans', sans-serif" class="only-apple">Hiragino Sans</option>
+<option value="'Hiragino Kaku Gothic Pr6', 'Hiragino Kaku Gothic Pro', sans-serif" class="only-apple">ヒラギノ角ゴ</option>
+<option value="'Hiragino Kaku Gothic Pr6N', 'Hiragino Kaku Gothic ProN', sans-serif" class="only-apple">ヒラギノ角ゴN</option>
+<option value="'Noto Sans JP', 'Source Han Sans JP', 'Noto Sans CJK JP', sans-serif">Noto Sans</option>
+<option value="'BIZ UDPGothic', sans-serif" class="pc-mode">BIZ UDPゴシック</option>
+<option value="'MS Gothic', sans-serif" class="only-mswindows">MSゴシック</option>
+<option value="'MSP Gothic', sans-serif" class="only-mswindows">MS Pゴシック</option>
+<option value="'Osaka', sans-serif" class="only-macos">osaka</option>
+<option value="'IPAGothic', sans-serif" class="only-linux">IPAゴシック</option>
+<option value="'IPAexGothic', sans-serif" class="only-linux">IPAexゴシック</option>
+<option value="'IPAPGothic', sans-serif" class="only-linux">IPA Pゴシック</option>
+<option value="'TakaoGothic', sans-serif" class="only-linux">Takaoゴシック</option>
+<option value="'Kochi Gothic', sans-serif" class="only-linux">東風ゴシック</option>
+<option value="'Sazanami Gothic', sans-serif" class="only-linux">さざなみゴシック</option>
+<option value="'VL Gothic', sans-serif" class="only-linux">VL ゴシック</option>
+<option value="'VL PGothic', sans-serif" class="only-linux">VL Pゴシック</option>
+<option value="serif">■明朝</option>
+<option value="'Yu Mincho', 'YuMincho', serif" class="pc-mode">游明朝</option>
+<option value="'Hiragino Mincho Pr6', 'Hiragino Mincho Pro', serif" class="only-apple">ヒラギノ明朝</option>
+<option value="'Hiragino Mincho Pr6N', 'Hiragino Mincho ProN', serif" class="only-apple">ヒラギノ明朝N</option>
+<option value="'Noto Serif JP', 'Source Han Serif JP', 'Noto Serif CJK JP', serif">Noto Serif</option>
+<option value="'BIZ UDMincho', serif">BIZ UD明朝</option>
+<option value="'UD Digi Kyokasho', 'Yu Kyokasho', serif" class="pc-mode">UDデジタル教科書体</option>
+<option value="'MS Mincho', serif" class="only-mswindows">MS明朝</option>
+<option value="'MS PMincho', serif" class="only-mswindows">MS P明朝</option>
+<option value="'IPAMincho', serif" class="only-linux">IPA明朝</option>
+<option value="'IPAexMincho', serif" class="only-linux">IPAex明朝</option>
+<option value="'IPAPMincho', serif" class="only-linux">IPA P明朝</option>
+<option value="'TakaoMincho', serif" class="only-linux">Takao明朝</option>
+<option value="'Kochi Mincho', serif" class="only-linux">東風明朝</option>
+<option value="'Sazanami Mincho', serif" class="only-linux">さざなみ明朝</option>
+<option value="monospace">■等幅</option>
+<option value="'Noto Sans Mono JP', 'Noto Sans Mono CJK JP', monospace" class="pc-mode">Noto Sans Mono JP</option>
+<option value="'Source Han Code JP', monospace" class="pc-mode">Source Han Code JP</option>
+<option value="system-ui">■system-ui</option>
+<!--
+<option value="sans-serif">■Web Fonts</option>
+<option value="'BIZ+UDMincho', sans-serif">BIZ+UDMincho</option>
+-->
+</select>
+<select id="font_size">
+<option value="50%">50%</option>
+<option value="80%">80%</option>
+<option value="90%">90%</option>
+<option value="100%" selected>100%</option>
+<option value="110%">110%</option>
+<option value="120%">120%</option>
+<option value="150%">150%</option>
+<option value="200%">200%</option>
+<option value="300%">300%</option>
+</select>
 </div>
-<textarea name="maintext" id="maintext" rows="8" style="width:95%"
+<textarea id="text_main" rows="8" style="width:95%"
  placeholder="ここにテキスト(小説)を貼り付けてください。
 もしくは、ファイルから開くこともできます。">
 </textarea>
 </div>
-<span class="mobile-only">　</span><input type="button" id="start" value="構文チェック" class="hit-button">
-　<input type="button" id="kanjistart" value="常用漢字">　<br class="mobile-only">
+<button type="button" id="start"  class="hit-button">構文チェック</button>
+　<button type="button" id="kanjistart">常用漢字</button>　<br class="mobile-only">
 <span style="display:none">
-　<br class="mobile-only">
-　<input type="button" id="page_add" value="ページ追加">
+　<button type="button" id="page_add" >ページ追加</button>
 ページ名<input type="text" id="page_name" size="10" value="ページ1">
 </span>
 <br>
@@ -68,7 +126,7 @@
 <option value="mixdata">内蔵+ユーザ辞書</option>
 </select><br>
 <span id="userdicinfo" style="display:none">ユーザ辞書：
-<input type="button" id="viewinfo" value="説明表示"><br></span>
+<button type="button" id="viewinfo" >説明表示</button><br></span>
 <span id="dicinfo" style="display:none">
 平仮名、平仮名に続く漢字、漢字に続く平仮名、カタカナに続く平仮名を単語を行ごとに区切って指定してください<br>
 　「ふつうのたんご」で該当単語を追加<br>
@@ -93,7 +151,10 @@
 ">
 </textarea>
 <div id="page_title"></div>
-<div id="result"></div>
+<div id="result" style="margin:1rem; border:1px">
+(ここに表示されます)
+</div>
+
 <div id="page_title_tail"></div>
 </form>
 <div id="footers">
@@ -146,11 +207,45 @@ text_coffee_cat + '\n\n' + text_goblin;
 	$('droptarget').addEventListener('dragover', drop_cancel);
 	$('file_open').addEventListener('change', button_file_open);
 	$('memosave').addEventListener('click', () => {
-		memo_data = $('maintext').value;
+		memo_data = $('text_main').value;
 	});
 	$('memoload').addEventListener('click', () => {
-		$('maintext').value = memo_data;
+		$('text_main').value = memo_data;
 	});
+
+	function changeFont() {
+	     $('result').style.fontFamily = $('font_select').value;
+	     $('result').style.fontSize = $('font_size').value;
+	}
+	window.addEventListener('load', () => {
+		changeFont();
+	});
+	$('font_select').addEventListener('change', changeFont);
+	$('font_size').addEventListener('change', changeFont);
+
+	const info = navigator.userAgent.toLowerCase();
+	const bodyTag = document.getElementsByTagName('body')[0];
+	let pcmac = false;
+	if (info.indexOf('iphone') !== -1) {
+		bodyTag.classList.add('os-apple');
+	} else if (info.indexOf('ipad') !== -1) {
+		bodyTag.classList.add('os-apple');
+	} else if (info.indexOf('mac os x') !== -1) {
+		bodyTag.classList.add('os-apple');
+		bodyTag.classList.add('os-macos');
+		pcmac = true;
+	} else if (info.indexOf('android')  !== -1) {
+		bodyTag.classList.add('os-android');
+	} else if (info.indexOf('linux')  !== -1) {
+		bodyTag.classList.add('os-linx');
+		pcmac = true;
+	} else {
+		bodyTag.classList.add('os-mswindows');
+		pcmac = true;
+	}
+	$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
+もしくは、ファイルまたはD＆Dから開くこともできます。
+`
 })();
 </script>
 </body>
