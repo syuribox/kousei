@@ -111,7 +111,7 @@ ABCabciW 0123456789 ＡＢＣ　０１２<br>
 </div>
 <hr>
 [<a href="./yourei/index.html">ヒント</a>]　[<a href="./yourei/help.html">ヘルプ</a>]　[<a href="#top">上へ</a>]<br>
-2026-4-22 ver0.1<br>
+2026-4-27 ver0.1<br>
 <br>
 <a href="index.html">index</a><br>
 <br>
@@ -233,6 +233,7 @@ $('button_set_musi').addEventListener('click', function(){
 無い
 無かった
 無かろう
+無き
 無く
 無けれ
 無そう
@@ -280,9 +281,10 @@ $('button_set_musi').addEventListener('click', function(){
 		bodyTag.classList.add('os-mswindows');
 		pcmac = true;
 	}
-	$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
-もしくは、ファイルまたはD＆Dから開くこともできます。
-`
+	if(pcmac){
+		$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
+もしくは、ファイルまたはD＆Dから開くこともできます。`;
+	}
 })();
 </script>
 </script>
