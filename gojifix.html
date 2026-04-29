@@ -20,11 +20,21 @@
 <div id="view_options" style="display:none">
 ファイル読込<input type="file" id="set_file" accept="text/*">
 <br>
-<button type="button" id="button_clear">クリア　</button>
-　<button type="button" id="button_sample">サンプル</button>
-<br class="mobile-only"><span class="pc-mode">　</span>
-<button type="button" id="button_memo_save">メモ保存</button>
-　<button type="button" id="button_memo_load">ロード　</button>
+<label for="func_select">機能</label>
+<select id="func_select">
+<option value="clear">枠クリア</option>
+<option value="sample" selected>サンプル</option>
+<option value="memosave1">メモ保存1</option>
+<option value="memosave2">メモ保存2</option>
+<option value="memoload1">メモロード1</option>
+<option value="memoload2">メモロード2</option>
+<option value="delnoline">空白行削除</option>
+<option value="trimline">空白削除</option>
+<option value="addlinenum">行番号付与</option>
+<option value="dellinenum">行番号削除</option>
+<option value="all">一括処理</option>
+</select>
+<button type="button" id="button_func">実行</button>
 <br>
 <input type="checkbox" id="check_warning" value="1" checked><label for="check_warning">警告情報</label>
 　<input type="checkbox" id="check_warning2" value="1"><label for="check_warning2">注意情報</label>
@@ -101,7 +111,7 @@
 　<button type="button" id="button_set_musi">無視サンプル</button>
 </form>
 <hr>
-<div id="result" style="margin:1rem; border:1px">
+<div id="result" style="margin:1rem 0.2rem 1rem 0.2rem; border:1px">
 ここに結果が表示されます。<br>
 あいうえお、がぎぐげご、ぱぴぷぺぽ、パピプペポ<br>
 新しい朝が来た、希望の朝だ。<br>
@@ -111,7 +121,7 @@ ABCabciW 0123456789 ＡＢＣ　０１２<br>
 </div>
 <hr>
 [<a href="./yourei/index.html">ヒント</a>]　[<a href="./yourei/help.html">ヘルプ</a>]　[<a href="#top">上へ</a>]<br>
-2026-4-27 ver0.1<br>
+2026-4-29 ver0.1<br>
 <br>
 <a href="index.html">index</a><br>
 <br>
@@ -119,6 +129,7 @@ ABCabciW 0123456789 ＡＢＣ　０１２<br>
 <br><br><br><br><br><br><br><br><br><br><br><br>
 </div>
 <script type="text/javascript" src="goji_fix.js" charset="utf-8"></script>
+<script type="text/javascript" src="multi_func.js" charset="utf-8"></script>
 <script type="text/javascript" src="coffee_cat.js" charset="utf-8"></script>
 <script type="text/javascript" src="goblin.js" charset="utf-8"></script>
 <script type="text/javascript">
@@ -133,31 +144,23 @@ $('button_view_options').addEventListener('click', function(){
 		$('view_options').style.display = 'none';
 	}
 });
-$('button_clear').addEventListener('click', function(){
-//	if(window.confirm('入力テキストをクリアしますか？')){
-	$('text_main').value = '';
-//	}
-});
-$('button_sample').addEventListener('click', function(){
-;
-	const t = `文章のサンプルとして小説を用意しました。
-・ラブコメ　　  3,000文字 「コーヒーと猫」
-・ファンタジー 35,000文字 「転生者ゴブリン初の貴族を目指します」\n\n` +
-text_coffee_cat + '\n\n' + text_goblin;
-	$('text_main').value = t;
-});
-
-let global_memo = `ここにはメモを一時的に記録することができます。
+(() => {
+	const str = 
+`ここにはメモを一時的に記録することができます。
 ブラウザのプログラムのJavaScriptの変数上に保存されます。
 メモリー上に展開され、ファイルなどには保存されません。
-F5などの再読み込みでも消えます。`;
-
-$('button_memo_save').addEventListener('click', function(){
-	global_memo = $('text_main').value;
-});
-
-$('button_memo_load').addEventListener('click', function(){
-	$('text_main').value = global_memo;
+F5などの再読み込みでも消えます。`
+	set_memory1(str + '\nメモ1です。');
+	set_memory2(str + '\nメモ2です。');
+	const sample = 
+`文章のサンプルとして小説を用意しました。
+・ラブコメ　　  3,000文字 「コーヒーと猫」
+・ファンタジー 35,000文字 「転生者ゴブリン初の貴族を目指します」\n\n` +
+		text_coffee_cat + '\n\n' + text_goblin;
+	set_sample(sample);
+})();
+$('button_func').addEventListener('click', function(){
+	muti_func($('func_select').value, 'text_main');
 });
 
 $('button_goji').addEventListener('click', function(){
@@ -211,7 +214,7 @@ $('font_select').addEventListener('change', changeFont);
 $('font_size').addEventListener('change', changeFont);
 
 $('button_set_musi').addEventListener('click', function(){
-	const t = `+ほげ■テスト
+	const t = `+角ウサギ■テスト
 にも関わらず
 かも知れな
 伺
@@ -280,10 +283,6 @@ $('button_set_musi').addEventListener('click', function(){
 	} else {
 		bodyTag.classList.add('os-mswindows');
 		pcmac = true;
-	}
-	if(pcmac){
-		$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
-もしくは、ファイルまたはD＆Dから開くこともできます。`;
 	}
 })();
 </script>

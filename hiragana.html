@@ -29,7 +29,6 @@
 <option value="none">無効</option>
 <option value="concat">結合モード</option>
 </select>
-</div>
 <span id="split_regex" style="display:none">
 区切り記号<input type="text" id="split_regex_head" size="10" value="^第?[0-9０-９〇一二三四五六七八九十百千]">
 </span>
@@ -37,18 +36,27 @@
 結合見出し文字列<input type="text" id="concat_head" size="10" value="■●■">
 </span>
 <br>
-<button type="button" id="clear">入力枠クリア</button>
-　<button type="button" id="sample">サンプル</button>
-<br class="mobile-only">
-　<button type="button" id="memosave">メモ保存</button>
-　<button type="button" id="memoload">ロード</button>
+</div>
+<label for="func_select">機能</label>
+<select id="func_select">
+<option value="clear">枠クリア</option>
+<option value="sample" selected>サンプル</option>
+<option value="memosave1">メモ保存1</option>
+<option value="memosave2">メモ保存2</option>
+<option value="memoload1">メモロード1</option>
+<option value="memoload2">メモロード2</option>
+<option value="delnoline">空白行削除</option>
+<option value="trimline">空白削除</option>
+<option value="addlinenum">行番号付与</option>
+<option value="dellinenum">行番号削除</option>
+<option value="all">一括処理</option>
+</select>
+<button type="button" id="button_func">実行</button>
 <span style="display:none">
 　<button type="button" id="area_split">入力枠をページ分割</button>
 </span>
 <br>
-<input type="checkbox" id="option_linenum" value="1" checked><label for="option_linenum">行番号</label>
-　<input type="checkbox" id="option_noneonly" value="1" checked><label for="option_noneonly">特徴行のみ</label>
-　<input type="checkbox" id="option_nospace" value="1" checked><label for="option_nospace">空白行略</label>
+<input type="checkbox" id="option_noneonly" value="1" checked><label for="option_noneonly">特徴行のみ</label>
 <br>
 <label for="font_select">Font</label>
 <select id="font_select">
@@ -152,7 +160,12 @@
 </textarea>
 <div id="page_title"></div>
 <div id="result" style="margin: 1rem 0.2rem 1rem 0.2rem; border:1px">
-(ここに表示されます)
+ここに結果が表示されます。<br>
+あいうえお、がぎぐげご、ぱぴぷぺぽ、パピプペポ<br>
+新しい朝が来た、希望の朝だ。<br>
+ABCabciW 0123456789 ＡＢＣ　０１２<br>
+バリュー、――依怙贔屓、饕餮<br>
+※OSに搭載されているフォントだけ利用できます。<br>
 </div>
 
 <div id="page_title_tail"></div>
@@ -162,7 +175,7 @@
 <a href="LICENSE.html">LICENSE</a>　<a href="hiragana_rule.html">ルール</a><br>
 <br>
 [<a href="#top">上へ</a>]<br>
-2026-4-27 ver0.1<br>
+2026-4-29 ver0.1<br>
 <br>
 <a href="index.html">index</a><br>
 <br>
@@ -171,28 +184,17 @@ copyright © syuribox
 </div>
 </div>
 <script type="text/javascript" src="hiraganacheck.js" charset="utf-8"></script>
+<script type="text/javascript" src="multi_func.js" charset="utf-8"></script>
 <script type="text/javascript" src="coffee_cat.js" charset="utf-8"></script>
 <script type="text/javascript" src="goblin.js" charset="utf-8"></script>
 <script type="text/javascript">
 "use strict";
-let memo_data = `ここにはメモを一時的に記録することができます。
-ブラウザのプログラムのJavaScriptの変数上に保存されます。
-メモリー上に展開され、ファイルなどには保存されません。
-F5などの再読み込みでも消えます。`;
-
-const sample_data = `文章のサンプルとして小説を用意しました。
-・ラブコメ　　  3,000文字 「コーヒーと猫」
-・ファンタジー 35,000文字 「転生者ゴブリン初の貴族を目指します」\n\n` +
-text_coffee_cat + '\n\n' + text_goblin;
-
 (function(){
 	function $(id){
 		return document.getElementById(id);
 	}
 	$('mainbody').addEventListener('load', page_onload);
 	$('option_split').addEventListener('click', split_view);
-	$('clear').addEventListener('click', area_clear);
-	$('sample').addEventListener('click', () => area_sample(sample_data));
 	$('area_split').addEventListener('click', split_area);
 	$('start').addEventListener('click', start_check);
 	$('kanjistart').addEventListener('click', start_kanji_check);
@@ -206,20 +208,28 @@ text_coffee_cat + '\n\n' + text_goblin;
 	$('droptarget').addEventListener('dragenter', drop_cancel);
 	$('droptarget').addEventListener('dragover', drop_cancel);
 	$('file_open').addEventListener('change', button_file_open);
-	$('memosave').addEventListener('click', () => {
-		memo_data = $('text_main').value;
+	$('button_func').addEventListener('click', function(){
+		muti_func($('func_select').value, 'text_main');
 	});
-	$('memoload').addEventListener('click', () => {
-		$('text_main').value = memo_data;
-	});
+	const str = 
+`ここにはメモを一時的に記録することができます。
+ブラウザのプログラムのJavaScriptの変数上に保存されます。
+メモリー上に展開され、ファイルなどには保存されません。
+F5などの再読み込みでも消えます。`
+	set_memory1(str + '\nメモ1です。');
+	set_memory2(str + '\nメモ2です。');
+	const sample = 
+`文章のサンプルとして小説を用意しました。
+・ラブコメ　　  3,000文字 「コーヒーと猫」
+・ファンタジー 35,000文字 「転生者ゴブリン初の貴族を目指します」\n\n` +
+		text_coffee_cat + '\n\n' + text_goblin;
+	set_sample(sample);
 
 	function changeFont() {
 	     $('result').style.fontFamily = $('font_select').value;
 	     $('result').style.fontSize = $('font_size').value;
 	}
-	window.addEventListener('load', () => {
-		changeFont();
-	});
+	window.addEventListener('load', changeFont);
 	$('font_select').addEventListener('change', changeFont);
 	$('font_size').addEventListener('change', changeFont);
 
@@ -243,9 +253,11 @@ text_coffee_cat + '\n\n' + text_goblin;
 		bodyTag.classList.add('os-mswindows');
 		pcmac = true;
 	}
-	$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
+	if(pcmac){
+		$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
 もしくは、ファイルまたはD＆Dから開くこともできます。
 `
+	}
 })();
 </script>
 </body>
