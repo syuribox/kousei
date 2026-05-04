@@ -15,10 +15,11 @@
 <div class="container2">
 <h1 id="top">小説誤字fix</h1>
 <form name="mainform">
+<div id="droptarget">
 <button type="button" id="button_view_options">オプション表示▼</button>
 <br>
 <div id="view_options" style="display:none">
-ファイル読込<input type="file" id="set_file" accept="text/*">
+ファイル読込<input type="file" id="file_open" accept="text/plain" multiple>
 <br>
 <label for="func_select">機能</label>
 <select id="func_select">
@@ -109,6 +110,7 @@
 </textarea><br>
 　<button type="button" id="button_goji" class="hit-button">誤字確認</button>
 　<button type="button" id="button_set_musi">無視サンプル</button>
+<button type="button" id="button_set_add_info">　2　</button>
 </form>
 <hr>
 <div id="result" style="margin:1rem 0.2rem 1rem 0.2rem; border:1px">
@@ -127,6 +129,7 @@ ABCabciW 0123456789 ＡＢＣ　０１２<br>
 <br>
 &copy; syuribox
 <br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
 </div>
 <script type="text/javascript" src="goji_fix.js" charset="utf-8"></script>
 <script type="text/javascript" src="multi_func.js" charset="utf-8"></script>
@@ -184,10 +187,10 @@ $('button_goji').addEventListener('click', function(){
 	window.setTimeout(function(){
 		$('result').textContent = '処理中(分割).......';
 		const text_all = $('text_main').value;
-		const limit_len = 20000; // 20K 2万文字
+		const limit_len = 50000; // 50K 5万文字
 		if(limit_len < text_all.length){
 			window.setTimeout(function(){
-				const r = call_gojifix(text_all.substr(0,limit_len), '(先頭2万字先行解析、全文処理中)...<br>');
+				const r = call_gojifix(text_all.substr(0,limit_len), '(先頭5万字先行解析、全文処理中)...<br>');
 				if(r){
 					window.setTimeout(function(){
 						call_gojifix(text_all, '全文解析完了<br>');
@@ -199,9 +202,6 @@ $('button_goji').addEventListener('click', function(){
 			window.setTimeout(call_gojifix(text_all, ''),50);
 		}
 	},50);
-});
-$('set_file').addEventListener('change', function(){
-	read_files($('text_main'), event.target.files);
 });
 function changeFont() {
      $('result').style.fontFamily = $('font_select').value;
@@ -251,6 +251,7 @@ $('button_set_musi').addEventListener('click', function(){
 荒げ
 何故
 何処
+勿論
 グレード
 グレート
 ホーム
@@ -262,6 +263,38 @@ $('button_set_musi').addEventListener('click', function(){
 ●(無効)其
 `;
 	$('text_musi').value = t;
+});
+button_set_add_info
+$('button_set_add_info').addEventListener('click', function(){
+	const t = `+のの■助詞確認
++をを■助詞確認
++へへ■助詞確認
++はは■助詞確認
++がが■助詞確認
++もも■助詞確認
++にに■助詞確認
++とと■助詞確認
++かか■助詞確認
++てて■助詞確認
++でで■助詞確認
++だだ■助詞確認
++例え■再確認
+`;
+	$('text_musi').value = t;
+});
+$('droptarget').addEventListener('drop', (e) => {
+	drop_files( e, (all_text) => {
+		$('text_main').value = all_text;
+		$('button_goji').click();
+	});
+});
+$('droptarget').addEventListener('dragenter', drop_cancel);
+$('droptarget').addEventListener('dragover', drop_cancel);
+$('file_open').addEventListener('change', (e) => {
+	button_file_open( e, (all_text) => {
+		$('text_main').value = all_text;
+		$('button_goji').click();
+	});
 });
 (() => {
 	const info = navigator.userAgent.toLowerCase();
@@ -284,8 +317,12 @@ $('button_set_musi').addEventListener('click', function(){
 		bodyTag.classList.add('os-mswindows');
 		pcmac = true;
 	}
+	if(pcmac){
+		$('text_main').placeholder = `ここにテキスト(小説)を貼り付けてください。
+もしくは、ファイルまたはD＆Dから開くこともできます。
+`
+	}
 })();
-</script>
 </script>
 </body>
 </html>

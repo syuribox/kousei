@@ -2,8 +2,8 @@
 // Copyright (c) 2024 suyribox
 // Released under the MIT license.
 "use strict";
-
-function html_escape(s){
+(function hiragana_js(){
+const html_escape = function(s){
 	return s.replace(/[&<>'"]/g, match => {
 		switch(match) {
 				case '&': return '&amp;';
@@ -16,7 +16,7 @@ function html_escape(s){
 	});
 }
 
-function is_kanji(c){
+const is_kanji = function (c){
 	if((0x4e00 <= c && c <= 0x9fcf)
 		|| (0x3400 <= c && c <= 0x4dbf)
 		|| (0xf900 <= c && c <= 0xfadf)
@@ -31,19 +31,19 @@ function is_kanji(c){
 	return false;
 }
 
-function is_surrogate(c){
+const is_surrogate = function(c){
 	return (0xd800 <= c && c <= 0xdfff);
 }
 
-function is_surrogate_high(c){
+const is_surrogate_high = function(c){
 	return (0xd800 <= c && c <= 0xdbff);
 }
 
-function is_surrogate_low(c){
+const is_surrogate_low = function(c){
 	return (0xdc00 <= c && c <= 0xdfff);
 }
 
-function is_hiragana(c){
+const is_hiragana = function(c){
 	// [ぁ-ゔ]
 	if(0x3041 <= c && c <= 0x3094){
 		return true;
@@ -51,7 +51,7 @@ function is_hiragana(c){
 	return false;
 }
 
-function is_katakana(c){
+const is_katakana = function(c){
 	// [ァ-ヴ]
 	// 0x30f5-0x30fa：ヵヶヷヸヹヺは対象外
 	// 濁点、半濁点、伸ばし棒も対象外
@@ -61,53 +61,46 @@ function is_katakana(c){
 	return false;
 }
 
-function is_nobasi(c){
+const is_nobasi = function(c){
 	return ( c === 0x30fc // ー
 		|| c === 0x301c  // 〜
 		|| c === 0xff5e  // ～
 	);
 }
 
-function kata_to_hira(c){
+const kata_to_hira = function(c){
 	return c - 96;
 }
 
-function fixnum(i){
+const fixnum = function(i){
 	return ("_____" + i).substr(-6);
 }
 
-function get_id(id){
+const get_id = function(id){
 	return document.getElementById(id);
 }
 
-function page_onload(){
+const page_onload = function(){
 	dic_change();
 }
 
-function button_file_open(e){
+const button_file_open = function(e){
 	read_files(e.target.files);
 }
 
-function drop_files(e){
+const drop_files = function(e){
 	e.preventDefault();
 	read_files(e.dataTransfer.files);
 }
 
-function drop_cancel(e){
+const drop_cancel = function(e){
 	if(e.preventDefault){
 		e.preventDefault();
 	}
 	return false;
 }
 
-var book = [];
-var current_page = -1;
-var button_start_val = '構文チェック';
-var concat_page_name = '結合テキスト';
-var str_update = ' [変更]';
-var last_check_type = 0;
-
-function read_files(files){
+const read_files = function(files){
 	let file_size = 0;
 	for(const f of files){
 		file_size += f.size;
@@ -118,40 +111,20 @@ function read_files(files){
 			return;
 		}
 	}
-	let curret_name = '<>';
-	if(current_page != -1){
-		curret_name = book[current_page].name;
-	}
-	book = []; //reset
 	let index = 0;
 	const one_file = files.length < 2;
+	let all_text = '';
 	const end_read = function(data, next){
-		const text = data.replace(/\r\n/g, '\n');
-		if(!one_file){
-			book[index] = {};
-			book[index].name = files[index].name;
-			book[index].text = text;
-		}else{
-			get_id('text_main').value = text;
-		}
+		all_text += data.replace(/\r\n/g, '\n') + '\n';
 		index++;
 		if(index < files.length){
 			//次のファイル
 			let reader2 = new FileReader();
 			reader2.onload = next;
 			reader2.readAsText(files[index], 'Shift_JIS');
-		}else if(one_file){
-			start_check();
 		}else{
-			split_file_to_pages(false);
-			let page_num = 0;
-			for(let i = 0; i < book.length; i++){
-				if(book[i].name === curret_name){
-					page_num = i;
-					break;
-				}
-			}
-			page_view(page_num);
+			get_id('text_main').value = all_text;
+			start_check();
 		}
 		return;
 	};
@@ -193,401 +166,9 @@ function split_view(){
 		disp = 'block';
 	}
 	get_id('option_split_view').style.display = disp;
-	split_change();
 }
 
-function split_change(){
-	let disp = 'none';
-	let split_value = 'auto';
-	if(get_id('split_type') != null){
-		split_value = get_id('split_type').value;
-	}
-	if(split_value == 'splitregex'){
-		disp = 'inline';
-	}
-	get_id('split_regex').style.display = disp;
-	disp = 'none';
-	let val = split_value;
-	if(val == 'concat' || val == 'splitconcat'){
-		disp = 'inline';
-	}
-	get_id('concat_head_view').style.display = disp;
-}
-
-function split_area(){
-	book = [];
-	let page = {};
-	page.text = get_id('text_main').value.replace(/\r\n/g, '\n');
-	let split_value = 'auto';
-	if(get_id('split_type') != null){
-		split_value = get_id('split_type').value;
-	}
-	const concat_mode = (split_value === 'concat');
-	if(concat_mode){
-		page.name = concat_page_name;
-	}else{
-		page.name = '';
-	}
-	book[0] = page;
-	split_file_to_pages(true);
-	page_view(0);
-}
-
-function split_file_to_pages(from_split_area){
-	let split_type = 'none'; // 旧：auto■■■無効にしておく
-//	if(get_id('split_type') != null){
-//		split_type = get_id('split_type').value;
-//	}
-	let concat_head = get_id('concat_head').value;
-	let newbook = [];
-	let narou_file = false;
-	let filename_max = 0;
-	for(let i = 0; i < book.length; i++){
-		let file = book[i];
-		if(-1 != file.name.search(/^N([0-9]{4})([A-Z]{2})\-([\d]+)\.txt$/i)){
-			narou_file = true;
-		}
-		if(filename_max < file.name.length){
-			filename_max = file.name.length;
-		}
-	}
-	if(narou_file && split_type === 'none' ){
-		split_type = 'nameonly';
-	}
-	let concat_text = [];
-	if(split_type != 'none'){
-		for(let i = 0; i < book.length; i++){
-			let file = book[i];
-			let complete = false;
-			const part_left = '\n------------------------- 第';
-			const part_right = '部分開始 -------------------------\n【サブタイトル】\n';
-			let part_end = -1;
-			let part_mark = part_left + '1' + part_right;
-			if(!complete && (split_type === 'auto' || split_type==='naroubackup')){
-				part_end = file.text.indexOf(part_mark);
-			}
-			if(-1 != part_end){
-				let part_start = 0;
-				let k = 0;
-				while(-1 != part_end){
-					let page = {};
-					page.name = file.name;
-					let title = '';
-					if(part_start === 0){
-						title = '/【情報ヘッダ】';
-					}else{
-						pos_start = part_start + part_mark.length;
-						let pos_end = file.text.indexOf('\n', pos_start);
-						if(-1 != pos_end){
-							let title = file.text.substr(pos_start, pos_end - pos_start);
-							if( 20 < title.length ){
-								title = title.substr(0, 30) + '..';
-							}
-							title = '/' + title;
-						}
-					}
-					page.name += title;
-					k++;
-					part_mark = part_left + k + part_right;
-					part_end = file.text.indexOf(part_mark, part_end);
-					let part_end2 = part_end;
-					if(-1 === part_end2){
-						part_end2 = file.text.length;
-					}
-					page.text = file.text.substr(part_start, part_end2 - part_start);
-					newbook.push(page);
-					part_start = part_end;
-				}
-				complete = true;
-			}
-			if(!complete){
-				let concat_head = get_id('concat_head').value;
-				let head = -1;
-				part_mark = '\n' + concat_head;
-				let head_top = false;
-				if(split_type === 'auto' || split_type==='splitconcat'){
-					head_top = (file.text.substr(0, concat_head.length) === concat_head);
-					if(head_top){
-						head = 0;
-					}else{
-						head = file.text.indexOf(part_mark);
-					}
-				}
-				if(head != -1 && head < 3000){
-					let k = 1;
-					if(head_top){
-						part_end = concat_head.length;
-					}else{
-						part_end = head + part_mark.length;
-					}
-					while(-1 != part_end){
-						let page = {};
-						page.name = file.name;
-						k++;
-						let pos_end = file.text.indexOf('\n', part_end);
-						if(-1 != pos_end){
-							let title = file.text.substr(part_end, pos_end - part_end);
-							if(from_split_area){
-								let re = title.match(/^[_\d]+\/([^\\\/<>:\*\?]+)\/([\s\S]+)$/);
-								let sub = '';;
-								if(re){
-									sub = re[2];
-									if( 20 < sub.length ){
-										sub = sub.substr(0, 30) + '..';
-									}
-									sub = '/' + sub;
-								}else{
-									re = title.match(/^[_\d]+\/([\s\S]+)$/);
-								}
-								if(re){
-									let re_file = re[1];
-									const re2 = re[1].match(/_+$/);
-									if(re2){
-										re_file = re_file.substr(0, re_file.length - re2.length);
-									}
-									title = re_file + sub;
-								}
-								page.name = title;
-							}else{
-								if( 20 < title.length ){
-									title = title.substr(0, 30) + '..';
-								}
-								page.name += '/' + title;
-							}
-							part_end = file.text.indexOf(part_mark, pos_end + 1);
-							if(part_end != -1){
-								part_end += part_mark.length;
-							}
-						}else{
-							part_end = -1;
-						}
-						if(2 === k && -1 === part_end){
-							// 1個しかないので分割しない
-							break;
-						}else{
-							multi_match = true;
-						}
-						let part_end2 = part_end;
-						if(-1 === part_end2){
-							part_end2 = file.text.length;
-						}else{
-							part_end2 -= part_mark.length;
-							if(pos_end + 1 < file.text.length && file.text[pos_end] === '\n'){
-									pos_end += 1;
-							}
-							if(pos_end + 1 < file.text.length && file.text[pos_end] === '\n'){
-									pos_end += 1;
-							}
-						}
-						page.text = file.text.substr(pos_end, part_end2 - pos_end);
-						newbook.push(page);
-					}
-					if(multi_match){
-						complete = true;
-					}
-				}
-			}
-			if(!complete){
-				const ret = file.text.match(/^[■□◆◇▼▽▲△●○]/m);
-				if((split_type === 'auto' || split_type==='headsign') && ret && ret.index < 3000){
-					let k = 1;
-					let part_start = 0;
-					let part_end = ret.index;
-					let part_mark = '\n' + ret[0];
-					let multi_match = false;
-					while(-1 != part_end){
-						let page = {};
-						page.name = file.name;
-						k++;
-						let pos_start = part_end;
-						let pos_end = file.text.indexOf('\n', pos_start);
-						if(-1 != pos_end){
-							let title = file.text.substr(pos_start, pos_end - pos_start);
-							if( 20 < title.length ){
-								title = title.substr(0, 30) + '..';
-							}
-							page.name += '/' + title;
-							part_end = file.text.indexOf(part_mark, pos_end + 1);
-							if(-1 != part_end){
-								part_end += 1;
-							}
-						}else{
-							part_end = -1;
-						}
-						if(2 === k && -1 === part_end){
-							// 1個しかないので分割しない
-							break;
-						}else{
-							multi_match = true;
-						}
-						let part_end2 = part_end;
-						if(-1 === part_end2){
-							part_end2 = file.text.length;
-						}
-						page.text = file.text.substr(part_start, part_end2 - part_start);
-						newbook.push(page);
-						part_start = part_end;
-					}
-					if(multi_match){
-						complete = true;
-					}
-				}
-			}
-			if(!complete){
-				const regex_str = get_id('split_regex_head').value;
-				let regex_obj = null;
-				let ret = null;
-				let second_ret = null;
-				try{
-					if(split_type==='splitregex'){
-						regex_obj = new RegExp(regex_str, 'mg');
-						ret = regex_obj.exec(file.text);
-						if(ret){
-							second_ret = regex_obj.exec(file.text);
-						}
-					}
-				}catch(e){
-					alert('正規表現指定がエラーです。\n' + regex_str + '');
-				}
-				if(second_ret && ret.index < 3000){
-					let k = 1;
-					let part_start = 0;
-					let part_end = ret.index;
-					let part_mark = ret[0];
-					let test = [];
-					while(ret){
-						test.push(part_end);
-						let page = {};
-						page.name = file.name;
-						k++;
-						if(second_ret){
-							ret = second_ret;
-							second_ret = null;
-						}else{
-							ret = regex_obj.exec(file.text);
-						}
-						let part_end2;
-						if(ret){
-							part_end = ret.index;
-							part_end2 = part_end;
-						}else{
-							part_end2 = file.text.length;
-						}
-						page.text = file.text.substr(part_start, part_end2 - part_start);
-						newbook.push(page);
-						part_start = part_end;
-					}
-					complete = true;
-				}
-			}
-			const filename_org = file.name;
-			if(split_type === 'concat'){
-				let limit = filename_max;
-				if(20 < limit){
-					limit = 20;
-				}
-				if(file.name.length < limit){
-					file.name = (file.name + '____________________').substr(0, limit);
-				}
-			}
-			if(!complete){
-				if(-1 != filename_org.search(/^N([0-9]{4})([A-Z]{2})\-([\d]+)\.txt$/i)){
-					const separeter = '\n********************************************\n';
-					const head = file.text.indexOf(separeter);
-					let pos_start = 0;
-					if(head != -1 && head < file.text.length / 3){
-						pos_start = head + separeter.length;
-					}
-					if(-1 == ' \t\n　'.indexOf(file.text[pos_start])){
-						const pos_end = file.text.indexOf('\n', pos_start);
-						if(pos_end != -1){
-							let title = file.text.substr(pos_start, pos_end - pos_start);
-							if( 20 < title.length ){
-								title = title.substr(0, 20) + '..';
-							}
-							file.name += '/' + title;
-						}
-					}
-				}
-			}
-			if(split_type === 'concat'){
-				if(!from_split_area){
-					let num = '';
-					if(10 <= book.length && i + 1 <= 9){
-						num = '_';
-					}
-					if(100 <= book.length && i + 1 <= 99){
-						num += '_';
-					}
-					num += i + 1;
-					concat_text.push('\n' + concat_head + num + '/' + file.name + '\n');
-				}
-				concat_text.push(file.text);
-				complete = true;
-			}
-			if(!complete){
-				newbook.push(file);
-			}
-			book[i] = null;
-		}
-		if(split_type === 'concat'){
-			const page = {};
-			page.text = concat_text.join('\n');
-			page.name = concat_page_name;
-			newbook.push(page);
-		}
-		book = newbook;
-	}
-	get_id('start').value = button_start_val + '&メモリ更新';
-	get_id('page_name').value = 'ページ' + (book.length + 1);
-}
-
-function concat_pages(){
-	const concat_text = [];
-	const concat_head = get_id('concat_head').value;
-	let filename_max = 0;
-	for(let i = 0; i < book.length; i++){
-		const file = book[i];
-		const re = file.name.match(/^([^\\\/<>:\*\?]+)\//);
-		if(re && filename_max < re[1].length){
-			filename_max = re[1].length;
-		}
-	}
-	for(let i = 0; i < book.length; i++){
-		const file = book[i];
-		let num = '';
-		if(10 <= book.length && i + 1 <= 9){
-			num = '_';
-		}
-		if(100 <= book.length && i + 1 <= 99){
-			num += '_';
-		}
-		num += i + 1;
-
-		const limit = Math.min(20, filename_max);
-		let name = file.name;
-		const re = name.match(/^([^\\\/<>:\*\?]+)\//);
-		if(re && re[1].length < limit){
-			name = (re[1] + '____________________').substr(0, limit) + name.substr(re[1].length);
-		}
-		concat_text.push('\n' + concat_head + num + '/' + name + '\n');
-		concat_text.push(file.text);
-	}
-	const page = {};
-	page.name = concat_page_name;
-	page.text = concat_text.join('\n');
-	book = [];
-	book.push(page);
-	get_id('start').value = button_start_val + '&メモリ更新';
-	get_id('page_name').value = 'ページ' + (book.length + 1);
-	page_view(0);
-}
-
-function page_view(index){
-	page_view_update(index, true);
-}
-
-function progress_box(){
+const progress_box = function(){
 	const myHeight = window.innerHeight - get_id('footers').clientHeight - 80;
 	let output = '';
 	if(0 < myHeight){
@@ -598,187 +179,36 @@ function progress_box(){
 	return output;
 }
 
-function page_view_update(index, mode){
-	current_page = index;
-	if(mode){
-		get_id('text_main').value = book[index].text;
-	}
-	get_id('result').innerHTML = progress_box();
-	get_id('page_title').innerHTML = create_pages(index, true);
-	get_id('page_title_tail').innerHTML = create_pages(index, false);
+const start_hiragana = function(param_text, param_sub, param_line){
+	start_check(main_hiragana, param_text, param_sub, param_line);
+}
 
-	const s = get_id('text_main').value;
+const start_kanji = function(param_text, param_sub, param_line){
+	start_check(main_kanji, param_text, param_sub, param_line);
+}
+
+const start_check = function(func_call, param_text, param_sub, param_line){
+	get_id('result').innerHTML = progress_box();
+
+	const s = param_text;
+	const t = param_sub;
+	const u = param_line;
 	const limit_length = 100000;
 	const stop_time = 100;
-	const f = (last_check_type === 1 ? check_kanji : check_output);
-	if( limit_length < s.length ){
+	const g = (a) => {
+		get_id('result').innerHTML = func_call(a, t, u);
+	};
+	if(limit_length < s.length){
 		setTimeout(() => {
-			f(s.substr(0, limit_length), stop_time);
-			setTimeout(() => f(s, stop_time));
+			g(s.substr(0, limit_length));
+			setTimeout(() => g(s));
 		});
 	}else{
-		setTimeout(() => f(s, stop_time));
+		setTimeout(() => g(s));
 	}
 }
 
-function create_pages(index, top){
-	let pages = '';
-	if(top){
-		pages += '<span id="filebar">ファイル制御：</span>　';
-	}
-	pages += '<input type="button" value="&lt;&lt;"';
-	if(0 < index){
-		pages += ' onclick="page_view(0);"';
-	}else{
-		pages += ' disabled';
-	}
-	pages += '>';
-	pages += '<input type="button" value="＜"';
-	if(0 < index){
-		pages += ' onclick="page_view('+ (index - 1) +');"';
-	}else{
-		pages += ' disabled';
-	}
-	pages += '>';
-	pages += '<input type="button" value="＞"';
-	if(index < book.length - 1){
-		pages += ' onclick="page_view('+ (index + 1) +');"';
-	}else{
-		pages += ' disabled';
-	}
-	pages += '>';
-	pages += '<input type="button" value="&gt;&gt;"';
-	if(index < book.length - 1){
-		pages += ' onclick="page_view('+ (book.length - 1) +');"';
-	}else{
-		pages += ' disabled';
-	}
-	pages += '>';
-	if(top){
-		pages += '　<select id="book_page1">';
-	}else{
-		pages += '　<select id="book_page2">';
-	}
-	for(let i = 0; i < book.length; i++){
-		pages += '<option value="' + i + '"';
-		if(i == index){
-			pages += ' selected';
-		}
-		pages += '>';
-		pages += (i + 1) + '.' + html_escape(book[i].name);
-		if(i == index){
-			pages += '●';
-		}
-		pages += '</option>';
-	}
-	pages += '</select>';
-	pages += '<input type="button" onclick="select_page(';
-	if(top){
-		pages += 'true';
-	}else{
-		pages += 'false';
-	}
-	pages += ');" value="移動">';
-	if(top){
-		pages += '　　<input type="button" value="全クリア" onclick="all_clear()">';
-		if(1 < book.length){
-			pages += '　<input type="button" value="ページ結合" onclick="concat_pages()">';
-		}
-	}
-	return pages;
-}
-
-function select_page(top){
-	if(top){
-		page_view(parseInt(get_id('book_page1').value));
-	}else{
-		page_view(parseInt(get_id('book_page2').value));
-	}
-}
-
-function start_check(){
-	last_check_type = 0;
-	start_check2();
-}
-
-function start_kanji_check(){
-	last_check_type = 1;
-	start_check2();
-}
-
-function start_check2(param_text){
-	if( -1 < current_page ){
-		const page = book[current_page];
-		const textarea = get_id('text_main').value.replace(/\r\n/g, '\n');
-		if(textarea !== page.text){
-			page.text = get_id('text_main').value;
-			const up = str_update;
-			if(-1 == page.name.indexOf(up)){
-				page.name += up;
-			}
-		}
-		page_view_update(current_page, false);
-	}else{
-		get_id('result').innerHTML = progress_box();
-		get_id('page_title').innerHTML = '';
-		get_id('page_title_tail').innerHTML = '';
-
-		const s = get_id('text_main').value;
-		const limit_length = 100000;
-		const stop_time = 100;
-		const f = (last_check_type === 1 ? check_kanji : check_output);
-		if( limit_length < s.length ){
-			setTimeout(() => {
-				f(s.substr(0, limit_length), stop_time);
-				setTimeout(() => f(s, stop_time));
-			});
-		}else{
-			setTimeout(() => f(s, stop_time));
-		}
-	}
-}
-
-function area_clear(){
-	get_id('text_main').value = "";
-}
-
-function all_clear(){
-	area_clear();
-	current_page = -1;
-	book = [];
-	get_id('start').value = button_start_val;
-	get_id('page_title').innerHTML = '';
-	get_id('page_title_tail').innerHTML = '';
-	get_id('result').innerHTML = '';
-	get_id('page_name').value = 'ページ' + 1;
-}
-
-function area_sample(sample_text){
-	const sample = `　ある日、空らかユーフォーが降っていいた。
-そなん馬鹿なとこがあとは思わなだろうが、家の屋根に刺さってがいる。
-「おはようごさいます。ご主人様」
-グレイが出てかてそう言った。
-　ある日、空からユーフォーが降ってきた。
-そんな馬鹿なことがあるとは思わないだろうが、家の屋根に刺さっている。
-「おはようございます。ご主人様」
-グレイが出てきてそう言った。
-`;
-	if(sample_text === undefined || sample_text == ''){
-		sample_text = sample;
-	}
-	get_id('text_main').value = sample_text;
-}
-
-function add_page(){
-	const page = {};
-	page.name = get_id('page_name').value;
-	page.text = get_id('text_main').value;
-	book[book.length] = page;
-	get_id('page_name').value = 'ページ' + (book.length + 1);
-	page_view_update(book.length - 1, true);
-}
-
-function dic_change(){
+const dic_change = function(){
 	let disp = 'none';
 	if(document.getElementById('book').value != 'include'){
 		disp = 'block';
@@ -798,10 +228,9 @@ function user_view(){
 	document.getElementById('dicinfo').style.display = disp;
 }
 
-
 //■■■■■■■■■■
-function check_output(param_text){
-function dummy_hiradic_org(){}
+const main_hiragana = function(param_text, param_sub, param_line){
+const dummy_hiradic_org = function(){}
 const hiradic_org = 
 `ぁ、
 ぁぁ/長音
@@ -890,6 +319,7 @@ const hiradic_org =
 あそうそう
 あそこ
 あそこから
+あそば; あそばす、あそばした
 あた/五段ラ
 あたい
 あたかも
@@ -900,6 +330,7 @@ const hiradic_org =
 あたたか/形容詞
 あたため/下一段
 あたふた
+あたま
 あたらし/形容詞
 あたりさわり
 あたりまえ
@@ -916,9 +347,7 @@ const hiradic_org =
 あっかんべえ
 あっかんべー
 あっけ
-あっけない
-あっけなかった
-あっけなく
+あっけな/形容詞
 あっけに
 あっけらかん
 あっさり
@@ -975,6 +404,8 @@ const hiradic_org =
 あぶみ
 あべこべ
 あほ
+あほずら/警告
+あほづら
 あま/五段ラ
 あま/形容詞
 あますところ
@@ -982,7 +413,7 @@ const hiradic_org =
 あまつさえ
 あまねく
 あまり
-あまりない
+あまりな/形容詞
 あみだくじ
 あむって
 あむっと
@@ -1008,13 +439,13 @@ const hiradic_org =
 あらまあんた/人称名詞
 あらゆる
 あらら。
-あられもない
+あられもな/形容詞
 あらわ
 あらわ/五段サ
 あらわか/五段ラ;■あら／わかる
 あり
 ありうる
-ありえない
+ありえな/形容詞
 ありえる
 ありか
 ありかも
@@ -1144,7 +575,7 @@ const hiradic_org =
 いいよう
 いいように
 いいわ
-いいわけではない
+いいわけではな/形容詞
 いいんじゃ
 いえ〈、
 いえあの〈、
@@ -1206,7 +637,9 @@ const hiradic_org =
 いそし/五段マ
 いた
 いた/五段サ
+いた/五段ラ
 いた/形容詞
+いたいた
 いたずら
 いたた/長音
 いたため
@@ -1281,20 +714,24 @@ const hiradic_org =
 いてちゃ
 いでたち
 いとおし/形容詞
-いとまがない
+いとけな/形容詞
+いとまがな/形容詞
 いとも簡単
-いとわない
+いとわな/形容詞
 いな/五段サ
 いないし
 いななき
 いにしえ
+いぬ
 いばら
 いびき
 いびつ
 いびり
+いぶ/五段サ
 いぶかし/五段マ
 いぶかし/形容詞
 いぶかしげ
+いぶかし気
 いま
 いまい
 いまいち
@@ -1321,7 +758,7 @@ const hiradic_org =
 いやが/五段ラ
 いやさすが;■いや／さすが
 いやしさ
-いやしない
+いやしな/形容詞
 いやな
 いやなら
 いやはや
@@ -1357,8 +794,8 @@ const hiradic_org =
 いわゆる
 いわれ
 いわれ/下一段
-いわれのない
-いわれはない
+いわれのな/形容詞
+いわれはな/形容詞
 いーじゃん
 ぅ。
 う/五段タ
@@ -1474,6 +911,7 @@ const hiradic_org =
 うづ高/警告;→うずたか(堆)く
 うとまし/形容詞
 うどん
+うどんこ
 うな/五段ラ
 うなが/五段サ
 うなぎ
@@ -1512,6 +950,7 @@ const hiradic_org =
 うまれ/下一段
 うま味
 うま塩
+うまーい
 うむ
 うむむ/長音
 うめ/五段カ
@@ -1551,6 +990,7 @@ const hiradic_org =
 うわー
 うわーって
 うわーっと
+うわ言
 うん
 うん、
 うんこ
@@ -1584,7 +1024,7 @@ const hiradic_org =
 えぐ/五段ラ
 えぐい
 えぐみ
-えげつない
+えげつな/形容詞
 えこひいき
 えっ、
 えっち
@@ -1606,6 +1046,7 @@ const hiradic_org =
 えーん
 え～
 ぉ、
+ぉぉぉ/長音
 お/五段カ
 お/五段サ
 お/五段ラ
@@ -1659,6 +1100,7 @@ const hiradic_org =
 おおおおおおぉ/長音
 おおき/形容詞
 おおきーい
+おおげさ
 おおざっぱ
 おおせ/下一段
 おおっと
@@ -1745,6 +1187,7 @@ const hiradic_org =
 おせっかい
 おそ/形容詞
 おそば
+おそまつさまでした
 おそらく
 おそるおそる
 おそるべし
@@ -1767,6 +1210,7 @@ const hiradic_org =
 おっ、
 おっかな/形容詞
 おっかなびっくり
+おっかぶせ/下一段
 おっき/形容詞
 おっくう
 おっさん
@@ -1803,6 +1247,7 @@ const hiradic_org =
 おとおちゃん/警告
 おとがめ
 おとぎ
+おとぎばなし
 おとしめ/下一段
 おとずれ/下一段
 おとっさん
@@ -1896,7 +1341,7 @@ const hiradic_org =
 おまかせ
 おまかわ
 おまけ
-おまじない
+おまじな/形容詞
 おまたせ
 おまとめ
 おままごと
@@ -1940,16 +1385,17 @@ const hiradic_org =
 おやすみぃ
 おやすみなさい
 おやすみなさーい
+おやっさん
 おやつ
 おやまあ
 おやまあんた/人称名詞
 おやめ
 およ/五段ガ
+およ/五段バ
 およし
 およそ
 およばれ
 および
-およぶ
 おら、
 おらなんだ
 おり/上一段
@@ -1974,6 +1420,7 @@ const hiradic_org =
 お姉
 お母
 お父
+お粗末
 お膝元
 お茶
 お菓子
@@ -2029,6 +1476,7 @@ const hiradic_org =
 かさな/五段ラ
 かさに着
 かさば/五段ラ
+かさぶた
 かさり
 かざ/五段サ
 かざ/五段ラ
@@ -2047,12 +1495,12 @@ const hiradic_org =
 かすめ/下一段
 かすめた
 かすら
-かすりもしない
+かすりもしな/形容詞
 かぞえ/下一段
 かた
 かた/形容詞
 かたくなさ
-かたじけない
+かたじけな/形容詞
 かたじけねぇ
 かたず/五段カ警告:→かたづ五段カ
 かたち
@@ -2136,7 +1584,7 @@ const hiradic_org =
 かもしれ
 かもしれず
 かもしれづ/警告:→かもしれず
-かもしれない
+かもしれな/形容詞
 かもしれないし
 かもしれぬ
 かもしれん
@@ -2191,6 +1639,7 @@ const hiradic_org =
 かわりばんこ
 かを
 かんがえ/下一段
+かんが/五段マ
 かんじ
 かんずめ/警告
 かんたん
@@ -2211,7 +1660,7 @@ const hiradic_org =
 がきんちょ
 がくり
 がけ
-がけない
+がけな/形容詞
 がさって
 がさっと
 がさりと
@@ -2285,7 +1734,7 @@ const hiradic_org =
 きたんですぅ/長音
 きちっと
 きちゃい
-きちゃいけない
+きちゃいけな/形容詞
 きちゃう
 きちゃえば
 きちゃおう
@@ -2332,6 +1781,8 @@ const hiradic_org =
 きやがりますか
 きやがりますから
 きやがる
+きゅうって
+きゅうっと
 きゅうり
 きゅっと
 きゅぽんて
@@ -2411,6 +1862,7 @@ const hiradic_org =
 くさ
 くさ/五段ラ
 くさ/形容詞
+くさーい
 くしゃ、
 くしゃくしゃ
 くしゃって
@@ -2525,9 +1977,10 @@ const hiradic_org =
 くわし/形容詞
 くわって
 くわっと
-くわない
+くわな/形容詞
 くん
 くんかくんか
+くんずほぐれつ
 くんです
 くんですぅ/長音
 くノ一
@@ -2539,6 +1992,7 @@ const hiradic_org =
 ぐいと
 ぐうたら
 ぐうの音
+ぐう有能
 ぐえって
 ぐえっと
 ぐぐって
@@ -2554,9 +2008,11 @@ const hiradic_org =
 ぐじゃぐじゃ
 ぐじゅぐじゅ
 ぐすん
+ぐず/五段ラ
 ぐたって
 ぐたっと
 ぐだつ/五段カ
+ぐちゃ
 ぐちゃぐちゃ
 ぐちゃっと
 ぐちゅぐちゅ
@@ -2579,8 +2035,10 @@ const hiradic_org =
 ぐにゃり
 ぐにゅぐにゅ
 ぐにょぐにょ
+ぐにょり
 ぐぬ、
 ぐぬぬ/長音
+ぐびり
 ぐふふ/長音
 ぐへへ
 ぐらい
@@ -2635,6 +2093,7 @@ const hiradic_org =
 けな/五段サ
 けなげ
 けなげな
+けぶ/五段ラ
 けぷって
 けぷっと
 けほっ
@@ -2656,6 +2115,7 @@ const hiradic_org =
 げんなり
 こ/五段ガ
 こ/五段マ
+こ/五段ラ
 こ/形容詞
 こい、
 こいつ
@@ -2701,7 +2161,7 @@ const hiradic_org =
 こさせうる
 こさせた
 こさせつつ
-こさせない
+こさせな/形容詞
 こさせながら
 こさせる
 こさせろ
@@ -2744,7 +2204,7 @@ const hiradic_org =
 こっち
 こっちこい
 こっちゃ
-こっちゃない
+こっちゃな/形容詞
 こってり
 こっぴどく
 こっ酷
@@ -2759,9 +2219,11 @@ const hiradic_org =
 ことがある
 ことごとく
 ことさら
+ことだわ
 ことば
 こともなげ
 ことやら
+ことよね
 ことわざ
 こな/五段サ
 こない
@@ -2839,6 +2301,8 @@ const hiradic_org =
 これづ/警告:→これず
 これて
 これでもか
+これどうなって
+これどうやって
 これら
 これる
 ころ
@@ -2867,6 +2331,7 @@ const hiradic_org =
 こーでも
 ご、
 ごうかな
+ごうつくばり
 ごかんべん
 ごきげん
 ごきげんよう
@@ -3037,6 +2502,7 @@ const hiradic_org =
 さめ/下一段
 さめざめ
 さも、
+さもし/形容詞
 さもありなん
 さもなくば
 さやか
@@ -3117,7 +2583,7 @@ const hiradic_org =
 ざまぁ
 ざまぁみろ
 ざまあ
-ざまあない
+ざまあな/形容詞
 ざまあみろ
 ざまーみろ
 ざら
@@ -3159,20 +2625,20 @@ const hiradic_org =
 しかたが
 しかたがありませぬ
 しかたがありません
-しかたがない
+しかたがな/形容詞
 しかたがなく
 しかたな
-しかたない
+しかたな/形容詞
 しかたなく
 しかった
 しかったし
 しかったら
 しかったらし/形容詞
 しかったり
-しかない
+しかな/形容詞
 しかないし
 しかないよ
-しかねない
+しかねな/形容詞
 しかねません
 しかねる
 しかめ/下一段
@@ -3194,7 +2660,7 @@ const hiradic_org =
 しく
 しくじ/五段ラ
 しくて
-しくない
+しくな/形容詞
 しぐさ
 しぐれ
 しけ/下一段
@@ -3212,6 +2678,7 @@ const hiradic_org =
 しそう
 しそびれ/下一段
 した
+したかわい/形容詞;■した／かわいい
 したい
 したか
 したかしら
@@ -3242,7 +2709,7 @@ const hiradic_org =
 しちゃ/五段ワ
 しちゃいけず
 しちゃいけづ/警告
-しちゃいけない
+しちゃいけな/形容詞
 しちゃいや
 しちゃいやだ
 しちゃだめ
@@ -3283,7 +2750,9 @@ const hiradic_org =
 してちゃ
 してちゃんと
 してて
+しては
 してや/五段ラ
+してやがんの
 してやんよ
 してりゃ
 してる
@@ -3399,7 +2868,7 @@ const hiradic_org =
 しやす/形容詞
 しやすくて
 しゅう
-しゅうない
+しゅうな/形容詞
 しゅご/形容詞
 しゅりゅう弾
 しゅん、
@@ -3408,7 +2877,7 @@ const hiradic_org =
 しょう
 しょうか
 しょうから
-しょうがない
+しょうがな/形容詞
 しょうゆ
 しょげ
 しょせん
@@ -3436,7 +2905,7 @@ const hiradic_org =
 しりあ/五段ワ
 しり目
 しれっと
-しれない
+しれな/形容詞
 しれぬ
 しれません
 しろ
@@ -3444,6 +2913,7 @@ const hiradic_org =
 しろよ
 しわ
 しわくちゃ
+しん、
 しんがり
 しんじ/上一段
 しんせつな
@@ -3462,6 +2932,8 @@ const hiradic_org =
 じいさん
 じいじ
 じいちゃん
+じいって
+じいっと
 じきじき
 じきに
 じさせ
@@ -3505,6 +2977,7 @@ const hiradic_org =
 じゃ
 じゃぁ
 じゃあ
+じゃあり
 じゃありません
 じゃあり得
 じゃあるまい
@@ -3518,12 +2991,13 @@ const hiradic_org =
 じゃった
 じゃって
 じゃな、
-じゃない
+じゃな/形容詞
 じゃないし
 じゃないぞ
 じゃないよ
 じゃないよう
 じゃないわ
+じゃないわけ
 じゃないわよ
 じゃなさげ
 じゃなさすぎ
@@ -3614,7 +3088,7 @@ const hiradic_org =
 すぎづ/警告
 すぎて
 すぎてる
-すぎない
+すぎな/形容詞
 すぎる
 すく/五段マ
 すく/五段ワ
@@ -3661,6 +3135,7 @@ const hiradic_org =
 すっからかん
 すっかり
 すっきり
+すっげぇ
 すっげー
 すっご/形容詞
 すって
@@ -3748,6 +3223,8 @@ const hiradic_org =
 するなと
 するのは
 するやつ
+するよ
+するよう
 するり
 するわこりゃ
 するわね
@@ -3815,6 +3292,7 @@ const hiradic_org =
 ずんぐり
 ずんぐりむっくり
 ずんずか
+ずんと
 ずーっと
 せい
 せいか
@@ -4055,6 +3533,7 @@ const hiradic_org =
 そんだけ
 そんで
 そんとき
+そんときゃ
 そんな
 そんなふう
 そんなやつ
@@ -4114,12 +3593,12 @@ const hiradic_org =
 たくさん
 たくし上
 たくとも
-たくない
+たくな/形容詞
 たくなかった
 たくなかったら
 たくなって
 たくなる
-たくはない
+たくはな/形容詞
 たくはなる
 たくまし/形容詞
 たくら/五段マ
@@ -4148,7 +3627,7 @@ const hiradic_org =
 たたっと
 たたっ斬
 たたづ/五段マ警告
-たたない
+たたな/形容詞
 ただ
 ただいま
 ただし
@@ -4186,14 +3665,14 @@ const hiradic_org =
 たまえ
 たまげた
 たまご
-たまったものではない
-たまったもんじゃない
+たまったものではな/形容詞
+たまったもんじゃな/形容詞
 たまに
 たまには
 たまねぎ
 たまの
 たまりにたまった
-たまんない
+たまんな/形容詞
 たまんね
 たむろ
 ため
@@ -4227,8 +3706,8 @@ const hiradic_org =
 たろうとする
 たわ/五段マ
 たわい
-たわいない
-たわいもない
+たわいな/形容詞
+たわいもな/形容詞
 たわごと
 たわわ
 たん
@@ -4261,7 +3740,7 @@ const hiradic_org =
 だいこん
 だいじょうぶ
 だいじょうぶな
-だいじょばない
+だいじょばな/形容詞
 だいじょーぶ
 だいすきな
 だいたい
@@ -4424,8 +3903,8 @@ const hiradic_org =
 ちゃぁん
 ちゃあん
 ちゃあんと
-ちゃいけない
-ちゃいない
+ちゃいけな/形容詞
+ちゃいな/形容詞
 ちゃいや
 ちゃいる
 ちゃか/五段サ
@@ -4539,8 +4018,8 @@ const hiradic_org =
 っちま/五段ワ
 っちゃ
 っちゃ/五段ワ
-っちゃいけない
-っちゃいない
+っちゃいけな/形容詞
+っちゃいな/形容詞
 っちゃいや
 っちゃだめ
 っちゅう
@@ -4552,7 +4031,7 @@ const hiradic_org =
 ってたまに; って／たまに
 ってたり
 ってて
-ってない
+ってな/形容詞
 ってば
 ってばっかり
 ってもん
@@ -4573,7 +4052,7 @@ const hiradic_org =
 つ/五段カ
 つ/五段マ
 つ/五段ラ
-つ[
+つ[; ]
 つ【
 つい
 ついぞ
@@ -4645,6 +4124,7 @@ const hiradic_org =
 つなが/五段ラ
 つね/五段ラ
 つねに
+つの/五段ラ
 つば
 つばさ
 つばめ
@@ -4688,7 +4168,7 @@ const hiradic_org =
 つるり
 つるん
 つれてい/五段イク
-つれない
+つれな/形容詞
 つん、
 つんざ/五段カ
 つんって
@@ -4794,6 +4274,7 @@ const hiradic_org =
 でかした
 でかつ
 でかつて
+でかなり
 でから
 でかーい
 でき
@@ -4849,8 +4330,8 @@ const hiradic_org =
 でてきたら
 でてきて
 でてくる
-でてこない
-でない
+でてこな/形容詞
+でな/形容詞
 での
 では
 でも
@@ -4935,9 +4416,9 @@ const hiradic_org =
 とこんな
 とこんなに
 としか
-としかいえない
+としかいえな/形容詞
 とした
-としたくない
+としたくな/形容詞
 としたら
 としたり
 として
@@ -5163,9 +4644,11 @@ const hiradic_org =
 どんと
 どんど焼
 どんな
+どんぱち
 どんぶらこ
 どんぶらこっこ
 どんぶり
+どんまい
 どんより
 どん底
 どん臭
@@ -5237,6 +4720,7 @@ const hiradic_org =
 なかんずく
 なかんづく/警告
 なが/形容詞
+ながめ/下一段
 ながら
 なき;　NG登録用
 なきゃ
@@ -5249,8 +4733,8 @@ const hiradic_org =
 なくな/五段ラ
 なくなす術
 なくなぜ
-なくはない
-なくもない
+なくはな/形容詞
+なくもな/形容詞
 なくらい
 なけなし
 なけりゃ
@@ -5258,7 +4742,7 @@ const hiradic_org =
 なけりゃあ
 なければ
 なげ/下一段
-なげない
+なげな/形容詞
 なげなく
 なご/五段マ
 なさ
@@ -5294,6 +4778,7 @@ const hiradic_org =
 なだれこ/五段マ
 なっ、
 なっ。
+なっそんな
 なったっす
 なっちま/五段ワ
 なっちゃ/五段ワ
@@ -5363,6 +4848,7 @@ const hiradic_org =
 なら/五段バ
 なら/五段ワ
 ならいつでも
+ならうちで
 ならうれし/形容詞;■なら／うれしい
 ならすぐ
 ならば
@@ -5430,6 +4916,7 @@ const hiradic_org =
 なんですぅ/長音
 なんですか
 なんですから
+なんでだよ
 なんでも
 なんと
 なんとか
@@ -5439,7 +4926,7 @@ const hiradic_org =
 なんど
 なんどき
 なんども
-なんない
+なんな/形容詞
 なんなの
 なんなのか
 なんなのかしら
@@ -5469,6 +4956,8 @@ const hiradic_org =
 なーんて
 なーんにも
 なーんも
+な～と
+な～ん
 に
 に/上一段
 にぃさま
@@ -5537,6 +5026,7 @@ const hiradic_org =
 にも/五段タ; ■に／もつ
 にもかかわらず
 にもしかしたら
+にもつら/形容詞; ■にも／つらく
 にもとから
 にもとずき/警告:→(に)もとづき
 にもとづき
@@ -5546,6 +5036,7 @@ const hiradic_org =
 にゃぁ
 にゃあ
 にゃあかん
+にゃっ、
 にゃはは
 にゃん
 にゃーん
@@ -5619,12 +5110,14 @@ const hiradic_org =
 ねじれ/下一段
 ねたまれ/下一段
 ねちょねちょ
+ねっちょり
 ねっとり
 ねば
 ねぶ/五段ラ
 ねむ/五段ラ
 ねむ/形容詞
 ねめつけ/下一段
+ねら/五段ワ
 ねんごろ
 ねーか
 ねーし
@@ -5653,7 +5146,7 @@ const hiradic_org =
 のかもしれ
 のかもしれず
 のかもしれづ/警告
-のかもしれない
+のかもしれな/形容詞
 のかもしれぬ
 のかもしれん
 のから
@@ -5753,6 +5246,7 @@ const hiradic_org =
 のもん
 のよ。
 のよう
+のような
 のよねえ
 のらくら
 のらり
@@ -5791,9 +5285,13 @@ const hiradic_org =
 はがき
 はぎこちな/形容詞
 はく;「は/動詞カ」の擬音表の例外辞書用
+はくる; ■は／くる
 はぐっすり
 はぐらか/五段サ
 はぐれ/下一段
+はげ
+はげずら/警告
+はげづら
 はこ/五段バ
 はさ/五段マ
 はさ。
@@ -5882,6 +5380,7 @@ const hiradic_org =
 はや/形容詞
 はやはり
 はやむなく
+はやめ/下一段
 はやめた
 はやめておけ
 はやり廃
@@ -5917,6 +5416,8 @@ const hiradic_org =
 ばかばかし/形容詞
 ばからし/形容詞
 ばかり
+ばかづら
+ばかずら/警告
 ばきり
 ばさみ
 ばさりと
@@ -5930,6 +5431,7 @@ const hiradic_org =
 ばたつかせ/下一段
 ばたり
 ばたん、
+ばたんと
 ばちって
 ばちっと
 ばちは当
@@ -6050,6 +5552,8 @@ const hiradic_org =
 ひぐらし
 ひけらか/五段サ
 ひげ
+ひげずら/警告
+ひげづら
 ひさし
 ひさびさ
 ひざ
@@ -6383,6 +5887,7 @@ const hiradic_org =
 ひど過
 ひなにんぎょう
 ひな形
+ひなびた;　鄙びた
 ひにかけ/下一段
 ひね/五段ラ
 ひねくれ/下一段
@@ -6438,8 +5943,8 @@ const hiradic_org =
 びくっと
 びくつ/五段カ
 びくとも
-びくともしていない
-びくともしない
+びくともしていな/形容詞
+びくともしな/形容詞
 びくり
 びくん
 びしっと
@@ -6521,7 +6026,7 @@ const hiradic_org =
 ふうだった
 ふうだって
 ふうっと
-ふうではない
+ふうではな/形容詞
 ふうとは
 ふうな
 ふうに
@@ -6568,6 +6073,7 @@ const hiradic_org =
 ふっわふわ
 ふっ飛
 ふつう
+ふつつかもの
 ふてぶてし/形容詞
 ふて腐
 ふと
@@ -6604,6 +6110,7 @@ const hiradic_org =
 ふる/五段ワ
 ふる/形容詞
 ふるま/五段ワ
+ふわ、
 ふわって
 ふわっと
 ふわっふわ
@@ -6617,9 +6124,11 @@ const hiradic_org =
 ふんだく/五段ラ
 ふんだん
 ふんっ
+ふんば/五段ラ
 ふんふふーん
 ふんわり
 ふーっと
+ふーふー
 ふーむ
 ふーん
 ふ化
@@ -6653,6 +6162,7 @@ const hiradic_org =
 ぶち込
 ぶっかけ/下一段
 ぶっきらぼう
+ぶっきらぼうさ
 ぶっきら棒
 ぶっこいと/五段カ
 ぶったおれ/下一段
@@ -6803,6 +6313,7 @@ const hiradic_org =
 ぺちゃくちゃ
 ぺちゃぺちゃ
 ぺちりと
+ぺちんと
 ぺっこり
 ぺったん
 ぺったんこ
@@ -6852,6 +6363,7 @@ const hiradic_org =
 ほだ/五段サ
 ほっかほか
 ほっかむり
+ほっくり
 ほっこり
 ほっそり
 ほっつき
@@ -7062,6 +6574,7 @@ const hiradic_org =
 まぜ/下一段
 また
 また/五段ガ
+またぞろ
 またた/五段カ
 または
 またもや
@@ -7128,7 +6641,9 @@ const hiradic_org =
 まるっきり
 まるで
 まれ
+まろみ
 まろやか
+まろやかさ
 まろやかな
 まわ/五段サ
 まわ/五段ラ
@@ -7137,6 +6652,7 @@ const hiradic_org =
 まんべんなく
 まんま
 まんまる
+まん中
 まん丸
 まーす
 まーた
@@ -7145,6 +6661,7 @@ const hiradic_org =
 みえる
 みかん
 みが/五段カ
+みしっと
 みしり
 みじか/形容詞
 みじめ
@@ -7183,12 +6700,15 @@ const hiradic_org =
 むかし
 むかつ/五段カ
 むかつく
+むぎゅっと
+むぎゅむぎゅ
 むくり
 むくりと
 むくれ/下一段
 むぐっ
 むげには
 むごたらし/形容詞
+むさい
 むさぼ/五段ラ
 むさ苦
 むし/五段ラ
@@ -7209,6 +6729,7 @@ const hiradic_org =
 むだな
 むち
 むちゃくちゃ
+むっ、
 むっちり
 むっつ
 むっつり
@@ -7221,6 +6742,9 @@ const hiradic_org =
 むなし/形容詞
 むにゃむにゃ
 むにゃむにゃむにゃ
+むにゅって
+むにゅっと
+むにゅり
 むふって
 むふっと
 むべなるかな
@@ -7325,7 +6849,7 @@ const hiradic_org =
 もたげて
 もたつ/五段カ
 もたつく
-もたない
+もたな/形容詞
 もたら/五段サ
 もちのろん
 もちゃんと
@@ -7333,7 +6857,7 @@ const hiradic_org =
 もっかい
 もっさり
 もったい
-もったいない
+もったいな/形容詞
 もったいぶる
 もっちり
 もってい/五段イク
@@ -7376,6 +6900,7 @@ const hiradic_org =
 もはや
 もみくちゃ
 もめ/下一段
+もら/五段サ
 もら/五段ワ
 もれ/下一段
 もろ
@@ -7434,7 +6959,7 @@ const hiradic_org =
 やっかい
 やっちま/五段ワ
 やっちゃ/五段ワ
-やっちゃいけない
+やっちゃいけな/形容詞
 やっちゃだめ
 やっちゃやだ
 やっつけ/下一段
@@ -7443,6 +6968,7 @@ const hiradic_org =
 やってたまに
 やってらんな/形容詞
 やっと
+やっとる
 やっぱ
 やっぱり
 やっべ
@@ -7486,7 +7012,6 @@ const hiradic_org =
 やるから
 やることなすこと
 やるせな/形容詞
-やるせない
 やるせなさ
 やるっきゃ
 やれどこぞの
@@ -7545,6 +7070,7 @@ const hiradic_org =
 ゆるふわ
 ゆるやか
 ゆるり
+ゆるキャラ
 ゆれ/下一段
 ゆーっくり
 よ/五段サ
@@ -7667,7 +7193,7 @@ const hiradic_org =
 らしいっちゃらしいし
 らしからぬ
 らしき
-らせない
+らせな/形容詞
 らせん
 らちが
 らちが明
@@ -7723,13 +7249,13 @@ const hiradic_org =
 られん
 らを
 りっぱな
-りゃぁしない
+りゃぁしな/形容詞
 りゃぁせぬ
 りゃぁせん
-りゃあしない
+りゃあしな/形容詞
 りゃあせぬ
 りゃあせん
-りゃしない
+りゃしな/形容詞
 りゃせぬ
 りゃせん
 りゅう弾
@@ -7752,8 +7278,7 @@ const hiradic_org =
 ろくすっぽ
 ろくでなし
 ろくでも
-ろくでもない
-ろくでもなく
+ろくでもな/形容詞
 ろくな
 ろくに
 ろくろを回
@@ -7787,6 +7312,8 @@ const hiradic_org =
 わざと
 わし/人称名詞
 わしゃわしゃ
+わしづか/五段マ
+わしずか/五段マ警告
 わすれ/下一段
 わずか
 わずらわ/五段サ
@@ -7797,6 +7324,7 @@ const hiradic_org =
 わたくし/人称名詞
 わたくしめ
 わたし/人称名詞
+わたしく/警告
 わだかま/五段ラ
 わちゃわちゃ
 わっ、
@@ -7855,6 +7383,7 @@ const hiradic_org =
 んかなぁ
 んしょ、
 んじゃ
+んじゃあ
 んじゃう
 んじゃよ
 んじゃろ
@@ -7925,15 +7454,15 @@ const hiradic_org =
 んー
 `;
 
-function dummy_hira2dic_org(){}
+const dummy_hira2dic_org = function(){}
 // 擬音などの重複文字の登録圧縮
 // 'あ|へまら' => 'あへあへ', 'あまあま', 'あらあら'
 const hira2dic_org = [
-'あ|ぃいぅうぐせつはひへまらりるわん',
+'あ|ぃいぅうぐせつはひへまむらりるわん',
 'い|えきがけじそちひぼやよらろ',
 'う|いかきごさしじすずだとにねはまむよりるろん',
 'え|いぐへろん',
-'お|いうえずたちどのほやよらろ',
+'お|いうえずたちどのほやよらろん',
 'か|あいきくさじたちつなぱびぴぷゆらりん',
 'が|あうおくこさしじたちつはばぶぷみやらりん',
 'き|いこしつびらりれん',
@@ -8006,7 +7535,7 @@ const hira2dic_org = [
 'ま|ぁあござじすずぜただちてねよるん',
 'み|ぅうえきけこしすちにりるん',
 'みゃ|ぁあぅうん',
-'む|かきくぐざしずだちにふらりん',
+'む|かきくぐざしずだちにふらりわん',
 'め|きそたもらりろ',
 'も|ぁあぅうぉおがくぐこごさしじそぞたちとふみめやりろわん',
 'や|ぁあぃいすだばほまめりれわん',
@@ -8021,7 +7550,7 @@ const hira2dic_org = [
 'ん|ぐだでと'
 ];
 
-function dummy_exdic_org(){}
+const dummy_exdic_org = function(){}
 const exdic_org = 
 `あああああああああけけぅんも#あああ
 あげた#まえ
@@ -8069,6 +7598,7 @@ const exdic_org =
 いたみ#んな
 いだく#らい
 いちゃ#!つ
+いっても#そもそ
 いつ#ながり
 いつ#もり
 いつも#がれ
@@ -8128,6 +7658,7 @@ const exdic_org =
 からい#く
 からい#た
 からい#つ
+からい#ろいろ
 からう#すうす
 からう#ねうね
 からう#るさ%いかきくけ
@@ -8141,6 +7672,7 @@ const exdic_org =
 からし#たたら%さしすせそ
 からし#て
 からし#ばらく
+からし#んど
 からした#たら%さしすせそ
 からみ#て
 からみ#ると
@@ -8155,6 +7687,7 @@ const exdic_org =
 がかろ#うじ
 がかろう#じ
 がけ#たたまし
+がぜん#ぜん
 がた#くさん
 がた#くまし
 がた#どり
@@ -8221,6 +7754,7 @@ const exdic_org =
 された#まえ
 されたく#らい
 されど#んどん
+されぬ#くぬく
 されるか#も
 しい#い
 しい#じっ
@@ -8367,6 +7901,7 @@ const exdic_org =
 でず#ぼら
 でず#らか
 でず#る%いかきく
+でた#こ焼
 でた#またま
 でた#まに
 でた#まら
@@ -8431,6 +7966,8 @@ const exdic_org =
 とか#らか%わいうえおっ
 とか#わい%いくさ
 とか#わいそう
+とが#んばる
+とがん#ばる
 とき#つい
 とき#つく
 とき#つけ
@@ -8445,6 +7982,7 @@ const exdic_org =
 とぐ#にゃり
 とぐ#にゅぐにゅ
 とぐ#にょぐにょ
+とぐ#るぐる
 とこ#いつ
 とこ#う
 とこ#うして
@@ -8460,6 +7998,7 @@ const exdic_org =
 とこ#なす
 とこ#ぼ
 とこ#まごま
+とこ#まめ
 とこ#れ
 とこ#んな
 とこ#んにゃく
@@ -8484,7 +8023,9 @@ const exdic_org =
 とは#ちみつ
 とまった#く
 とめ#ぐら
+とめ#ちゃくちゃ
 とめ#んど
+とめちゃ#くちゃ
 とも#う
 とも#たれ%るてな
 とも#たれ掛
@@ -8565,6 +8106,7 @@ const exdic_org =
 にくく#りつけ
 にげんな#り
 にじり#じり
+にず#ぶぬれ
 にず#ら
 にず#らっと
 にず#んぐり
@@ -8658,6 +8200,7 @@ const exdic_org =
 のじ#ゃれ合
 のじゃ#れ合
 のせ#い
+のせ#せらぎ
 のせ#めぎ
 のだ#いぶ
 のだ#から
@@ -8695,6 +8238,7 @@ const exdic_org =
 のに#んじん
 のにも#う
 のは#がき
+のは#ぐらか
 のは#ざま
 のは#しっこ
 のは#しゃ%がぎぐげご
@@ -8736,14 +8280,18 @@ const exdic_org =
 はく#すぐった
 はく#びれ
 はく#るくる
+はく#るり
 はく#れ%るぬん
 はく#れな%いかきくけこ
 はく#れません
+はくる#りと
 はぐ#るぐる
 はけ#して
+はけ#らけら
 はげ#らげら
 はざま#あ
 はず#いぶん
+はず#ぶ濡
 はず#るい
 はず#るく
 はず#るそう
@@ -8778,6 +8326,7 @@ const exdic_org =
 はやめ#て
 はやめて#ほしい
 へそ#ういう
+へそ#れぞれ
 ほうばっ#かり
 ほどいた#だけ%るたてな
 ほどく#ださ%いらりるれろん
@@ -8846,6 +8395,8 @@ const exdic_org =
 もむ#べなる
 もめ#げず
 もめ#げない
+もめ#ちゃくちゃ
+もめちゃ#くちゃ
 やってた#どり
 やっとく#だんの
 やめた#まえ
@@ -8884,7 +8435,7 @@ const exdic_org =
 見てく#つろ%いがぎぐげご
 舘#除外指定最後`;
 
-function dummy_warndic_org(){}
+const dummy_warndic_org = function(){}
 const warndic_org = 
 `あいずち/→あいづち(相槌..)
 あたらめ/→あらため
@@ -9024,10 +8575,12 @@ const warndic_org =
 わずらし[い,か,く,すぎ]/→わずらわし-い(煩わし-い)
 `;
 
-function dummy_kanji_pre_dic_org(){}
+const dummy_kanji_pre_dic_org = function(){}
 const kanji_pre_dic_org = 
-`アツ/形容詞
+`アタ/五段ラ
+アツ/形容詞
 イ/五段イク
+イカ/五段サ
 イカれ/下一段
 イジ/五段ラ
 イジメ/下一段
@@ -9061,6 +8614,7 @@ const kanji_pre_dic_org =
 ダサ/形容詞
 ダメさ
 チビ/五段ラ
+チャラ/形容詞
 チラり
 ッて/サ変
 ツッコ/五段マ
@@ -9085,16 +8639,20 @@ const kanji_pre_dic_org =
 バズ/五段ラ
 バテ/下一段
 バレ/上一段
+パク/五段ラ
 ビビ/五段ラ
 ピンと
 ピンときた
 フグしゃぶ
+フラれ/下一段
+フラレ/下一段
 ブレ/上一段
 プレイヤ/人称名詞
 プレイヤー/人称名詞
 ペンだこ
 ボケ/下一段
 ボケて
+ボヤ/五段カ
 ボロ/形容詞
 マズ/形容詞
 マセ/下一段
@@ -9106,6 +8664,8 @@ const kanji_pre_dic_org =
 モフ/五段ラ
 ヤバ/形容詞
 ヤベぇ
+ヨレ/上一段
+ラリ/上一段
 ワザとらし/形容詞
 一人とて
 一切れ
@@ -9227,7 +8787,7 @@ const kanji_pre_dic_org =
 今さらすぎて
 今さらすぎる
 今しがた
-今だに/→未だに
+今だに/警告:→未だに
 介/五段サ
 仕え/下一段
 仕分け/下一段
@@ -9251,6 +8811,7 @@ const kanji_pre_dic_org =
 仰け;   仰け反る
 仰せ
 仰仰し/形容詞
+仲直り
 仲直り/サ変
 任/五段サ
 任じ/上一段
@@ -9296,11 +8857,18 @@ const kanji_pre_dic_org =
 体たらく
 体つき
 体力づくり
-何かもら/五段ワ
 何かいけな/形容詞
+何かくれ
+何かすごい
+何かすごく
+何かもら/五段ワ
 何すか
 何せ
+何ぞや
 何だか
+何だよあれ
+何だよこれ
+何だよそれ
 何て
 何でのけ者
 何とかしろ
@@ -9547,8 +9115,10 @@ const kanji_pre_dic_org =
 剥け/下一段
 割/五段カ
 割/五段ラ
+割がた
 割け/下一段
 割り
+割りばし
 割れ/下一段
 創/五段ラ
 劈/五段カ
@@ -9592,6 +9162,7 @@ const kanji_pre_dic_org =
 勝/五段タ
 勝/五段ラ
 勝すじ
+勝ちすじ
 勝手知ったる
 募/五段ラ
 勢い
@@ -9615,6 +9186,7 @@ const kanji_pre_dic_org =
 千千に
 半ば
 半べそ
+半分こ
 半壊
 卑し/五段マ
 卑し/形容詞
@@ -9658,6 +9230,8 @@ const kanji_pre_dic_org =
 収ま/五段ラ
 収め/下一段
 取/五段ラ
+取っつき
+取りっぱぐれ
 取れ/下一段
 取締/五段ラ
 受か/五段ラ
@@ -9690,6 +9264,7 @@ const kanji_pre_dic_org =
 吃/五段ラ
 合/五段サ
 合/五段ワ
+合いなんぞ
 合わ/五段サ
 合わさ/五段ラ
 合わせ/下一段
@@ -9768,6 +9343,8 @@ const kanji_pre_dic_org =
 哀れ/五段マ
 哀れな
 品ぞろえ
+哭/五段カ
+唄/五段ワ
 唆/五段サ
 唱え/下一段
 唸/五段ラ
@@ -9841,6 +9418,7 @@ const kanji_pre_dic_org =
 在/五段ラ
 地べた
 坊ちゃま
+坊っちゃん
 垂ら/五段サ
 垂れ/下一段
 型ど/五段ラ
@@ -9883,6 +9461,9 @@ const kanji_pre_dic_org =
 墜と/五段サ
 壊/五段サ
 壊れ/下一段
+声でけぇ
+声でけえ
+声でけー
 売/五段ラ
 売りだ/五段サ
 売れ/下一段
@@ -9967,6 +9548,7 @@ const kanji_pre_dic_org =
 好/形容詞
 好かれ/下一段
 好きたち
+好きなやつ
 好まし/形容詞
 如く
 如何よう
@@ -9987,6 +9569,7 @@ const kanji_pre_dic_org =
 娶/五段ラ
 媚び/上一段
 嫁/五段ガ
+嫁/五段サ
 嫉まし/形容詞
 嫉妬にかられ/下一段
 嫌
@@ -10168,7 +9751,7 @@ const kanji_pre_dic_org =
 干ばつ
 干乾び/上一段
 平た/形容詞
-平べったい
+平べった/形容詞
 平ら
 平らげ/下一段
 平らな
@@ -10552,6 +10135,7 @@ const kanji_pre_dic_org =
 手はづ/警告:→手はず
 手ぶら
 手ほどき
+手みやげ
 手向け/下一段
 手懐け/下一段
 手懸け/下一段
@@ -10573,6 +10157,7 @@ const kanji_pre_dic_org =
 打ちまけ/下一段
 払/五段ワ
 払いのけ/下一段
+払しょく
 扱/五段ワ
 承/五段ラ
 抉/五段ラ
@@ -10758,6 +10343,7 @@ const kanji_pre_dic_org =
 摑まえ/下一段
 摘/五段マ
 摘ま/五段マ
+摩/五段ラ
 摺/五段ラ
 撃/五段タ
 撒/五段カ
@@ -10838,6 +10424,7 @@ const kanji_pre_dic_org =
 新しさ
 新た
 施/五段サ
+旅すがら
 既でに
 日がな
 日にち
@@ -10851,6 +10438,7 @@ const kanji_pre_dic_org =
 早め/下一段
 早めな
 早早に
+昂/五段ラ
 昂ぶ/五段ラ
 昇/五段ラ
 明/五段カ
@@ -10894,6 +10482,7 @@ const kanji_pre_dic_org =
 暗/形容詞
 暗め/下一段
 暫く
+暫し
 暮/五段サ
 暮ら/五段サ
 暮らし
@@ -11065,6 +10654,7 @@ const kanji_pre_dic_org =
 正し/形容詞
 正しさ
 正に
+此れ
 歩/五段カ
 歩/五段マ
 歩み
@@ -11190,6 +10780,7 @@ const kanji_pre_dic_org =
 浅/形容詞
 浅からぬ
 浅はか
+浅はかさ
 浅まし/形容詞
 浮/五段カ
 浮/五段バ
@@ -11202,6 +10793,7 @@ const kanji_pre_dic_org =
 浸/五段サ
 浸/五段ラ
 浸か/五段ラ
+浸け/下一段
 消/五段サ
 消え/下一段
 涌/五段カ
@@ -11213,6 +10805,8 @@ const kanji_pre_dic_org =
 涼しさ
 淀/五段マ
 淋し/形容詞
+淑やか
+淑やかさ
 淡/形容詞
 淫ら
 深/形容詞
@@ -11364,6 +10958,8 @@ const kanji_pre_dic_org =
 無さすぎ
 無さすぎる
 無理くり
+無理強い
+無理強い/サ変
 焦/五段ラ
 焦が/五段サ
 焦がれ/下一段
@@ -11422,6 +11018,7 @@ const kanji_pre_dic_org =
 爛やか
 爛れ/下一段
 爽やか
+爽やかさ
 片ず/五段カ警告:→片づく
 片ずけ/警告
 片っぽ
@@ -11462,6 +11059,7 @@ const kanji_pre_dic_org =
 珍しさ
 現/五段サ
 現れ/下一段
+現わ/五段サ
 瑞瑞し/形容詞
 甘/形容詞
 甘え/下一段
@@ -11654,6 +11252,7 @@ const kanji_pre_dic_org =
 硬めな
 碌すっぽ
 確か
+確かすごい
 確かにそら
 確かめ/下一段
 確り
@@ -11688,6 +11287,7 @@ const kanji_pre_dic_org =
 移ろ/五段ワ
 移動
 程遠/形容詞
+稚/形容詞
 種明かし
 稲刈り
 稼/五段ガ
@@ -11758,6 +11358,7 @@ const kanji_pre_dic_org =
 籠もり
 籠り
 粗/形容詞
+粗末さまでした
 粘/五段ラ
 粘っこ/形容詞
 粘り
@@ -11788,6 +11389,7 @@ const kanji_pre_dic_org =
 細か
 細か/形容詞
 細っこい
+細ま/五段ラ
 細め
 細め/下一段
 細めて
@@ -11801,6 +11403,7 @@ const kanji_pre_dic_org =
 終わり
 組/五段マ
 組みこ/五段マ
+経/下一段
 経/五段タ
 経/五段ラ
 経ず
@@ -11982,6 +11585,7 @@ const kanji_pre_dic_org =
 腹ばい
 腹びれ
 腹ぺこ
+腹立/五段タ
 腹立たし/形容詞
 膝まづ/五段カ警告:×跪ず-く
 膨ら/五段マ
@@ -12138,6 +11742,7 @@ const kanji_pre_dic_org =
 虫けら
 蝕/五段マ
 蝶つがい
+蟠/五段ラ
 蠢/五段カ
 血みどろ
 行/五段イク
@@ -12161,6 +11766,7 @@ const kanji_pre_dic_org =
 被/五段サ
 被/五段ラ
 被さ/五段ラ
+被ばく
 裁/五段カ
 裁/五段タ
 裂/五段カ
@@ -12202,7 +11808,7 @@ const kanji_pre_dic_org =
 見損な/五段ワ
 見栄っぱり
 見紛/五段ワ
-見蕩れて/下一段
+見蕩れ/下一段
 見送/五段ラ
 見逃/五段サ
 見遣/五段ラ
@@ -12401,6 +12007,7 @@ const kanji_pre_dic_org =
 赤/形容詞
 赤ずきん
 赤づきん/警告
+赤べこ
 赤やけ/下一段
 赤ら/五段マ
 赤らめ/下一段
@@ -12627,6 +12234,7 @@ const kanji_pre_dic_org =
 郁子なるかな
 部分
 都落ち
+鄙びた
 酌/五段マ
 配/五段サ
 配/五段ラ
@@ -12771,6 +12379,7 @@ const kanji_pre_dic_org =
 非ず
 非づ/警告
 靡/五段カ
+面映ゆ/形容詞
 面白/形容詞
 靴ひも
 靴べら
@@ -12931,7 +12540,7 @@ const kanji_pre_dic_org =
 舘;仮置き
 `;
 
-function dummy_one_kanji_dic_org(){}
+const dummy_one_kanji_dic_org = function(){}
 const one_kanji_dic_org = 
 `
 い一今以位医命囲妹嫌急意椅畏異痛移維胃良茨行言違遺
@@ -13342,7 +12951,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 			// 行データ「うろは」「うろなりに」にマッチして
 			// 「うろ」を返す
 			{
-				let v = 3;
+				let v = 3; // max_length
 				for(; 1 <= v; v--){
 					const w = suffix.substr(0, v);
 					if(jyosi_set.has(w)){
@@ -13410,10 +13019,10 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 	/* 3書い書け */ `たから, たきり, たくせ, たし, たっけ, たっきり, たぞ, たのち, たの, たもうた, たもうて, たら, たわけ, た,
 		ていかない, ていかなく, ていたい, ていたく, ていた, ている,
 		ていろ, てかない, てかなく, てかなきゃ, てきた, てきてた, てきてる, てきて, てくる,
-		てくださった, てくださって, てくださる, てくださらない,
-		てくれちゃ, てくれず, てくれた, てくれてて, てくれてた, てくれてる, てくれて, てくれば, てくれた,
+		てください, てくださった, てくださって, てくださる, てくださらない,
+		てくれちゃ, てくれず, てくれたまえ, てくれたまへ, てくれてて, てくれてた, てくれてる, てくれて, てくれば, てくれた,
 		てくれぬ, てくれりゃ, てくれる, てくれん, てくれ, てくんない, てくんなく, てくんねえ, てくんねぇ, てく,
-		てけ, てこいつ, てこそ, てこの, てこれ, てこんな, てこ,
+		てけ, てこいつ, てこそ, てこの, てこれた, てこれる, てこれ, てこんな, てこ,
 		てた, てちゃ, てった, てって, てても, てて, ても, てない, てなくて, てなく, てみたい, ては,
 		てみたく, てみた, てみない, てみなかった, てみなくては, てみなく, てみる,
 		てられた, てられて, てられる, てられ, てら, てりゃ, てる, てれば, てろ, て,
@@ -13421,11 +13030,12 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 		ちまい, ちまう, ちまった, ちまってた, ちまってる, ちまって, ちまえば, ちまえ, ちまおう,
 		ちゃぁ, ちゃあ, ちゃいそう, ちゃう, ちゃえば, ちゃえ, ちゃおう, ちゃお, ちゃだめ, ちゃやだ, ちゃった,
 		ちゃってた, ちゃっても, ちゃってる, ちゃってろ, ちゃって, ちゃわない, ちゃわなくて,ちゃわなく, ちゃ`,
-	/* 4書く*/ `うちに, から, かも, か, すべて, すべ, ぜよ, ぜ, つもり, なり, なんて, べく, まい, まじ, より, みたい, みたかった, みたく, x`,
+	/* 4書く*/ `うちに, から, かも, か, すべて, すべ, ぜよ, ぜ, つもり, なり, なんて, べく, まい, まじ, より, みたい, みたかった, みたく,
+		らしい, らしかった, らしかろう, らしき, らしく, らしければ, x`,
 	
 	/* 5書き書く書け */ `そうだから, そうだった, そうだ, そうです, そうで, そうなら,そうな, そう`,
 	/* 6書け */ `うる, っつうか, っつうのか, っつうのが, っつうのも, っつうのは, っつうの, つつ, なんて,
-		るかも, るから, るか, るわきゃ, るわけ, るわね, るわ, る,
+		よ, るかも, るから, るか, るわきゃ, るわけ, るわね, るわ, る,
 		れちゃ, れば, ろ, ば, まい, まじ, ども, ど, りゃあな, りゃあね, りゃ, x`,
 	/* 7なさい */ `ましたから, ましたから, ましたか, ました, ましても, まして, ましょうから, ましょうか, ましょう, ましょ, ますから,
 		ますから, ますか, ますし, ます, まーす, ませぬ, ませんから, ませんか, ませんし, ません, ませ, まっせ`,
@@ -13528,6 +13138,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 									 	'ては/るばる',
 										'てく/ださ%らりるれろいっ', 'でく/ださ%らりるれろいっ',
 										'てく/れ', 'でく/れ',
+										'てく/すくす', 'でく/すくす',
 										'てた/め息', 'でく/れ',
 										'たら/し%いかきく', 'だら/し%いかきく',
 										'てちゃ/んと', 'でちゃ/んと',
@@ -13539,6 +13150,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 										'ちゃ/%わいうえおっ',
 										'か/ぎり', 'か/しら', 'か/もしれ',
 										'し/こり', 'し/ばらく',
+										'し/んど',
 										'た/まえ', 'た/め息', 'た/めいき', 'た/くさん',
 										'ど/んな',
 										'な/ど', 'な/かれ', 'な/んか', 'な/んざ', 'な/んて',
@@ -13625,8 +13237,10 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 				いたい, いたく,
 				いただいた, いただいてた, いただいてる, いただいて, いただき, いただく,
 				いただけた, いただけて, いただける, いただけ,
-				いた, いて, いる, いろ, かない, かなく, かなきゃ,
-				から, きたい, きたく, きた, きてた, きてる, きて, くる, くれず, くれぬ,
+				いた, いて, いる, いろ,
+				おけば, おけ,
+				かない, かなく, かなきゃ,
+				から, きたい, きたく, きた, きてた, きてる, きて, くるりと, くる, くれず, くれぬ,
 				くれた, くれてて, くれてた, くれてる, くれて,
 				くれば, くれまい, くれりゃ, くれる, くれん, くれ, く, けば, け,
 				こい, こず, こそ, こぬ, これ, こん, こ,
@@ -13636,14 +13250,14 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 				はくれまい,
 				もろた, もろて,
 				られない, られぬ, られん, らんない, らんなかった, らんなく, りゃ, る, ろ, x
-				●と, く, らん
+				●と, く, けよ, け, らん
 				●な, いから, いか, い, かろうから, かろうか, かろう, かった, がら,
 				きゃ, くなる, くちゃ, くても, くて, く, ければ, さい, さそう, さる, さ, り
 				●に, ゃ
 				●す, ぎず, ぎた, ぎだぜ, ぎだよ, ぎだわ, ぎだ, ぎてた, ぎてる, ぎて, ぎでした, ぎでしょう, ぎです, ぎぬ, ぎる, ぎん, ぎ
 				●ず, x
 				●ぬ, x
-				●さ, せたく, せた, せてたくない, せてた, せてる, せてろ, せて, せない, せなかった, せる
+				●さ, せず, せたく, せた, せてたくない, せてた, せてる, せてろ, せて, せない, せなかった, せぬ, せる
 				●ら, せて, せた,
 				れず, れたい, れたく, れた, れっこ, れぬ, れん,
 				れちゃあ, れちゃ, れてしまう, れてた, れてる, れてろ, れて, れない, れなくて, れなく,
@@ -13656,7 +13270,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 				●る, かもしれない, すべて, すべ,
 				でしょう, でしょ, ですかしら, ですから, ですか, ですし, ですよ, ですわ, です,
 				とき, はず, ひとつ, ひとり, ひと, んかい, x
-				●ろ, よ, x
+				●ろ, って, よ, x
 				●よ, うか, う, っか, り, x
 				●り, ゃ
 				●ん, なよ, なら, な, の, x
@@ -13805,6 +13419,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 				'がり', 'がるし', 'がる', 'がれば', 'がれ',
 				'き',
 				'くさせたか', 'くさせた', 'くさせたかった', 'くさせて', 'くさせる', 'くさせ',
+				'くしていく', 'くしてく', 'くしていった', 'くした', 'くして',
 				'くぞんじたし', 'くぞんじた', 'くぞんじて', 'くぞんじ','くぞんずる',
 				'くても', 'くて',
 				'くなぁれ', 'くなあれ',
@@ -13914,8 +13529,7 @@ const expand_word_info = function(dic_info, word, suffix, exdic_){
 	return ret;
 }
 
-const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_info)
-{
+const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_info){
 	const my_add = function(keylen){
 		hiradic2_arr.filter(item => keylen * 2 == item.length)
 			.forEach(item => {
@@ -13937,9 +13551,6 @@ const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_
 	//　じゃぶじゃぶ
 	my_add(3);
 }
-
-const output_main = function(param_text){
-	last_check_type = 0;
 
 	let hoge = '';
 	const error_info = [];
@@ -13981,10 +13592,10 @@ const output_main = function(param_text){
 わ
 `;
 		const chan2_list = chan_list.replace(/[\r\n]/g, '');
+		const my_push = function(d, e){
+			hiradic_arr.push(chan2_list[d] + e);
+		}
 		for(let c = 0; c < chan2_list.length; c++){
-			const my_push = function(d, e){
-				hiradic_arr.push(chan2_list[d] + e);
-			}
 			my_push(c, 'ーちゃん');
 			my_push(c, 'ーさん');
 			my_push(c, 'ーくん');
@@ -13992,6 +13603,7 @@ const output_main = function(param_text){
 			my_push(c, 'ーちゃま');
 		}
 	})();
+
 
 	(() => {
 	const exdic_arr = exdic_org.replace(/\r\n/g, '\n').replace(/#/g, '\n').split('\n');
@@ -14416,22 +14028,9 @@ const output_main = function(param_text){
 	const option_nospace = false; // get_id('option_nospace').checked;
 	const option_prev_kanji = false;
 
-	let concat_mode = false;
-	if(0 < book.length){
-		const bookname = book[current_page].name;
-		if(bookname === concat_page_name || bookname === (concat_page_name + str_update)){
-			concat_mode = true;
-		}
-	}
-
 	let text = param_text;
 	text = text.replace(/\r\n/g, '\n');
 	text = html_escape(text);
-
-	let part_titles = [];
-	let part_num = 1;
-	let part_title_line = false;
-	let concat_head = get_id('concat_head').value;
 
 	let line_num = 1;
 	let word_start1 = -1;
@@ -14466,20 +14065,6 @@ const output_main = function(param_text){
 					spaceline = true;
 				}else{
 					spaceline = false;
-				}
-			}
-			if(concat_mode){
-				if(line.substr(0, concat_head.length) === concat_head){
-					let part = '';
-					part += '　　　・<a href="#part' + part_num + '">';
-					part += line.replace('\n', '').substr(concat_head.length) + '</a>';
-					part_titles.push(part);
-					line_tag = '<a id="part' + part_num + '" href="#titles">';
-					part_num++;
-					part_title_line = true;
-				}else{
-					line_tag = '';
-					part_title_line = false;
 				}
 			}
 			diff = 0;
@@ -14543,8 +14128,7 @@ const output_main = function(param_text){
 		if(end_check){
 			if(0 <= word_start1){
 				word_end = r;
-				// {[
-				if( -1 !== '　、。，．！？⁉‼・…―–─━〜～」』）】｝］〕＞≫〉》 .,}]"\';:!\?/)\n'.indexOf(line[r]) ){
+				if( -1 !== '　、。，．！？⁉‼・…―–─━〜～」』）】｝］〕＞≫〉》 .,{}[]"\';:!\?/)\n'.indexOf(line[r]) ){
 					word_period = true;
 				}
 			}
@@ -14883,9 +14467,6 @@ const output_main = function(param_text){
 		if(line.length - 1 === r){
 			const line_hit = line_none_hit;
 			const add_line = ((line) => lines.push(line + '<br>'));
-			if(part_title_line){
-				line_none_hit = true;
-			}
 			if(option_noneonly && false === line_none_hit){
 				// この行は結果に加えない
 			}else if(option_nospace && spaceline){
@@ -14912,9 +14493,6 @@ const output_main = function(param_text){
 						s5 = '# </span>';
 						hit_count++;
 					}
-					if(concat_mode){
-						num += (part_num - 1) + '/';
-					}
 					num += fixnum(line_num);
 					const s_ = s4 + num + s5;
 					if(0 < line_tag.length){
@@ -14935,8 +14513,6 @@ const output_main = function(param_text){
 			line_num++;
 		}
 	}
-
-	
 
 	text = '';
 	const out_error = new Array(error_info.length);
@@ -14961,24 +14537,17 @@ const output_main = function(param_text){
 	}
 	text += '<hr>';
 	text += '■結果テキスト<br>';
-	if(concat_mode){
-		text += '<span id="titles"></span>' + part_titles.join('<br>') + '<hr>';
-	}else{
-		text += '';
-	}
 	text += lines.join('');
 	hoge = hoge.replace(/\n/g, '<br>');
 
-	get_id('result').innerHTML = '<div class="resultext">' + text + '<br>' + hoge + '</div>';
 	if(0 < err_str.length){
 		alert('エラーがあります。本文上部をご覧ください。');
 	}
-}
-	output_main(param_text);
+	return '<div class="resultext">' + text + '<br>' + hoge + '</div>';
 }
 
 //■■■■■■■■■■■■■■
-function check_kanji(param_text){
+const main_kanji = function(param_text, param_sub, param_line){
 const kanji_list = [
 	// 小学校で習う漢字(1年-6年)
 	'一右雨円王音下火花貝学気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文木本名目立力林六',
@@ -15009,22 +14578,12 @@ const kanji_list_ex = [
 	'亞惡爲榮衞圓應櫻奧價壞懷樂卷陷氣僞戲峽狹曉勳惠鷄藝縣儉劍險圈檢顯驗嚴廣恆國碎雜兒濕實壽收從澁獸縱敍將燒奬條乘淨剩疊孃讓釀眞寢愼盡粹醉穗齊靜攝專戰纖禪壯爭莊搜裝騷藏臟帶滯單團彈晝鑄廳聽鎭轉傳盜稻拜賣髮拔祕拂佛飜萬默彌藥與搖樣謠來覽凉壘禮橫寬薰黑緖諸祥神瀨增都德福賴綠郞朗',
 ];
 
-	last_check_type = 1;
-
 	let hoge = '';
 	const error_info = [];
 
 	const option_linenum = false; // get_id('option_linenum').checked;
-	const option_noneonly = get_id('option_noneonly').checked;
+	const option_noneonly = param_line;
 	const option_nospace = false; // get_id('option_nospace').checked;
-
-	let concat_mode = false;
-	if(0 < book.length){
-		const bookname = book[current_page].name;
-		if(bookname === concat_page_name || bookname === (concat_page_name + str_update)){
-			concat_mode = true;
-		}
-	}
 
 	let text = param_text;
 	text = text.replace(/\r\n/g, '\n');
@@ -15033,7 +14592,6 @@ const kanji_list_ex = [
 	let part_titles = [];
 	let part_num = 1;
 	let part_title_line = false;
-	const concat_head = get_id('concat_head').value;
 
 	let line_num = 1;
 	let word_start = -1;
@@ -15067,20 +14625,6 @@ const kanji_list_ex = [
 					spaceline = true;
 				}else{
 					spaceline = false;
-				}
-			}
-			if(concat_mode){
-				if(line.substr(0, concat_head.length) === concat_head){
-					let part = '';
-					part += '　　　・<a href="#part' + part_num + '">';
-					part += line.replace('\n', '').substr(concat_head.length) + '</a>';
-					part_titles.push(part);
-					line_tag = '<a id="part' + part_num + '" href="#titles">';
-					part_num++;
-					part_title_line = true;
-				}else{
-					line_tag = '';
-					part_title_line = false;
 				}
 			}
 			diff = 0;
@@ -15130,9 +14674,6 @@ const kanji_list_ex = [
 		}
 		if(line.length - 1 === r){
 			const line_hit = line_none_hit;
-			if(part_title_line){
-				line_none_hit = true;
-			}
 			if(option_noneonly && false === line_none_hit){
 				// この行は結果に加えない
 			}else if(option_nospace && spaceline){
@@ -15185,10 +14726,6 @@ const kanji_list_ex = [
 	}
 
 	let parts = [];
-	
-	if(concat_mode){
-		parts.push('<span id="titles"></span>' + part_titles.join('<br>') + '<hr>');
-	}
 	parts.push('<div class="resultext">');
 	let headtext = '';
 	headtext += '■常用漢字テスト<br>';
@@ -15208,12 +14745,37 @@ const kanji_list_ex = [
 	headtext += '<hr>';
 	headtext += '■結果テキスト<br>';
 	parts.push(headtext);
+	parts.push(...lines);
+	parts.push('<br>');
 	if(0 < hoge.length){
 		hoge = hoge.replaceAll('\n', '<br>');
 	}
-	parts.push(...lines);
-	parts.push('<br>');
 	parts.push(hoge);
 	parts.push('</div>');
-	get_id('result').innerHTML = parts.join('');
+	return parts.join('');
 }
+
+const add_events = function(){
+		get_id('mainbody').addEventListener('load', page_onload);
+		get_id('option_split').addEventListener('click', split_view);
+		get_id('start').addEventListener('click', () =>
+			start_hiragana(
+				get_id('text_main').value,
+				get_id('userdic').value,
+				get_id('option_noneonly').checked
+			));
+		get_id('kanjistart').addEventListener('click', () =>
+			start_kanji(
+				get_id('text_main').value,
+				get_id('userdic').value,
+				get_id('option_noneonly').checked
+			));
+		get_id('viewinfo').addEventListener('click', user_view);
+
+		get_id('droptarget').addEventListener('drop', drop_files);
+		get_id('droptarget').addEventListener('dragenter', drop_cancel);
+		get_id('droptarget').addEventListener('dragover', drop_cancel);
+		get_id('file_open').addEventListener('change', button_file_open);
+};
+add_events();
+})();

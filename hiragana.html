@@ -122,10 +122,6 @@
 </div>
 <button type="button" id="start"  class="hit-button">構文チェック</button>
 　<button type="button" id="kanjistart">常用漢字</button>　<br class="mobile-only">
-<span style="display:none">
-　<button type="button" id="page_add" >ページ追加</button>
-ページ名<input type="text" id="page_name" size="10" value="ページ1">
-</span>
 <br>
 　辞書選択：
 <select name="dic" id="book">
@@ -193,21 +189,6 @@ copyright © syuribox
 	function $(id){
 		return document.getElementById(id);
 	}
-	$('mainbody').addEventListener('load', page_onload);
-	$('option_split').addEventListener('click', split_view);
-	$('area_split').addEventListener('click', split_area);
-	$('start').addEventListener('click', start_check);
-	$('kanjistart').addEventListener('click', start_kanji_check);
-	$('page_add').addEventListener('click', add_page);
-	$('viewinfo').addEventListener('click', user_view);
-
-	$('split_type').addEventListener('change', split_change);
-	$('book').addEventListener('change', dic_change);
-
-	$('droptarget').addEventListener('drop', drop_files);
-	$('droptarget').addEventListener('dragenter', drop_cancel);
-	$('droptarget').addEventListener('dragover', drop_cancel);
-	$('file_open').addEventListener('change', button_file_open);
 	$('button_func').addEventListener('click', function(){
 		muti_func($('func_select').value, 'text_main');
 	});
