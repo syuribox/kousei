@@ -107,53 +107,54 @@ const start_hiragana = function(param_text, param_sub, param_line){
 	start_check(main_hiragana, param_text, param_sub, param_line);
 }
 
-const start_kanji = function(param_text, param_sub, param_line){
-	start_check(main_kanji, param_text, param_sub, param_line);
+const start_kanji = function(param_text, param_sub, param_line, param_head_msg){
+	start_check(main_kanji, param_text, param_sub, param_line, param_head_msg);
 }
 
 const start_check = function(func_call, param_text, param_sub, param_line){
-	get_id('result').innerHTML = progress_box();
 
 	const s = param_text;
 	const t = param_sub;
 	const u = param_line;
-	const limit_length = 100000;
+	const limit_length = 500000;
 	const stop_time = 100;
-	const g = (a) => {
-		get_id('result').innerHTML = func_call(a, t, u);
+	const g = (a, b) => {
+		get_id('result').innerHTML = func_call(a, t, u, b);
 	};
 	if(limit_length < s.length){
+		get_id('result').textContent = '処理中(分割).......';
 		setTimeout(() => {
-			g(s.substr(0, limit_length));
-			setTimeout(() => g(s));
+			g(s.substr(0, limit_length), '(先頭5万字先行解析、全文処理中)...<br>');
+			setTimeout(() => g(s, '全文解析完了<br>'));
 		});
 	}else{
-		setTimeout(() => g(s));
+		get_id('result').textContent = '処理中(一括).........';
+		setTimeout(() => g(s, ''));
 	}
 }
 
 const dic_change = function(){
 	let disp = 'none';
-	if(document.getElementById('book').value != 'include'){
+	if(get_id('dic').value != 'include'){
 		disp = 'block';
 	}
-	document.getElementById('userdic').style.display = disp;
-	document.getElementById('userdicinfo').style.display = disp;
+	get_id('userdic').style.display = disp;
+	get_id('userdicinfo').style.display = disp;
 	if( disp === 'none' ){
-		document.getElementById('dicinfo').style.display = 'none';
+		get_id('dicinfo').style.display = 'none';
 	}
 }
 
 function user_view(){
 	let disp = 'none';
-	if(document.getElementById('dicinfo').style.display == 'none'){
+	if(get_id('dicinfo').style.display == 'none'){
 		disp = 'block';
 	}
-	document.getElementById('dicinfo').style.display = disp;
+	get_id('dicinfo').style.display = disp;
 }
 
 //■■■■■■■■■■
-const main_hiragana = function(param_text, param_sub, param_line){
+const main_hiragana = function(param_text, param_sub, param_line, param_head_msg){
 const dummy_hiradic_org = function(){}
 const hiradic_org = 
 `ぁ、
@@ -336,6 +337,7 @@ const hiradic_org =
 あまた
 あまつさえ
 あまねく
+あまのいわと
 あまり
 あまりな/形容詞
 あみだくじ
@@ -785,7 +787,7 @@ const hiradic_org =
 うずくま/五段ラ
 うずめ/下一段
 うずら
-うず高
+うず高/警告:→うずたか(堆)く
 うそ
 うそでしょ
 うそぶ/五段カ
@@ -832,7 +834,7 @@ const hiradic_org =
 うづくま/五段ラ警告:→うずくま五段ラ
 うづめ/下一段警告:→うずめ下一段
 うづら/警告:→うずら
-うづ高/警告;→うずたか(堆)く
+うづ高/警告:→うずたか(堆)く
 うとまし/形容詞
 うどん
 うどんこ
@@ -3051,6 +3053,7 @@ const hiradic_org =
 すすって
 すすっと
 すすり
+すず
 すずし/形容詞
 すずめ
 すたこらさっさ
@@ -3509,6 +3512,7 @@ const hiradic_org =
 たか。
 たかが
 たかだか
+たかまがはら
 たが/五段ラ
 たきつ/五段カ
 たきゃ
@@ -3895,6 +3899,7 @@ const hiradic_org =
 ちょろ/形容詞
 ちょろちょろ
 ちょろっと
+ちょろまか/五段サ
 ちょんと
 ちょん切
 ちょーすごい
@@ -4300,6 +4305,7 @@ const hiradic_org =
 とおなじ
 とおり
 とおんなじ
+とおの昔/警告:→とうの昔
 とか
 とか/五段サ
 とかく、
@@ -4348,6 +4354,7 @@ const hiradic_org =
 として
 としている
 としてた
+としてたまに
 としてる
 としてんぞ
 としてんな
@@ -5521,6 +5528,7 @@ const hiradic_org =
 ひっぱ/五段ラ
 ひっぱた/五段カ
 ひっぱって
+ひつじ
 ひつような
 ひづみ/警告
 ひづめ
@@ -6874,6 +6882,7 @@ const hiradic_org =
 やすり
 やせ/下一段
 やせ形
+やたがらす
 やたら
 やだ、
 やだぁ
@@ -7715,6 +7724,7 @@ const exdic_org =
 しているか#%いしつともら
 してくれたら#しい
 してた#くさん
+してた#またま
 してた#まに
 してた#まらな
 してた#め
@@ -8370,8 +8380,6 @@ const warndic_org =
 いとをし[い,く,ない|なかった,なく,なけれ]/→いとおし%
 いづれ/→いずれ(何れ)
 いなづま/→いなずま(稲妻)
-うず高/→うずたか[く](堆[く])●未実装
-うづ高/→うずたか[く](堆[く])●未実装
 うなづ[い,か,き,く,け,こ]/→うなず%(頷%)
 おうい/→おおい(多い)／　◎おうい(王位,王威..)
 おうかみ/→おおかみ(狼,オオカミ)
@@ -8463,7 +8471,6 @@ const warndic_org =
 どきとき/→ときどき
 どりとり/→とりどり
 どりどり/→とりどり
-とおの昔/→とうの昔●未実装
 なかんづく/→なかんずく(就中)
 なりおうせ[すぎ,そう,て,た,ない,なかっ,なく,なければ,る,ます,ました,ません]/なりおおせ%
 はるはる/→はるばる(遥々)
@@ -8483,7 +8490,6 @@ const warndic_org =
 ほのう/→ほのお(炎)
 ほのほの/→ほのぼの
 ぼそほそ/→ほそぼそ
-ぼそぼそ/→ほそぼそ
 ぼのほの/→ほのぼの
 ぼのぼの/→ほのぼの
 むづかし/→むずかし(難し[い])
@@ -13478,7 +13484,7 @@ const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_
 
 	let hoge = '';
 	const error_info = [];
-	const dic_type = get_id('book').value;
+	const dic_type = get_id('dic').value;
 	const hiradic = [];
 	const hiradic_info = [];
 	const warndic = [];
@@ -13947,6 +13953,27 @@ const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_
 	// 初期化変数スコープここまで
 	})();
 
+	const utf8_byte_length = function(str) {
+		let size = 0;
+		const length = str.length;
+		for (let i = 0; i < length; i++) {
+			const code = str.charCodeAt(i);
+			if (code < 0x80) {
+				size += 1;
+			} else if (code < 0x800) {
+				size += 2;
+			} else if (code < 0xD800 || code > 0xDFFF) {
+				size += 3;
+			} else {
+				// サロゲートペア
+				size += 4;
+				i++;  // next skip
+		  }
+		}
+		return size;
+	}
+
+
 	const option_linenum = false; // get_id('option_linenum').checked;
 	const option_noneonly = get_id('option_noneonly').checked;
 	const option_nospace = false; // get_id('option_nospace').checked;
@@ -13955,6 +13982,10 @@ const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_
 	let text = param_text;
 	text = text.replace(/\r\n/g, '\n');
 	text = html_escape(text);
+
+	const char_count = text.length;
+	const file_size = utf8_byte_length(text);
+	const file_size_kb = Math.floor((file_size + 1023) / 1024);
 
 	let line_num = 1;
 	let word_start1 = -1;
@@ -14439,6 +14470,7 @@ const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_
 	}
 
 	text = '';
+	const line_count = line_num;
 	const out_error = new Array(error_info.length);
 	for(let i = 0;i < error_info.length; i++){
 		out_error[i] = html_escape(error_info[i]);
@@ -14447,6 +14479,8 @@ const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_
 	if(0 < err_str.length){
 		text += err_str + '<hr>';
 	}
+	text += param_head_msg;
+	text += `${file_size_kb}KB　${line_count}行　約${char_count}文字<br>`;
 	text += '<span class="colorwarn">テキスト</span>：警告表示<br>';
 	text += '<span class="color1">あい</span><span class="color2">うえ</span><span class="color3">お</span>：識別結果<br>';
 	text += '<span class="colornone">かきく</span>：識別失敗(誤字の可能性)<br>'
@@ -14471,7 +14505,7 @@ const exdic_add_hiradic2 = function(exdic_arr, hiradic2_arr, hiradic_arr, error_
 }
 
 //■■■■■■■■■■■■■■
-const main_kanji = function(param_text, param_sub, param_line){
+const main_kanji = function(param_text, param_sub, param_line, param_head_msg){
 const kanji_list = [
 	// 小学校で習う漢字(1年-6年)
 	'一右雨円王音下火花貝学気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文木本名目立力林六',
@@ -14502,6 +14536,26 @@ const kanji_list_ex = [
 	'亞惡爲榮衞圓應櫻奧價壞懷樂卷陷氣僞戲峽狹曉勳惠鷄藝縣儉劍險圈檢顯驗嚴廣恆國碎雜兒濕實壽收從澁獸縱敍將燒奬條乘淨剩疊孃讓釀眞寢愼盡粹醉穗齊靜攝專戰纖禪壯爭莊搜裝騷藏臟帶滯單團彈晝鑄廳聽鎭轉傳盜稻拜賣髮拔祕拂佛飜萬默彌藥與搖樣謠來覽凉壘禮橫寬薰黑緖諸祥神瀨增都德福賴綠郞朗',
 ];
 
+	const utf8_byte_length = function(str) {
+		let size = 0;
+		const length = str.length;
+		for (let i = 0; i < length; i++) {
+			const code = str.charCodeAt(i);
+			if (code < 0x80) {
+				size += 1;
+			} else if (code < 0x800) {
+				size += 2;
+			} else if (code < 0xD800 || code > 0xDFFF) {
+				size += 3;
+			} else {
+				// サロゲートペア
+				size += 4;
+				i++;  // next skip
+		  }
+		}
+		return size;
+	}
+
 	let hoge = '';
 	const error_info = [];
 
@@ -14512,6 +14566,10 @@ const kanji_list_ex = [
 	let text = param_text;
 	text = text.replace(/\r\n/g, '\n');
 	text = html_escape(text);
+
+	const char_count = text.length;
+	const file_size = utf8_byte_length(text);
+	const file_size_kb = Math.floor((file_size + 1023) / 1024);
 
 	let part_titles = [];
 	let part_num = 1;
@@ -14648,10 +14706,13 @@ const kanji_list_ex = [
 			line_num++;
 		}
 	}
+	const line_count = line_num;
 
 	let parts = [];
 	parts.push('<div class="resultext">');
 	let headtext = '';
+	headtext += param_head_msg;
+	headtext += `${file_size_kb}KB　${line_count}行　約${char_count}文字<br>`;
 	headtext += '■常用漢字テスト<br>';
 	headtext += '　<span class="kanjiext">漢字</span>：常用・人名以外の漢字<br>';
 	headtext += '　<span class="kanjizinmei">漢字</span>：人名用漢字<br>';
@@ -14682,6 +14743,7 @@ const kanji_list_ex = [
 const add_events = function(){
 		get_id('mainbody').addEventListener('load', page_onload);
 		get_id('option_split').addEventListener('click', split_view);
+
 		get_id('start').addEventListener('click', () =>
 			start_hiragana(
 				get_id('text_main').value,
@@ -14694,6 +14756,7 @@ const add_events = function(){
 				get_id('userdic').value,
 				get_id('option_noneonly').checked
 			));
+		get_id('dic').addEventListener('change', dic_change);
 		get_id('viewinfo').addEventListener('click', user_view);
 };
 add_events();
