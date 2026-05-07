@@ -214,6 +214,20 @@ F5などの再読み込みでも消えます。`
 	$('font_select').addEventListener('change', changeFont);
 	$('font_size').addEventListener('change', changeFont);
 
+	$('droptarget').addEventListener('drop', (e) => {
+		drop_files( e, (all_text) => {
+			$('text_main').value = all_text;
+			$('start').click();
+		});
+	});
+	$('droptarget').addEventListener('dragenter', drop_cancel);
+	$('droptarget').addEventListener('dragover', drop_cancel);
+	$('file_open').addEventListener('change', (e) => {
+		button_file_open( e, (all_text) => {
+			$('text_main').value = all_text;
+			$('start').click();
+		});
+	});
 	const info = navigator.userAgent.toLowerCase();
 	const bodyTag = document.getElementsByTagName('body')[0];
 	let pcmac = false;
