@@ -41,6 +41,8 @@
 　<input type="checkbox" id="check_warning2" value="1"><label for="check_warning2">注意情報</label>
 <br class="mobile-only"><span class="pc-mode">　</span>
 <input type="checkbox" id="check_yure" value="1"><label for="check_yure">表記ゆれ</label>
+　<input type="checkbox" id="check_nandoku" value="1" checked><label for="check_nandoku">難読</label>
+<br class="mobile-only">
 　<input type="checkbox" id="check_line" value="1" checked><label for="check_line">情報行のみ</label>
 <br>
 <label for="font_select">Font</label>
@@ -175,6 +177,7 @@ $('button_goji').addEventListener('click', function(){
 				$('check_warning2').checked,
 				$('check_line').checked,
 				$('check_yure').checked,
+				$('check_nandoku').checked,
 				$('text_musi').value
 			);
 		}catch(e){
@@ -215,6 +218,9 @@ $('font_size').addEventListener('change', changeFont);
 
 $('button_set_musi').addEventListener('click', function(){
 	const t = `+角ウサギ■テスト
++［＃中見出し］■話
++^第(?=[0-9]+話)■話
++^第(?=[一二三四五六七八九十百〇]+話)■話
 にも関わらず
 かも知れな
 伺
