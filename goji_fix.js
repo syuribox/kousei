@@ -17889,18 +17889,18 @@ const aimai_list =
 1人言(?=[がにのはを。、」』])■独り言？
 1人身(?=[でがにのはを。、」』])■独り身？
 1人身■独り身？
-Google■Web検索%{hanken}
-LINE■チャットアプリ%{hanken}
-TIKTOK■動画投稿サイト%{hanken}
-TWITTER■短文SNS%{hanken}
-TikTok■動画投稿サイト%{hanken}
-Twitter■短文SNS%{hanken}
-YOUTUBE■動画投稿サイト%{hanken}
-YouTube■動画投稿サイト%{hanken}
-Youtube■動画投稿サイト%{hanken}
-tiktok■動画投稿サイト%{hanken}
-twitter■短文SNS%{hanken}
-youtube■動画投稿サイト%{hanken}
+Google■Web検索%{ref_hanken}
+LINE■チャットアプリ%{ref_hanken}
+TIKTOK■動画投稿サイト%{ref_hanken}
+TWITTER■短文SNS%{ref_hanken}
+TikTok■動画投稿サイト%{ref_hanken}
+Twitter■短文SNS%{ref_hanken}
+YOUTUBE■動画投稿サイト%{ref_hanken}
+YouTube■動画投稿サイト%{ref_hanken}
+Youtube■動画投稿サイト%{ref_hanken}
+tiktok■動画投稿サイト%{ref_hanken}
+twitter■短文SNS%{ref_hanken}
+youtube■動画投稿サイト%{ref_hanken}
 いじまし■[意：けち臭い]／いじらし[確認]？
 いましだが■いましたが？
 うず高([いかきくけこ])■堆$1[とも書く／参考]
@@ -17950,7 +17950,7 @@ youtube■動画投稿サイト%{hanken}
 グルーブ■[ノリ(音楽)groove／グループ集いgroup]
 グレート■[とてもgreat／グレード階級grade]
 グレード■[階級grade／グレートとてもgreat]
-グーグル■短文SNS%{hanken}
+グーグル■短文SNS%{ref_hanken}
 ケージ■[籠cage／ゲージ計測器gauge]
 ゲージ■[計測器gauge／ケージ籠cage]
 サイドバック■[左右後ろside back／サイドバッグ横置き鞄side bag]
@@ -17960,7 +17960,7 @@ youtube■動画投稿サイト%{hanken}
 ショベル■%{ref_shovel}
 ショベルカー■[シャベルカー]%{ref_shovel}
 スコップ■[関連：シャベル]%{ref_shovel}
-ツイッター■短文SNS%{hanken}
+ツイッター■短文SNS%{ref_hanken}
 ツインテイル■ツインテール[一般的]
 ドック■%{ref_dog_dock}
 ドッグ■%{ref_dog_dock}
@@ -17987,7 +17987,7 @@ youtube■動画投稿サイト%{hanken}
 ホーム■%{ref_home}
 ポニーテイル■ポニーテール[一般的]
 メード■メイド[maid]？
-ヤクルト■乳酸菌飲料%{hanken}
+ヤクルト■乳酸菌飲料%{ref_hanken}
 ユニフォーム■%{ref_home}
 ユニホーム■%{ref_home}
 リアス式海岸■リアス海岸<a href="https://www.teikokushoin.co.jp/high/faq/detail/115/" target="webdic">🌎帝国書院</a>
